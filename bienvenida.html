@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bienvenido — Reunvo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="bienvenida.html" data-keep-token>Reunvo<span>.</span></a>
+</header>
+
+<main class="wrap">
+
+  <!-- Token inválido -->
+  <section class="error-token" data-error-token hidden>
+    <h1>Este enlace no es válido</h1>
+    <p class="lead" style="margin:0 auto;">Compruebe que ha copiado el enlace completo de su invitación.<br>
+    Si el problema persiste, escríbanos a <a href="mailto:gp@reunvo.com" style="color:var(--gold-dark)">gp@reunvo.com</a>.</p>
+  </section>
+
+  <!-- Contenido -->
+  <section data-app>
+    <p class="eyebrow" id="saludo">Bienvenido</p>
+    <h1>Oportunidades de venta cualificadas, cada mañana en su correo.</h1>
+    <p class="lead" id="intro">Hemos preparado Reunvo para su firma. Solo necesita un paso para empezar.</p>
+
+    <ol class="steps">
+      <li><span class="n">1</span><p><strong>Conecte su correo,</strong> una sola vez. Le llevará menos de un minuto.</p></li>
+      <li><span class="n">2</span><p><strong>Cada mañana</strong> dejamos borradores listos en su bandeja: mensaje redactado y dossier en PDF, dirigidos a propietarios de empresas que encajan con su perfil.</p></li>
+      <li><span class="n">3</span><p><strong>Usted los revisa y los envía.</strong> Nada sale de su correo sin su decisión.</p></li>
+    </ol>
+
+    <div class="clausula">
+      <h2>Usted mantiene el control</h2>
+      <p>Reunvo prepara los borradores; el envío lo decide y ejecuta usted, siempre. No leemos su correo.</p>
+    </div>
+
+    <a class="btn btn--block" href="conectar.html" data-keep-token>Conectar mi correo</a>
+
+    <p class="contacto">¿Dudas antes de empezar? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
+  </section>
+
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const t = getToken();
+  if (!t) { mostrarErrorToken(); return; }
+  propagarToken(t);
+  try {
+    const d = await panelCliente(t);
+    if (!d.ok) { mostrarErrorToken(); return; }
+    if (d.consultor) document.getElementById("saludo").textContent = "Bienvenido, " + d.consultor;
+    if (d.firma)     document.getElementById("intro").textContent  =
+      "Hemos preparado Reunvo para " + d.firma + ". Solo necesita un paso para empezar.";
+  } catch (e) { /* sin red: la página funciona igualmente con el texto genérico */ }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Su panel — Reunvo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="bienvenida.html" data-keep-token>Reunvo<span>.</span></a>
+</header>
+
+<main class="wrap wrap--wide">
+
+  <section class="cargando" data-cargando>Cargando su panel…</section>
+
+  <section class="error-token" data-error-token hidden>
+    <h1>Este enlace no es válido</h1>
+    <p class="lead" style="margin:0 auto;">Compruebe que ha copiado el enlace completo de su invitación.<br>
+    Si el problema persiste, escríbanos a <a href="mailto:gp@reunvo.com" style="color:var(--gold-dark)">gp@reunvo.com</a>.</p>
+  </section>
+
+  <section data-app hidden>
+    <p class="eyebrow" id="firma">Su panel</p>
+    <h1>Sus borradores, de un vistazo.</h1>
+
+    <!-- Estado de conexión -->
+    <div class="estado estado--ok" id="estado-ok" hidden>
+      <span class="dot"></span>
+      <span>Conexión activa &nbsp;<small id="gmail"></small></span>
+    </div>
+    <div class="estado estado--ko" id="estado-ko" hidden>
+      <span class="izq"><span class="dot"></span><span>Conexión interrumpida. Vuelva a conectarla para seguir recibiendo borradores.</span></span>
+      <a class="btn" style="padding:.55rem 1.3rem;font-size:.92rem;" href="conectar.html" data-keep-token>Reconectar</a>
+    </div>
+
+    <!-- Conteos -->
+    <div class="tarjetas">
+      <div class="tarjeta">
+        <div class="num" id="num-semana">0</div>
+        <div class="lbl">Borradores esta semana</div>
+      </div>
+      <div class="tarjeta">
+        <div class="num" id="ultimo-lote" style="font-size:1.6rem;padding-top:.45rem;">—</div>
+        <div class="lbl">Último lote</div>
+      </div>
+    </div>
+
+    <!-- Lista de borradores -->
+    <div class="tabla-wrap">
+      <table id="tabla" hidden>
+        <thead>
+          <tr><th>Empresa</th><th>Asunto</th><th>Fecha</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="filas"></tbody>
+      </table>
+      <div class="vacio" id="vacio" hidden>
+        <p><b>Aún no hay borradores.</b><br>El primer lote llegará mañana a las 7:00 en su carpeta Borradores de Gmail.</p>
+      </div>
+    </div>
+
+    <p class="contacto">¿Algo no encaja? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
+  </section>
+
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const t = getToken();
+  const cargando = document.querySelector("[data-cargando]");
+  if (!t) { cargando.hidden = true; mostrarErrorToken(); return; }
+  propagarToken(t);
+
+  let d;
+  try { d = await panelCliente(t); }
+  catch (e) {
+    cargando.textContent = "No hemos podido cargar su panel. Compruebe su conexión y recargue la página.";
+    return;
+  }
+  cargando.hidden = true;
+  if (!d.ok) { mostrarErrorToken(); return; }
+
+  document.querySelector("[data-app]").hidden = false;
+  if (d.firma) document.getElementById("firma").textContent = d.firma;
+
+  // Estado de conexión
+  if (d.conectado) {
+    document.getElementById("estado-ok").hidden = false;
+    if (d.gmail_email) document.getElementById("gmail").textContent = d.gmail_email;
+  } else {
+    document.getElementById("estado-ko").hidden = false;
+  }
+
+  // Conteos
+  document.getElementById("num-semana").textContent = d.borradores_semana ?? 0;
+  document.getElementById("ultimo-lote").textContent = fmtFecha(d.ultimo_lote);
+
+  // Tabla
+  const filas = d.borradores || [];
+  if (filas.length === 0) {
+    document.getElementById("vacio").hidden = false;
+  } else {
+    const tbody = document.getElementById("filas");
+    filas.forEach(b => {
+      const tr = document.createElement("tr");
+      const celda = (cls, txt) => {
+        const td = document.createElement("td");
+        if (cls) td.className = cls;
+        td.textContent = txt || "—";
+        return td;
+      };
+      tr.appendChild(celda("empresa", b.company_name));
+      tr.appendChild(celda("asunto",  b.email_subject));
+      tr.appendChild(celda("",        fmtFecha(b.created_at)));
+      const tdEstado = document.createElement("td");
+      const pill = document.createElement("span");
+      pill.className = "pill";
+      pill.textContent = fmtEstado(b.status);
+      tdEstado.appendChild(pill);
+      tr.appendChild(tdEstado);
+      tbody.appendChild(tr);
+    });
+    document.getElementById("tabla").hidden = false;
+  }
+})();
+</script>
+</body>
+</html>

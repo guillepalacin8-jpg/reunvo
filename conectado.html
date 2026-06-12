@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Correo conectado — Reunvo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="bienvenida.html" data-keep-token>Reunvo<span>.</span></a>
+</header>
+
+<main class="wrap">
+  <section data-app>
+    <p class="eyebrow">Todo listo</p>
+    <h1>Su correo está conectado.</h1>
+    <p class="lead">Mañana a las 7:00 encontrará sus primeros borradores en la carpeta <strong>Borradores</strong> de Gmail. Cada uno incluye el mensaje redactado y el PDF adjunto, listos para revisar y enviar.</p>
+
+    <div class="clausula">
+      <h2>Recuerde</h2>
+      <p>Los borradores no se envían solos. El envío lo decide y ejecuta usted, siempre.</p>
+    </div>
+
+    <a class="btn btn--block" href="panel.html" data-keep-token>Ir a mi panel</a>
+
+    <p class="contacto">¿Algo no encaja? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
+  </section>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+(() => { propagarToken(getToken()); })();
+</script>
+</body>
+</html>

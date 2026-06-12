@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conectar su correo — Reunvo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="bienvenida.html" data-keep-token>Reunvo<span>.</span></a>
+</header>
+
+<main class="wrap">
+
+  <section class="error-token" data-error-token hidden>
+    <h1>Este enlace no es válido</h1>
+    <p class="lead" style="margin:0 auto;">Compruebe que ha copiado el enlace completo de su invitación.<br>
+    Si el problema persiste, escríbanos a <a href="mailto:gp@reunvo.com" style="color:var(--gold-dark)">gp@reunvo.com</a>.</p>
+  </section>
+
+  <section data-app>
+    <p class="eyebrow">Paso único</p>
+    <h1>Conecte su cuenta de Google.</h1>
+    <p class="lead">Le llevaremos a Google para que autorice a Reunvo a crear borradores en su Gmail. Solo eso.</p>
+
+    <div class="aviso">
+      <h2>Antes de continuar, un aviso</h2>
+      <p>Google le mostrará una pantalla indicando que la aplicación «no está verificada». Es normal en aplicaciones nuevas y no supone ningún riesgo.</p>
+      <div class="pasos-google">
+        Para continuar en esa pantalla:<br>
+        1. Pulse <b>«Configuración avanzada»</b>.<br>
+        2. Pulse <b>«Ir a Reunvo (no seguro)»</b>.<br>
+        3. Elija su cuenta y pulse <b>«Permitir»</b>.
+      </div>
+    </div>
+
+    <button class="btn btn--block" id="btn-google">Continuar a Google</button>
+
+    <p class="contacto">Solo pedimos permiso para crear borradores. No accedemos a su bandeja de entrada.<br>
+    ¿Prefiere hacerlo acompañado? Llámenos y lo hacemos juntos en dos minutos: <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
+  </section>
+
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+(() => {
+  const t = getToken();
+  if (!t) { mostrarErrorToken(); return; }
+  propagarToken(t);
+  document.getElementById("btn-google").addEventListener("click", () => {
+    location.href = REUNVO.OAUTH_START_URL + "?t=" + encodeURIComponent(t);
+  });
+})();
+</script>
+</body>
+</html>
