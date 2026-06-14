@@ -383,36 +383,8 @@
     const N8N_AUTH_BASE    = 'https://guillepalacin1.app.n8n.cloud/webhook/auth/start';
 
     // ── Helpers ─────────────────────────────────────────────────────────────
-    const params   = new URLSearchParams(window.location.search);
-    const clientId = params.get('client_id');
-
-    const BASE_HEADERS = {
-      apikey:          SUPABASE_ANON_KEY,
-      Authorization:   `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type':  'application/json',
-      Accept:          'application/json',
-    };
-
-    async function sbGet(table, qs = {}) {
-      const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
-      Object.entries(qs).forEach(([k, v]) => url.searchParams.set(k, v));
-      const res = await fetch(url.toString(), { headers: BASE_HEADERS });
-      if (!res.ok) throw new Error(`${table}: HTTP ${res.status}`);
-      return res.json();
-    }
-
-    async function sbCount(table, qs = {}) {
-      const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
-      url.searchParams.set('select', 'id');
-      Object.entries(qs).forEach(([k, v]) => url.searchParams.set(k, v));
-      const res = await fetch(url.toString(), {
-        headers: { ...BASE_HEADERS, Prefer: 'count=exact', Range: '0-0' },
-      });
-      // 206 Partial Content is expected when results exist
-      if (res.status !== 206 && !res.ok) throw new Error(`count ${table}: HTTP ${res.status}`);
-      const range = res.headers.get('content-range') || '*/0';
-      return parseInt(range.split('/').pop(), 10) || 0;
-    }
+    const params     = new URLSearchParams(window.location.search);
+    const panelToken = params.get('token');
 
     function esc(str) {
       return String(str ?? '')
@@ -433,36 +405,34 @@
       el.style.display = 'block';
     }
 
-    function renderGmailStatus(token) {
+    function renderGmailStatus(gmail) {
       const card   = document.getElementById('js-status-card');
       const icon   = document.getElementById('js-status-icon');
       const title  = document.getElementById('js-status-title');
       const sub    = document.getElementById('js-status-sub');
       const action = document.getElementById('js-status-action');
-      const authHref = `${N8N_AUTH_BASE}?client_id=${encodeURIComponent(clientId)}`;
+      const authHref = N8N_AUTH_BASE;
 
-      if (!token) {
-        card.className  = 'status-card err';
-        icon.textContent = '❌';
+      if (!gmail.connected) {
+        card.className    = 'status-card err';
+        icon.textContent  = '❌';
         title.textContent = 'Gmail no conectado';
         sub.textContent   = 'Conecta tu cuenta para empezar a enviar propuestas';
         action.innerHTML  = `<a href="${esc(authHref)}" class="btn btn-navy">Conectar Gmail</a>`;
         return;
       }
 
-      const expired = token.token_expiry && new Date(token.token_expiry) < new Date();
-
-      if (expired) {
-        card.className  = 'status-card warn';
-        icon.textContent = '⚠️';
+      if (gmail.expired) {
+        card.className    = 'status-card warn';
+        icon.textContent  = '⚠️';
         title.textContent = 'Token caducado — reconecta tu Gmail';
-        sub.textContent   = esc(token.gmail_email || '');
+        sub.textContent   = esc(gmail.email || '');
         action.innerHTML  = `<a href="${esc(authHref)}" class="btn btn-warn">Reconectar Gmail</a>`;
       } else {
-        card.className  = 'status-card ok';
-        icon.textContent = '✅';
+        card.className    = 'status-card ok';
+        icon.textContent  = '✅';
         title.textContent = 'Gmail conectado';
-        sub.textContent   = esc(token.gmail_email || '');
+        sub.textContent   = esc(gmail.email || '');
       }
     }
 
@@ -474,7 +444,7 @@
       }
       tbody.innerHTML = rows.map(r => `
         <tr>
-          <td class="col-company">${esc(r.companies?.company_name ?? '—')}</td>
+          <td class="col-company">${esc(r.company_name ?? '—')}</td>
           <td class="col-subject" title="${esc(r.email_subject)}">${esc(r.email_subject || '—')}</td>
           <td class="col-date">${r.created_at ? fmtDate(r.created_at) : '—'}</td>
         </tr>
@@ -483,64 +453,48 @@
 
     // ── Main ────────────────────────────────────────────────────────────────
     async function init() {
-      if (!clientId) {
-        setError('Enlace inválido: falta el parámetro client_id en la URL.');
+      if (!panelToken) {
+        setError('Enlace inválido: falta el parámetro token en la URL.');
         return;
       }
 
-      const now           = new Date();
-      const startOfMonth  = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const startOfToday  = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      const monthLabel    = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-      const todayLabel    = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      const now       = new Date();
+      const monthLabel = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+      const todayLabel = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
       document.getElementById('js-label-month').textContent = monthLabel;
       document.getElementById('js-label-today').textContent = todayLabel;
 
       try {
-        // 1 — Client info
-        const [client] = await sbGet('clients', {
-          id:     `eq.${clientId}`,
-          select: 'id,name,company',
-          limit:  '1',
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_client_dashboard`, {
+          method:  'POST',
+          headers: {
+            apikey:          SUPABASE_ANON_KEY,
+            Authorization:   `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type':  'application/json',
+          },
+          body: JSON.stringify({ p_token: panelToken }),
         });
-        if (!client) {
-          setError('Cliente no encontrado. Verifica que el enlace sea correcto.');
+
+        if (!res.ok) throw new Error(`RPC HTTP ${res.status}`);
+
+        const data = await res.json();
+
+        if (!data) {
+          setError('Enlace inválido o cliente no encontrado.');
           document.getElementById('js-client-name').textContent = '';
           return;
         }
+
         document.getElementById('js-client-name').textContent =
-          client.company || client.name || '';
+          data.client.company || data.client.name || '';
 
-        // 2 — Gmail token (serial: needed before render)
-        const [token] = await sbGet('client_tokens', {
-          client_id: `eq.${clientId}`,
-          select:    'gmail_email,token_expiry',
-          limit:     '1',
-        });
-        renderGmailStatus(token ?? null);
+        renderGmailStatus(data.gmail);
 
-        // 3 — Metrics + campaigns in parallel
-        const [countMonth, countToday, campaigns] = await Promise.all([
-          sbCount('campaigns', {
-            client_id:  `eq.${clientId}`,
-            created_at: `gte.${startOfMonth}`,
-          }),
-          sbCount('campaigns', {
-            client_id:  `eq.${clientId}`,
-            created_at: `gte.${startOfToday}`,
-          }),
-          sbGet('campaigns', {
-            client_id: `eq.${clientId}`,
-            select:    'email_subject,created_at,companies(company_name)',
-            order:     'created_at.desc',
-            limit:     '10',
-          }),
-        ]);
+        document.getElementById('js-count-month').textContent = data.counts.month;
+        document.getElementById('js-count-today').textContent = data.counts.today;
 
-        document.getElementById('js-count-month').textContent = countMonth;
-        document.getElementById('js-count-today').textContent = countToday;
-        renderCampaigns(campaigns);
+        renderCampaigns(data.campaigns);
 
       } catch (err) {
         console.error(err);
