@@ -379,7 +379,7 @@
     // ── Config ─────────────────────────────────────────────────────────────
     // IMPORTANTE: usa la *anon key* (Settings → API → anon public), NO la service-role key.
     const SUPABASE_URL     = 'https://quywrltqzoyyorbsuiwc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1eXdybHRxem95eW9yYnN1aXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDYzMTQsImV4cCI6MjA4NTk4MjMxNH0.pTHmfCBFMFBCHiCNnRKjrFfBQiCVaOG5tkrTJYhAXI0';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1eXdybHRxem95eW9yYnN1aXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDYzMTQsImV4cCI6MjA4NTk4MjMxNH0.Tz_CvS_ngJZIn4SOjahKuEqEJOrWOltfti7tEQt0_Rk';
     const N8N_AUTH_BASE    = 'https://guillepalacin1.app.n8n.cloud/webhook/auth/start';
 
     // ── Helpers ─────────────────────────────────────────────────────────────
@@ -450,19 +450,19 @@
         return;
       }
 
-      const expired = token.expires_at && new Date(token.expires_at) < new Date();
+      const expired = token.token_expiry && new Date(token.token_expiry) < new Date();
 
       if (expired) {
         card.className  = 'status-card warn';
         icon.textContent = '⚠️';
         title.textContent = 'Token caducado — reconecta tu Gmail';
-        sub.textContent   = esc(token.email || '');
+        sub.textContent   = esc(token.gmail_email || '');
         action.innerHTML  = `<a href="${esc(authHref)}" class="btn btn-warn">Reconectar Gmail</a>`;
       } else {
         card.className  = 'status-card ok';
         icon.textContent = '✅';
         title.textContent = 'Gmail conectado';
-        sub.textContent   = esc(token.email || '');
+        sub.textContent   = esc(token.gmail_email || '');
       }
     }
 
@@ -474,7 +474,7 @@
       }
       tbody.innerHTML = rows.map(r => `
         <tr>
-          <td class="col-company">${esc(r.company_name)}</td>
+          <td class="col-company">${esc(r.companies?.company_name ?? '—')}</td>
           <td class="col-subject" title="${esc(r.email_subject)}">${esc(r.email_subject || '—')}</td>
           <td class="col-date">${r.created_at ? fmtDate(r.created_at) : '—'}</td>
         </tr>
@@ -501,7 +501,7 @@
         // 1 — Client info
         const [client] = await sbGet('clients', {
           id:     `eq.${clientId}`,
-          select: 'id,name,company_name',
+          select: 'id,name,company',
           limit:  '1',
         });
         if (!client) {
@@ -510,12 +510,12 @@
           return;
         }
         document.getElementById('js-client-name').textContent =
-          client.company_name || client.name || '';
+          client.company || client.name || '';
 
         // 2 — Gmail token (serial: needed before render)
         const [token] = await sbGet('client_tokens', {
           client_id: `eq.${clientId}`,
-          select:    'email,expires_at',
+          select:    'gmail_email,token_expiry',
           limit:     '1',
         });
         renderGmailStatus(token ?? null);
@@ -532,7 +532,7 @@
           }),
           sbGet('campaigns', {
             client_id: `eq.${clientId}`,
-            select:    'company_name,email_subject,created_at',
+            select:    'email_subject,created_at,companies(company_name)',
             order:     'created_at.desc',
             limit:     '10',
           }),
