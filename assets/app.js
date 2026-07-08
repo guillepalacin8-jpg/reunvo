@@ -4,7 +4,7 @@
 
 const REUNVO = {
   SUPABASE_URL: "https://quywrltqzoyyorbsuiwc.supabase.co",
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1eXdybHRxem95eW9yYnN1aXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDYzMTQsImV4cCI6MjA4NTk4MjMxNH0.Tz_CvS_ngJZIn4SOjahKuEqEJOrWOltfti7tEQt0_Rk",
+  SUPABASE_ANON_KEY: "sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp",
   OAUTH_START_URL: "https://guillepalacin1.app.n8n.cloud/webhook/auth/start"
 };
 
