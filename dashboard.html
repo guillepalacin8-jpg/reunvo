@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reunvo · Panel</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reunvo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a3c6e">
+<style>
+  :root{color-scheme:light}
+  *{box-sizing:border-box}
+  body{margin:0;background:#f7f8fa;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  h1{font-size:19px;margin:0 0 2px;letter-spacing:-.01em;color:#1a3c6e}
+  h1 span{font-size:11px;color:#6b7688;font-weight:400}
+  .sub{color:#6b7688;font-size:12.5px;margin:2px 0 0}
+  button{background:#1a3c6e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+  h2{font-family:Arial,sans-serif;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#c87800;margin:24px 0 10px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
+  .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:12px 14px}
+  .card .k{font-size:10.5px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+  .card .v{font-size:23px;font-weight:650;letter-spacing:-.02em;color:#1a3c6e}
+  .card .v small{font-size:12px;color:#6b7688;font-weight:500}
+  .card.hot .v{color:#15803d}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e6e9ef;border-radius:11px;overflow:hidden;font-size:13px;margin-top:4px}
+  th,td{text-align:right;padding:9px 12px;border-bottom:1px solid #eef0f4}
+  th{background:#fafbfc;color:#6b7688;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  td:first-child,th:first-child{text-align:left}
+  tr:last-child td{border-bottom:0}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+  .b-active{background:#e9f7ef;color:#15803d}.b-off{background:#eef1f6;color:#6b7688}
+  .foot{color:#94a0b3;font-size:11px;margin-top:20px;font-family:Arial,sans-serif}
+  .msg{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
+  .gate{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:18px;max-width:340px;display:none;margin-top:14px}
+  .gate label{font-size:13px;color:#1a2233;display:block;margin-bottom:8px}
+  .gate input{width:100%;padding:9px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}
+  .gate .e{color:#b91c1c;font-size:12px;margin-top:6px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Reunvo · Panel <span>(interno)</span></h1>
+      <p class="sub" id="sub">Cargando…</p>
+    </div>
+    <button onclick="load()">Actualizar</button>
+  </div>
+  <div id="msg" class="msg"></div>
+
+  <div id="gate" class="gate">
+    <label for="pw">Introduce la contraseña</label>
+    <input id="pw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')submitPw()">
+    <div id="gerr" class="e"></div>
+    <button style="margin-top:10px" onclick="submitPw()">Entrar</button>
+  </div>
+
+  <div id="content" style="display:none">
+    <h2>Negocio</h2>
+    <div class="cards" id="neg"></div>
+    <h2>Respuestas (campaña de Ramón)</h2>
+    <div class="cards" id="emb"></div>
+    <h2>Por cliente</h2>
+    <div id="cli"></div>
+    <p class="foot" id="foot"></p>
+  </div>
+</div>
+<script>
+const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
+const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
+let PW=localStorage.getItem("reunvo_pw")||new URLSearchParams(location.search).get('t')||'';
+const D=713;
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct=(a,b)=>b>0?(100*a/b).toFixed(0)+"%":"—";
+const card=(k,v,note,hot)=>`<div class="card${hot?' hot':''}"><div class="k">${esc(k)}</div><div class="v">${v} ${note?`<small>${esc(note)}</small>`:""}</div></div>`;
+
+function showGate(err){
+  document.getElementById("content").style.display="none";
+  document.getElementById("sub").textContent="";
+  document.getElementById("gate").style.display="block";
+  const e=document.getElementById("gerr");
+  if(err){e.style.display="block";e.textContent=err;} else e.style.display="none";
+  document.getElementById("pw").focus();
+}
+function submitPw(){
+  const v=document.getElementById("pw").value.trim(); if(!v)return;
+  PW=v; localStorage.setItem("reunvo_pw",v);
+  document.getElementById("gate").style.display="none"; load();
+}
+async function load(){
+  const msg=document.getElementById("msg"); msg.style.display="none";
+  if(!PW){ showGate(); return; }
+  document.getElementById("sub").textContent="Cargando…";
+  try{
+    const r=await fetch(SUPA+"/rest/v1/rpc/reunvo_panel_kpis",{
+      method:"POST",
+      headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+      body:JSON.stringify({p_token:PW})
+    });
+    const d=await r.json();
+    if(d && d.error){ localStorage.removeItem("reunvo_pw"); PW=""; showGate("Contraseña incorrecta"); return; }
+    if(!d){ throw new Error("Sin datos"); }
+    render(d);
+  }catch(e){
+    document.getElementById("sub").textContent="";
+    msg.style.display="block"; msg.textContent="No se pudo cargar: "+(e&&e.message?e.message:e);
+  }
+}
+function render(d){
+  const n=d.negocio||{}, m=d.embudo||{}, o=d.apertura||{};
+  const ts=d.ts?new Date(d.ts):new Date();
+  document.getElementById("sub").textContent="Datos en vivo · "+ts.toLocaleString('es-ES');
+  document.getElementById("neg").innerHTML=[
+    card("Empresas (BD)",n.total),
+    card("Usables ya",n.usable,"listas para envío"),
+    card("Contactadas",n.contactadas),
+    card("Email verif.",pct(n.verif,n.total),n.verif+" empresas"),
+    card("Compradores",n.buyers,"buy-side",true),
+    card("Leads",n.leads,"atribución"),
+    card("QA abiertas",n.qa,"banderas")
+  ].join("");
+  let tot=0; Object.keys(m).forEach(k=>tot+=m[k]);
+  const hot=m.vende_interesado||0, reales=tot-(m.autorespuesta||0);
+  document.getElementById("emb").innerHTML=[
+    card("Respuestas reales",reales,"de "+D+" · "+pct(reales,D)),
+    card("🔥 Valorar venta",hot,"interesados",true),
+    card("En futuro",m.vende_futuro||0,"o pasa a decisor"),
+    card("Apertura piloto",pct(o.aperturas,o.contactadas),(o.aperturas||0)+"/"+(o.contactadas||0)+" · píxel")
+  ].join("");
+  let rows='<table><tr><th>Cliente</th><th>Estado</th><th>Borradores</th><th>Últ. 7d</th><th>Aperturas</th><th>Cola</th><th>Runway</th></tr>';
+  (d.clientes||[]).forEach(c=>{
+    const runway=c.cola>0&&c.epd>0?Math.round(c.cola/c.epd)+" días":"—";
+    const b=c.status==='active'?'<span class="badge b-active">activo</span>':'<span class="badge b-off">'+esc(c.status)+'</span>';
+    rows+=`<tr><td>${esc(c.cliente)}</td><td style="text-align:left">${b}</td><td>${c.dt}</td><td>${c.d7}</td><td>${c.ap}</td><td>${c.cola}</td><td>${runway}</td></tr>`;
+  });
+  rows+='</table>'; document.getElementById("cli").innerHTML=rows;
+  document.getElementById("foot").textContent="Apertura solo del piloto (píxel); ~40% se pierde por caché de Gmail. Respuestas = bandeja de Ramón.";
+  document.getElementById("content").style.display="block";
+}
+load();
+</script>
+</body>
+</html>
