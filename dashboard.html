@@ -125,7 +125,7 @@ function render(d){
   const hot=m.vende_interesado||0, reales=tot-(m.autorespuesta||0);
   document.getElementById("emb").innerHTML=[
     card("Respuestas reales",reales,"de "+D+" · "+pct(reales,D)),
-    card("🔥 Valorar venta",hot,"interesados",true),
+    card("🔥 Interesados (total)",(n.leads||hot),"acumulado · nunca baja",true),
     card("En futuro",m.vende_futuro||0,"o pasa a decisor"),
     card("Apertura piloto",pct(o.aperturas,o.contactadas),(o.aperturas||0)+"/"+(o.contactadas||0)+" · píxel")
   ].join("");
