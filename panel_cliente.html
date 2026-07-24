@@ -31,12 +31,12 @@
   .bt{background:#eef1f6;border-radius:5px;height:9px;overflow:hidden}.bf{display:block;height:100%;background:#2a4372;border-radius:5px}
   .bn{color:#6b7688;text-align:right}
   input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:12px;max-width:420px}
-  .tbl{width:100%;border-collapse:separate;border-spacing:0 6px}
-  .tbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#6b7688;padding:0 12px 2px;font-weight:600}
-  .tbl td{background:#fff;border-top:1px solid #e6e9ef;border-bottom:1px solid #e6e9ef;padding:8px 12px;font-size:13px;vertical-align:middle}
-  .tbl td:first-child{border-left:1px solid #e6e9ef;border-radius:9px 0 0 9px;font-weight:600}
-  .tbl td:last-child{border-right:1px solid #e6e9ef;border-radius:0 9px 9px 0}
-  .tbl tr.out td{opacity:.45}.tbl .m{color:#6b7688}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:9px}
+  .gcard{background:#fff;border:1px solid #e6e9ef;border-radius:10px;padding:9px 12px}
+  .gcard.out{opacity:.45}
+  .gcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .gcard .nm{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gcard .gmeta{color:#6b7688;font-size:11.5px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   button.act{border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .b-out{background:#fef2f2;color:#b91c1c}.b-in{background:#eef1f6;color:#1a3c6e}.b-info{background:#1a3c6e;color:#fff}.b-done{background:#e9f7ef;color:#15803d}.b-gold{background:#b7791f;color:#fff}
   .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:0 0 12px;display:none}
@@ -92,12 +92,12 @@
     <section id="s-empresas"><h1>Empresas de este mes</h1>
       <p class="hint">Se contactarán en tu nombre. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente para que siempre tengas tu cupo lleno.</p>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
-      <table class="tbl"><thead><tr><th>Empresa</th><th></th><th class="hidecol">Sector</th><th class="hidecol">Ciudad</th><th>Facturación</th></tr></thead><tbody id="lista-emp"></tbody></table></section>
+      <div class="grid" id="lista-emp"></div></section>
 
     <section id="s-contactadas"><h1>Contactadas</h1>
       <p class="hint">Todas a las que ya se ha escrito. Cuando una te responda con interés, <b>búscala y pide el dossier</b> — te llega al email.</p>
       <input class="search" id="q-con" placeholder="Buscar empresa…" oninput="filtrar('con')">
-      <table class="tbl"><thead><tr><th>Empresa</th><th></th><th class="hidecol">Sector</th><th class="hidecol">Ciudad</th><th>Facturación</th></tr></thead><tbody id="lista-con"></tbody></table></section>
+      <div class="grid" id="lista-con"></div></section>
 
     <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
 
@@ -139,10 +139,11 @@ function render(d){
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
   document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
-  const rowT=(a,accion)=>`<tr class="${a.excluida?'out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
-     <td>${esc(a.empresa)}</td><td>${accion}</td><td class="m hidecol">${esc(a.sector||'—')}</td><td class="m hidecol">${esc(a.localidad||'—')}</td><td>${mEur(a.facturacion)}</td></tr>`;
-  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>rowT(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<tr><td colspan="5" class="hint">No hay empresas en cola.</td></tr>';
-  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>rowT(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<tr><td colspan="5" class="hint">Aún no hay contactadas.</td></tr>';
+  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+     <div class="top"><div class="nm">${esc(a.empresa)}</div>${accion}</div>
+     <div class="gmeta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>`;
+  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
+  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">${fecha(x.fecha)} · ${esc(x.estado)}</span></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier. Pídelos desde Contactadas.</p>';
   const avanzado=(c.plan||'').toLowerCase().includes('avanz')||(c.plan||'').toLowerCase().includes('premium');
   document.getElementById("ajustes").innerHTML=
@@ -155,7 +156,7 @@ async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_tog
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
 async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
 async function pedirUpgrade(btn){btn.disabled=true;const r=await rpc("client_request_upgrade",{});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitado.");}else{flash("No se pudo, reintenta.");}}
-function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" tr").forEach(r=>{const t=r.getAttribute("data-txt");if(t!==null)r.style.display=t.toLowerCase().includes(q)?"table-row":"none";});}
+function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}
 load();
 </script>
 </body>
