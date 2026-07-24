@@ -18,28 +18,35 @@
   h1{font-size:19px;margin:0 0 6px;color:#1a3c6e}
   .lead{color:#3a4763;font-size:14px;margin:0 0 16px}
   .hint{color:#6b7688;font-size:12.5px;margin:0 0 12px}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
   .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:12px 14px}
   .card .k{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .card .v{font-size:22px;font-weight:650;color:#1a3c6e}.card.hot .v{color:#15803d}.card.gold .v{color:#b7791f}
+  .card .v{font-size:22px;font-weight:650;color:#1a3c6e}.card.gold .v{color:#b7791f}
   .panelbox{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:16px 18px;margin-bottom:14px}
-  .panelbox h3{margin:0 0 10px;font-size:13px;color:#1a3c6e}
-  input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:10px}
-  .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}
-  .frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}
-  .frm .full{grid-column:1/3}
-  .row{background:#fff;border:1px solid #e6e9ef;border-radius:10px;padding:10px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-  .row.out{opacity:.5}.row .info{min-width:0}.row .nm{font-weight:600;font-size:14px}.row .meta{color:#6b7688;font-size:12px;margin-top:2px}
-  button.act{border:0;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .panelbox h3{margin:0 0 12px;font-size:13px;color:#1a3c6e}
+  .stats2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .stats2 .k{font-size:11px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .bar{display:grid;grid-template-columns:135px 1fr 26px;align-items:center;gap:8px;margin-bottom:6px;font-size:12.5px}
+  .bl{color:#3a4763;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bt{background:#eef1f6;border-radius:5px;height:9px;overflow:hidden}.bf{display:block;height:100%;background:#2a4372;border-radius:5px}
+  .bn{color:#6b7688;text-align:right}
+  input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:12px;max-width:420px}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0 6px}
+  .tbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#6b7688;padding:0 12px 2px;font-weight:600}
+  .tbl td{background:#fff;border-top:1px solid #e6e9ef;border-bottom:1px solid #e6e9ef;padding:8px 12px;font-size:13px;vertical-align:middle}
+  .tbl td:first-child{border-left:1px solid #e6e9ef;border-radius:9px 0 0 9px;font-weight:600}
+  .tbl td:last-child{border-right:1px solid #e6e9ef;border-radius:0 9px 9px 0}
+  .tbl tr.out td{opacity:.45}.tbl .m{color:#6b7688}
+  button.act{border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .b-out{background:#fef2f2;color:#b91c1c}.b-in{background:#eef1f6;color:#1a3c6e}.b-info{background:#1a3c6e;color:#fff}.b-done{background:#e9f7ef;color:#15803d}.b-gold{background:#b7791f;color:#fff}
   .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:0 0 12px;display:none}
   .pend{background:#fff8ec;border:1px solid #f0dcae;color:#8a6d2f;border-radius:10px;padding:10px 13px;font-size:12.5px;margin-bottom:12px}
   .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
   section{display:none}section.on{display:block}
   .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e6e9ef;font-size:13.5px}.kv .k{color:#6b7688}
+  .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}
   .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
-  @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.frm{grid-template-columns:1fr}.frm .full{grid-column:1}}
+  @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.stats2,.frm{grid-template-columns:1fr}.frm .full{grid-column:1}.tbl .hidecol{display:none}}
 </style>
 </head>
 <body>
@@ -63,32 +70,34 @@
     <section id="s-resumen"><h1>Resumen</h1>
       <p class="lead" id="lead"></p>
       <div class="cards" id="kpis"></div>
-      <div class="panelbox"><h3>Tu target actual</h3><div id="target-mini"></div></div>
+      <div class="panelbox"><h3>Panorama de tus contactadas</h3>
+        <div class="stats2">
+          <div><div class="k">Sectores</div><div id="secbars"></div></div>
+          <div><div class="k">Dónde</div><div id="citybars"></div></div>
+        </div></div>
+      <div class="panelbox"><h3>Tu target</h3><div id="target-mini"></div></div>
     </section>
 
     <section id="s-target"><h1>Mi target</h1>
       <p class="hint">Define a quién quieres contactar. Al guardar, <b>nos llega una solicitud</b> y te confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por tus empresas.</p>
       <div id="target-pend"></div>
-      <div class="panelbox">
-        <div class="frm">
-          <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
-          <div class="full"><label>Sector</label><input id="t-sector" placeholder="p.ej. industrial, alimentación, servicios…"></div>
-          <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
-          <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
-          <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
-        </div>
-      </div>
-    </section>
+      <div class="panelbox"><div class="frm">
+        <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
+        <div class="full"><label>Sector (opcional — vacío = todos)</label><input id="t-sector" placeholder="p.ej. industrial, alimentación…"></div>
+        <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
+        <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
+        <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
+      </div></div></section>
 
     <section id="s-empresas"><h1>Empresas de este mes</h1>
-      <p class="hint">Se contactarán en tu nombre. <b>Quita las que no encajen</b> — el resto sale automáticamente.</p>
-      <input class="search" id="q-emp" placeholder="Buscar empresa, sector o localidad…" oninput="filtrar('emp')">
-      <div id="lista-emp"></div></section>
+      <p class="hint">Se contactarán en tu nombre. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente para que siempre tengas tu cupo lleno.</p>
+      <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
+      <table class="tbl"><thead><tr><th>Empresa</th><th></th><th class="hidecol">Sector</th><th class="hidecol">Ciudad</th><th>Facturación</th></tr></thead><tbody id="lista-emp"></tbody></table></section>
 
     <section id="s-contactadas"><h1>Contactadas</h1>
       <p class="hint">Todas a las que ya se ha escrito. Cuando una te responda con interés, <b>búscala y pide el dossier</b> — te llega al email.</p>
       <input class="search" id="q-con" placeholder="Buscar empresa…" oninput="filtrar('con')">
-      <div id="lista-con"></div></section>
+      <table class="tbl"><thead><tr><th>Empresa</th><th></th><th class="hidecol">Sector</th><th class="hidecol">Ciudad</th><th>Facturación</th></tr></thead><tbody id="lista-con"></tbody></table></section>
 
     <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
 
@@ -106,59 +115,47 @@ const fecha=d=>d?new Date(d).toLocaleDateString('es-ES'):"";
 async function rpc(fn,a){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({p_token:T},a||{}))});return await r.json();}
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
 function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
+function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
+function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
 
 async function load(){
   try{const d=await rpc("client_panel",{});if(!d||d.error){throw new Error("Enlace no válido");}render(d);}
   catch(e){document.getElementById("loading").style.display="none";const el=document.getElementById("err");el.style.display="block";el.textContent="No se pudo cargar: "+(e.message||e);}
 }
-function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
 function render(d){
   document.getElementById("loading").style.display="none";
-  const c=d.cliente||{},k=d.kpis||{},t=d.target||{};
+  const c=d.cliente||{},k=d.kpis||{},t=d.target||{},st=d.stats||{};
   document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
   document.getElementById("s-resumen").classList.add("on");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
-  document.getElementById("lead").textContent="Este mes contactaremos "+(k.en_cola||0)+" empresas en tu nombre. Puedes revisarlas, ajustar tu target y pedir el dossier de quien te responda.";
-  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
+  document.getElementById("lead").textContent="Este mes contactaremos "+(k.en_cola||0)+" empresas en tu nombre. Revísalas, ajusta tu target y pide el dossier de quien te responda.";
+  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
     .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
+  document.getElementById("secbars").innerHTML=bars(st.sectores);
+  document.getElementById("citybars").innerHTML=bars(st.ciudades);
   document.getElementById("target-mini").innerHTML=`<div class="kv"><span class="k">A quién contactamos</span><span>${esc(tgtTxt(t))}</span></div>`;
-  // target form prefill
   document.getElementById("t-region").value=t.region||"";document.getElementById("t-sector").value=t.sector||"";
   document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
   const tp=d.target_pendiente;
-  document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Tienes una solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
-  // empresas
+  document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
   document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
-  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>`
-    <div class="row${a.excluida?' out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
-      <div class="info"><div class="nm">${esc(a.empresa)}</div><div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
-      ${a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`}
-    </div>`).join("")||'<p class="hint">No hay empresas en cola ahora mismo.</p>';
-  // contactadas
-  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>`
-    <div class="row" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
-      <div class="info"><div class="nm">${esc(a.empresa)}</div><div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
-      ${a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`}
-    </div>`).join("")||'<p class="hint">Aún no hay empresas contactadas.</p>';
-  // dossiers
-  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`
-    <div class="row"><div class="info"><div class="nm">${esc(x.empresa)}</div><div class="meta">${fecha(x.fecha)} · ${esc(x.estado)}</div></div></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier. Pídelos desde Contactadas.</p>';
-  // ajustes
+  const rowT=(a,accion)=>`<tr class="${a.excluida?'out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+     <td>${esc(a.empresa)}</td><td>${accion}</td><td class="m hidecol">${esc(a.sector||'—')}</td><td class="m hidecol">${esc(a.localidad||'—')}</td><td>${mEur(a.facturacion)}</td></tr>`;
+  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>rowT(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<tr><td colspan="5" class="hint">No hay empresas en cola.</td></tr>';
+  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>rowT(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<tr><td colspan="5" class="hint">Aún no hay contactadas.</td></tr>';
+  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">${fecha(x.fecha)} · ${esc(x.estado)}</span></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier. Pídelos desde Contactadas.</p>';
   const avanzado=(c.plan||'').toLowerCase().includes('avanz')||(c.plan||'').toLowerCase().includes('premium');
   document.getElementById("ajustes").innerHTML=
     [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("")
-    + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7">
-        <h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
+    + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7"><h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
         <p class="hint" style="margin-bottom:12px">Pasa de 10 a <b>20 emails/día</b> personalizados y apunta a <b>6-8 clientes potenciales interesados cada mes</b> (frente a 3-4 del Básico). El mismo sistema, el doble de volumen, el doble de oportunidades.</p>
         <button class="act b-gold" onclick="pedirUpgrade(this)">Quiero subir a Avanzado</button></div>`);
 }
-async function pedirUpgrade(btn){btn.disabled=true;const r=await rpc("client_request_upgrade",{});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitado.");}else{flash("No se pudo, reintenta.");}}
 async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});if(r&&r.ok){await load();nav('empresas');}else{btn.disabled=false;flash("No se pudo, reintenta.");}}
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
-async function pedirTarget(btn){btn.disabled=true;
-  const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});
-  btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar la solicitud.");}}
-function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .row").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"flex":"none";});}
+async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
+async function pedirUpgrade(btn){btn.disabled=true;const r=await rpc("client_request_upgrade",{});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitado.");}else{flash("No se pudo, reintenta.");}}
+function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" tr").forEach(r=>{const t=r.getAttribute("data-txt");if(t!==null)r.style.display=t.toLowerCase().includes(q)?"table-row":"none";});}
 load();
 </script>
 </body>
