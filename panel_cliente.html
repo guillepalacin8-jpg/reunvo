@@ -3,129 +3,143 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reunvo · Tu panel</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Reunvo">
-<meta name="theme-color" content="#1a3c6e">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reunvo"><meta name="theme-color" content="#1a3c6e">
 <style>
   :root{color-scheme:light}*{box-sizing:border-box}
   body{margin:0;background:#f7f8fa;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
-  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 48px}
-  h1{font-size:19px;margin:0 0 2px;color:#1a3c6e}
-  h1 span{font-size:12px;color:#6b7688;font-weight:400}
-  .sub{color:#6b7688;font-size:12.5px;margin:2px 0 18px}
-  h2{font-family:Arial,sans-serif;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#c87800;margin:26px 0 6px}
+  .app{display:flex;min-height:100vh}
+  /* sidebar */
+  .side{width:210px;background:#14243f;color:#cdd6e6;flex-shrink:0;padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+  .brand{font-size:18px;font-weight:700;color:#fff;padding:4px 10px 14px}
+  .brand span{color:#e9c98a}
+  .who{font-size:12px;color:#8fa0bd;padding:0 10px 14px;border-bottom:1px solid #24365a;margin-bottom:8px}
+  .nav{background:none;border:0;color:#cdd6e6;text-align:left;padding:9px 11px;border-radius:8px;font-size:13.5px;cursor:pointer;width:100%;display:flex;justify-content:space-between;align-items:center}
+  .nav:hover{background:#1e3155}
+  .nav.active{background:#2a4372;color:#fff;font-weight:600}
+  .nav .badge{background:#e9c98a;color:#14243f;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
+  /* main */
+  .main{flex:1;padding:22px 22px 48px;max-width:820px}
+  h1{font-size:19px;margin:0 0 14px;color:#1a3c6e}
   .hint{color:#6b7688;font-size:12.5px;margin:0 0 12px}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-  .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:11px 13px}
+  .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:12px 14px}
   .card .k{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .card .v{font-size:21px;font-weight:650;color:#1a3c6e}
-  .card.hot .v{color:#15803d}
+  .card .v{font-size:22px;font-weight:650;color:#1a3c6e}.card.hot .v{color:#15803d}
   input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:10px}
   .row{background:#fff;border:1px solid #e6e9ef;border-radius:10px;padding:10px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-  .row.out{opacity:.5}
-  .row .info{min-width:0}
-  .row .nm{font-weight:600;color:#1a2233;font-size:14px}
-  .row .meta{color:#6b7688;font-size:12px;margin-top:2px}
+  .row.out{opacity:.5}.row .info{min-width:0}
+  .row .nm{font-weight:600;font-size:14px}.row .meta{color:#6b7688;font-size:12px;margin-top:2px}
   .row .resp{color:#3a4763;font-size:12.5px;margin-top:3px;font-style:italic}
-  button{border:0;border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  button.act{border:0;border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
   .b-out{background:#fef2f2;color:#b91c1c}.b-in{background:#eef1f6;color:#1a3c6e}
   .b-info{background:#1a3c6e;color:#fff}.b-done{background:#e9f7ef;color:#15803d}
-  .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:10px 0;display:none}
+  .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:0 0 12px;display:none}
   .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
-  .foot{color:#94a0b3;font-size:11px;margin-top:24px;font-family:Arial,sans-serif}
+  section{display:none}section.on{display:block}
+  .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e6e9ef;font-size:13.5px}.kv .k{color:#6b7688}
+  .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
+  @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Reunvo · Tu panel <span id="plan"></span></h1>
-  <p class="sub" id="sub">Cargando…</p>
-  <div id="err" class="err"></div>
-  <div id="msg" class="msg"></div>
+<div class="app">
+  <nav class="side">
+    <div class="brand">Reunvo<span>.</span></div>
+    <div class="who" id="who">…</div>
+    <button class="nav active" data-s="resumen" onclick="nav('resumen')">Resumen</button>
+    <button class="nav" data-s="empresas" onclick="nav('empresas')">Empresas del mes <span class="badge" id="b-emp"></span></button>
+    <button class="nav" data-s="contactadas" onclick="nav('contactadas')">Contactadas <span class="badge" id="b-con"></span></button>
+    <button class="nav" data-s="interesados" onclick="nav('interesados')">Interesados <span class="badge" id="b-int"></span></button>
+    <button class="nav" data-s="dossiers" onclick="nav('dossiers')">Dossiers</button>
+    <button class="nav" data-s="ajustes" onclick="nav('ajustes')">Ajustes</button>
+    <div class="foot">Nunca leemos tu bandeja · tú controlas los envíos</div>
+  </nav>
+  <main class="main">
+    <div id="err" class="err"></div>
+    <div id="msg" class="msg"></div>
+    <div id="loading" class="hint">Cargando…</div>
 
-  <div id="content" style="display:none">
-    <div class="cards" id="kpis"></div>
+    <section id="s-resumen"><h1>Resumen</h1><div class="cards" id="kpis"></div></section>
 
-    <h2>Empresas de este mes</h2>
-    <p class="hint">Estas empresas se contactarán en tu nombre. <b>Quita las que no encajen</b> — el resto sale automáticamente. Puedes buscar por nombre, sector o localidad.</p>
-    <input class="search" id="search" placeholder="Buscar empresa, sector o localidad…" oninput="filtrar()">
-    <div id="aprobacion"></div>
+    <section id="s-empresas"><h1>Empresas de este mes</h1>
+      <p class="hint">Se contactarán en tu nombre. <b>Quita las que no encajen</b> — el resto sale automáticamente.</p>
+      <input class="search" id="q-emp" placeholder="Buscar empresa, sector o localidad…" oninput="filtrar('emp')">
+      <div id="lista-emp"></div></section>
 
-    <h2>Interesados <span style="color:#6b7688;font-weight:400;text-transform:none;letter-spacing:0">· pide el dossier de los que quieras (<span id="dcount"></span>)</span></h2>
-    <p class="hint">Cuando alguien responde con interés, pídele el <b>dossier</b> y te llega al email en breve.</p>
-    <div id="pipeline"></div>
-  </div>
-  <p class="foot">Reunvo · nunca leemos tu bandeja · tú controlas los envíos</p>
+    <section id="s-contactadas"><h1>Contactadas</h1>
+      <p class="hint">Todas a las que ya se ha escrito. Cuando una te responda con interés, <b>búscala y pide el dossier</b> — te llega al email.</p>
+      <input class="search" id="q-con" placeholder="Buscar empresa…" oninput="filtrar('con')">
+      <div id="lista-con"></div></section>
+
+    <section id="s-interesados"><h1>Interesados</h1>
+      <p class="hint">Tu pipeline de oportunidades. Pide el dossier de los que quieras (<span id="dcount"></span>).</p>
+      <div id="lista-int"></div></section>
+
+    <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
+
+    <section id="s-ajustes"><h1>Ajustes</h1><div id="ajustes"></div>
+      <p class="hint" style="margin-top:12px">Para cambiar tu plan, target o preferencias de envío, escríbenos a gp@reunvo.com.</p></section>
+  </main>
 </div>
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
 const T=new URLSearchParams(location.search).get('t')||'';
-let DATA=null;
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const mEur=k=>k?("€"+(k/1000).toFixed(1)+"M"):"—";
 const fecha=d=>d?new Date(d).toLocaleDateString('es-ES'):"";
-
-async function rpc(fn,args){
-  const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",
-    headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
-    body:JSON.stringify(Object.assign({p_token:T},args||{}))});
-  return await r.json();
-}
+async function rpc(fn,a){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({p_token:T},a||{}))});return await r.json();}
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",4000);}
+function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
 
 async function load(){
   try{
     const d=await rpc("client_panel",{});
     if(!d||d.error){throw new Error("Enlace no válido");}
-    DATA=d; render(d);
-  }catch(e){document.getElementById("sub").textContent="";const el=document.getElementById("err");el.style.display="block";el.textContent="No se pudo cargar: "+(e.message||e);}
+    render(d);
+  }catch(e){document.getElementById("loading").style.display="none";const el=document.getElementById("err");el.style.display="block";el.textContent="No se pudo cargar: "+(e.message||e);}
 }
 function render(d){
+  document.getElementById("loading").style.display="none";
   const c=d.cliente||{},k=d.kpis||{};
-  document.getElementById("sub").textContent="Hola "+esc(c.name||"")+" · "+ (c.epd||10)+" envíos/día";
-  document.getElementById("plan").textContent=c.plan?("· "+esc(c.plan)):"";
-  document.getElementById("kpis").innerHTML=[
-    ["En cola",k.en_cola],["Contactadas",k.contactadas],["Aperturas",k.aperturas],
-    ["Interesados",k.interesados,true],["Dossiers",(k.dossiers_mes||0)+"/"+(k.dossiers_cap||10)]
-  ].map(([kk,vv,hot])=>`<div class="card${hot?' hot':''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
+  document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+" envíos/día"+(c.plan?" · "+c.plan:"");
+  document.getElementById("s-resumen").classList.add("on");
+  // KPIs
+  document.getElementById("kpis").innerHTML=[["En cola",k.en_cola],["Contactadas",k.contactadas],["Aperturas",k.aperturas],["Interesados",k.interesados,true],["Dossiers",(k.dossiers_mes||0)+"/"+(k.dossiers_cap||10)]]
+    .map(([kk,vv,h])=>`<div class="card${h?' hot':''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
   document.getElementById("dcount").textContent=(k.dossiers_mes||0)+"/"+(k.dossiers_cap||10)+" este mes";
-  // aprobación
-  document.getElementById("aprobacion").innerHTML=(d.aprobacion||[]).map(a=>`
+  // badges
+  document.getElementById("b-emp").textContent=k.en_cola||0;
+  document.getElementById("b-con").textContent=k.contactadas||0;
+  document.getElementById("b-int").textContent=k.interesados||0;
+  // empresas del mes
+  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>`
     <div class="row${a.excluida?' out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
-      <div class="info"><div class="nm">${esc(a.empresa)}</div>
-        <div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
-      ${a.excluida
-        ? `<button class="b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`
-        : `<button class="b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`}
+      <div class="info"><div class="nm">${esc(a.empresa)}</div><div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
+      ${a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`}
     </div>`).join("")||'<p class="hint">No hay empresas en cola ahora mismo.</p>';
-  // pipeline
-  document.getElementById("pipeline").innerHTML=(d.pipeline||[]).map(p=>`
-    <div class="row">
-      <div class="info"><div class="nm">${esc(p.empresa||'(sin empresa)')}</div>
-        ${p.respuesta?`<div class="resp">"${esc(p.respuesta)}"</div>`:''}
-        <div class="meta">${p.replied_at?'respondió '+fecha(p.replied_at):''}</div></div>
-      ${p.dossier_pedido
-        ? `<button class="b-done" disabled>Pedido ✓</button>`
-        : `<button class="b-info" onclick="pedir('${p.company_id}',this)">Pedir info</button>`}
-    </div>`).join("")||'<p class="hint">Aún no hay interesados. Aparecerán aquí cuando alguien responda.</p>';
-  document.getElementById("content").style.display="block";
+  // contactadas
+  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>`
+    <div class="row" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+      <div class="info"><div class="nm">${esc(a.empresa)}</div><div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
+      ${a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`}
+    </div>`).join("")||'<p class="hint">Aún no hay empresas contactadas.</p>';
+  // interesados
+  document.getElementById("lista-int").innerHTML=(d.pipeline||[]).map(p=>`
+    <div class="row"><div class="info"><div class="nm">${esc(p.empresa||'(sin empresa)')}</div>
+      ${p.respuesta?`<div class="resp">"${esc(p.respuesta)}"</div>`:''}<div class="meta">${p.replied_at?'respondió '+fecha(p.replied_at):''}</div></div>
+      ${p.dossier_pedido?`<button class="act b-done" disabled>Dossier ✓</button>`:`<button class="act b-info" onclick="pedir('${p.company_id}',this)">Pedir info</button>`}
+    </div>`).join("")||'<p class="hint">Aún no hay interesados.</p>';
+  // dossiers
+  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`
+    <div class="row"><div class="info"><div class="nm">${esc(x.empresa)}</div><div class="meta">${fecha(x.fecha)} · ${esc(x.estado)}</div></div></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier.</p>';
+  // ajustes
+  document.getElementById("ajustes").innerHTML=[["Plan",c.plan||'—'],["Envíos/día",c.epd||10],["Región objetivo",c.region||'—'],["Sector objetivo",c.sector||'—']]
+    .map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
 }
-async function toggle(id,exclude,btn){
-  btn.disabled=true;
-  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:exclude});
-  if(r&&r.ok){ await load(); } else { btn.disabled=false; flash("No se pudo, reintenta."); }
-}
-async function pedir(id,btn){
-  btn.disabled=true;btn.textContent="…";
-  const r=await rpc("client_request_dossier",{p_company_id:id});
-  if(r&&r.ok){ flash(r.mensaje||"Pedido. Te llegará al email."); await load(); }
-  else { btn.disabled=false;btn.textContent="Pedir info"; flash((r&&r.mensaje)||"Límite alcanzado o error."); }
-}
-function filtrar(){
-  const q=document.getElementById("search").value.toLowerCase();
-  document.querySelectorAll("#aprobacion .row").forEach(r=>{
-    r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"flex":"none";});
-}
+async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});if(r&&r.ok){await load();nav('empresas');}else{btn.disabled=false;flash("No se pudo, reintenta.");}}
+async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
+function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .row").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"flex":"none";});}
 load();
 </script>
 </body>
