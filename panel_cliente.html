@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reunvo · Tu panel</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reunvo">
+<meta name="theme-color" content="#1a3c6e">
+<style>
+  :root{color-scheme:light}*{box-sizing:border-box}
+  body{margin:0;background:#f7f8fa;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 48px}
+  h1{font-size:19px;margin:0 0 2px;color:#1a3c6e}
+  h1 span{font-size:12px;color:#6b7688;font-weight:400}
+  .sub{color:#6b7688;font-size:12.5px;margin:2px 0 18px}
+  h2{font-family:Arial,sans-serif;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#c87800;margin:26px 0 6px}
+  .hint{color:#6b7688;font-size:12.5px;margin:0 0 12px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:11px 13px}
+  .card .k{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .card .v{font-size:21px;font-weight:650;color:#1a3c6e}
+  .card.hot .v{color:#15803d}
+  input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:10px}
+  .row{background:#fff;border:1px solid #e6e9ef;border-radius:10px;padding:10px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .row.out{opacity:.5}
+  .row .info{min-width:0}
+  .row .nm{font-weight:600;color:#1a2233;font-size:14px}
+  .row .meta{color:#6b7688;font-size:12px;margin-top:2px}
+  .row .resp{color:#3a4763;font-size:12.5px;margin-top:3px;font-style:italic}
+  button{border:0;border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .b-out{background:#fef2f2;color:#b91c1c}.b-in{background:#eef1f6;color:#1a3c6e}
+  .b-info{background:#1a3c6e;color:#fff}.b-done{background:#e9f7ef;color:#15803d}
+  .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:10px 0;display:none}
+  .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
+  .foot{color:#94a0b3;font-size:11px;margin-top:24px;font-family:Arial,sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reunvo · Tu panel <span id="plan"></span></h1>
+  <p class="sub" id="sub">Cargando…</p>
+  <div id="err" class="err"></div>
+  <div id="msg" class="msg"></div>
+
+  <div id="content" style="display:none">
+    <div class="cards" id="kpis"></div>
+
+    <h2>Empresas de este mes</h2>
+    <p class="hint">Estas empresas se contactarán en tu nombre. <b>Quita las que no encajen</b> — el resto sale automáticamente. Puedes buscar por nombre, sector o localidad.</p>
+    <input class="search" id="search" placeholder="Buscar empresa, sector o localidad…" oninput="filtrar()">
+    <div id="aprobacion"></div>
+
+    <h2>Interesados <span style="color:#6b7688;font-weight:400;text-transform:none;letter-spacing:0">· pide el dossier de los que quieras (<span id="dcount"></span>)</span></h2>
+    <p class="hint">Cuando alguien responde con interés, pídele el <b>dossier</b> y te llega al email en breve.</p>
+    <div id="pipeline"></div>
+  </div>
+  <p class="foot">Reunvo · nunca leemos tu bandeja · tú controlas los envíos</p>
+</div>
+<script>
+const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
+const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
+const T=new URLSearchParams(location.search).get('t')||'';
+let DATA=null;
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mEur=k=>k?("€"+(k/1000).toFixed(1)+"M"):"—";
+const fecha=d=>d?new Date(d).toLocaleDateString('es-ES'):"";
+
+async function rpc(fn,args){
+  const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+    body:JSON.stringify(Object.assign({p_token:T},args||{}))});
+  return await r.json();
+}
+function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",4000);}
+
+async function load(){
+  try{
+    const d=await rpc("client_panel",{});
+    if(!d||d.error){throw new Error("Enlace no válido");}
+    DATA=d; render(d);
+  }catch(e){document.getElementById("sub").textContent="";const el=document.getElementById("err");el.style.display="block";el.textContent="No se pudo cargar: "+(e.message||e);}
+}
+function render(d){
+  const c=d.cliente||{},k=d.kpis||{};
+  document.getElementById("sub").textContent="Hola "+esc(c.name||"")+" · "+ (c.epd||10)+" envíos/día";
+  document.getElementById("plan").textContent=c.plan?("· "+esc(c.plan)):"";
+  document.getElementById("kpis").innerHTML=[
+    ["En cola",k.en_cola],["Contactadas",k.contactadas],["Aperturas",k.aperturas],
+    ["Interesados",k.interesados,true],["Dossiers",(k.dossiers_mes||0)+"/"+(k.dossiers_cap||10)]
+  ].map(([kk,vv,hot])=>`<div class="card${hot?' hot':''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
+  document.getElementById("dcount").textContent=(k.dossiers_mes||0)+"/"+(k.dossiers_cap||10)+" este mes";
+  // aprobación
+  document.getElementById("aprobacion").innerHTML=(d.aprobacion||[]).map(a=>`
+    <div class="row${a.excluida?' out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+      <div class="info"><div class="nm">${esc(a.empresa)}</div>
+        <div class="meta">${esc(a.sector||'—')} · ${esc(a.localidad||'—')} · ${mEur(a.facturacion)}</div></div>
+      ${a.excluida
+        ? `<button class="b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`
+        : `<button class="b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`}
+    </div>`).join("")||'<p class="hint">No hay empresas en cola ahora mismo.</p>';
+  // pipeline
+  document.getElementById("pipeline").innerHTML=(d.pipeline||[]).map(p=>`
+    <div class="row">
+      <div class="info"><div class="nm">${esc(p.empresa||'(sin empresa)')}</div>
+        ${p.respuesta?`<div class="resp">"${esc(p.respuesta)}"</div>`:''}
+        <div class="meta">${p.replied_at?'respondió '+fecha(p.replied_at):''}</div></div>
+      ${p.dossier_pedido
+        ? `<button class="b-done" disabled>Pedido ✓</button>`
+        : `<button class="b-info" onclick="pedir('${p.company_id}',this)">Pedir info</button>`}
+    </div>`).join("")||'<p class="hint">Aún no hay interesados. Aparecerán aquí cuando alguien responda.</p>';
+  document.getElementById("content").style.display="block";
+}
+async function toggle(id,exclude,btn){
+  btn.disabled=true;
+  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:exclude});
+  if(r&&r.ok){ await load(); } else { btn.disabled=false; flash("No se pudo, reintenta."); }
+}
+async function pedir(id,btn){
+  btn.disabled=true;btn.textContent="…";
+  const r=await rpc("client_request_dossier",{p_company_id:id});
+  if(r&&r.ok){ flash(r.mensaje||"Pedido. Te llegará al email."); await load(); }
+  else { btn.disabled=false;btn.textContent="Pedir info"; flash((r&&r.mensaje)||"Límite alcanzado o error."); }
+}
+function filtrar(){
+  const q=document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll("#aprobacion .row").forEach(r=>{
+    r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"flex":"none";});
+}
+load();
+</script>
+</body>
+</html>
