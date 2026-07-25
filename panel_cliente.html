@@ -151,6 +151,7 @@ function render(d){
     + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7"><h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
         <p class="hint" style="margin-bottom:12px">Pasa de 10 a <b>20 emails/día</b> personalizados y apunta a <b>6-8 clientes potenciales interesados cada mes</b> (frente a 3-4 del Básico). El mismo sistema, el doble de volumen, el doble de oportunidades.</p>
         <button class="act b-gold" onclick="pedirUpgrade(this)">Quiero subir a Avanzado</button></div>`);
+  const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});if(r&&r.ok){await load();nav('empresas');}else{btn.disabled=false;flash("No se pudo, reintenta.");}}
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
