@@ -27,7 +27,7 @@
       <p>Los borradores no se envían solos. El envío lo decide y ejecuta usted, siempre.</p>
     </div>
 
-    <a class="btn btn--block" href="panel.html" data-keep-token>Ir a mi panel</a>
+    <a class="btn btn--block" href="panel_cliente.html" data-keep-token-qs>Ir a mi panel</a>
 
     <p class="contacto">¿Algo no encaja? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
   </section>
@@ -35,7 +35,7 @@
 
 <script src="assets/app.js"></script>
 <script>
-(() => { propagarToken(getToken()); })();
+(() => { const t = getToken(); propagarToken(t); propagarTokenQS(t); })();
 </script>
 </body>
 </html>

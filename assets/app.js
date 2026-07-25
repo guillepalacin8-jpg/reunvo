@@ -28,6 +28,15 @@ function propagarToken(token) {
   });
 }
 
+/* Añade el token como query (?t=) a los enlaces marcados con data-keep-token-qs
+   (panel_cliente.html lee el token de location.search, no del fragment) */
+function propagarTokenQS(token) {
+  if (!token) return;
+  document.querySelectorAll("a[data-keep-token-qs]").forEach(a => {
+    a.href = a.getAttribute("href").split("?")[0] + "?t=" + encodeURIComponent(token);
+  });
+}
+
 /* ---------- RPC panel_cliente ---------- */
 async function panelCliente(token) {
   const res = await fetch(REUNVO.SUPABASE_URL + "/rest/v1/rpc/panel_cliente", {
