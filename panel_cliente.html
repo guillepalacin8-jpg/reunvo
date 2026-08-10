@@ -56,7 +56,7 @@
     <div class="who" id="who">…</div>
     <button class="nav active" data-s="resumen" onclick="nav('resumen')">Resumen</button>
     <button class="nav" data-s="target" onclick="nav('target')">Mi target</button>
-    <button class="nav" data-s="empresas" onclick="nav('empresas')">Empresas del mes <span class="badge" id="b-emp"></span></button>
+    <button class="nav" data-s="empresas" onclick="nav('empresas')">Tu cola <span class="badge" id="b-emp"></span></button>
     <button class="nav" data-s="contactadas" onclick="nav('contactadas')">Contactadas <span class="badge" id="b-con"></span></button>
     <button class="nav" data-s="dossiers" onclick="nav('dossiers')">Dossiers</button>
     <button class="nav" data-s="ajustes" onclick="nav('ajustes')">Ajustes</button>
@@ -89,8 +89,8 @@
         <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
-    <section id="s-empresas"><h1>Empresas de este mes</h1>
-      <p class="hint">Se contactarán en tu nombre. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente para que siempre tengas tu cupo lleno.</p>
+    <section id="s-empresas"><h1>Tu cola de empresas</h1>
+      <p class="hint">Estas son las empresas reservadas para ti, en exclusiva. Se irán contactando en tu nombre al ritmo de tu plan. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
 
@@ -128,7 +128,8 @@ function render(d){
   document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
   document.getElementById("s-resumen").classList.add("on");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
-  document.getElementById("lead").textContent="Este mes contactaremos "+(k.en_cola||0)+" empresas en tu nombre. Revísalas, ajusta tu target y pide el dossier de quien te responda.";
+  const cupo=(k.cupo_mes==null?k.en_cola:k.cupo_mes)||0;
+  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en tu nombre, de tu cola de "+(k.en_cola||0)+". Revísalas, ajusta tu target y pide el dossier de quien te responda.";
   document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
     .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
   document.getElementById("secbars").innerHTML=bars(st.sectores);
