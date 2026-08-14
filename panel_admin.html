@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reunvo · Control</title>
+<meta name="theme-color" content="#14243f">
+<style>
+ :root{color-scheme:light}*{box-sizing:border-box}
+ body{margin:0;background:#f4f6f9;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+ header{background:#14243f;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+ header .b{font-size:18px;font-weight:700}.b span{color:#e9c98a}
+ header .ts{color:#8fa0bd;font-size:12px;margin-left:auto}
+ button.r{background:#2a4372;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer}
+ main{padding:20px 24px 60px;max-width:1250px;margin:0 auto}
+ h2{font-size:14px;color:#14243f;margin:26px 0 10px;text-transform:uppercase;letter-spacing:.05em}
+ h2:first-child{margin-top:0}
+ .box{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:16px 18px;margin-bottom:12px}
+ .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:12px}
+ .card{background:#fff;border:1px solid #e3e7ee;border-radius:11px;padding:12px 14px}
+ .card .k{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+ .card .v{font-size:21px;font-weight:650;color:#1a3c6e}
+ .card.warn{border-color:#f0c98a;background:#fffdf6}.card.warn .v{color:#b7791f}
+ .card.bad{border-color:#f6b9b9;background:#fff7f7}.card.bad .v{color:#b91c1c}
+ table{width:100%;border-collapse:collapse;font-size:13px}
+ th{text-align:left;color:#6b7688;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:0 10px 8px;border-bottom:1px solid #e6e9ef}
+ td{padding:9px 10px;border-bottom:1px solid #f0f2f6;vertical-align:middle}
+ tr:last-child td{border-bottom:0}
+ .nm{font-weight:600}
+ .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:600}
+ .p-ok{background:#e9f7ef;color:#15803d}.p-off{background:#eef1f6;color:#6b7688}
+ .p-test{background:#fff4e5;color:#b7791f}.p-bad{background:#fef2f2;color:#b91c1c}
+ a.go{display:inline-block;background:#1a3c6e;color:#fff;text-decoration:none;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600}
+ a.go:hover{background:#2a4372}
+ .act{border-left:3px solid #e9c98a;padding:9px 12px;margin-bottom:7px;background:#fffdf7;border-radius:0 8px 8px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+ .act.old{border-left-color:#b91c1c;background:#fff7f7}
+ .act .d{color:#6b7688;font-size:12px}
+ .none{color:#6b7688;font-size:13px;padding:6px 2px}
+ .gate{max-width:330px;margin:70px auto;background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:22px}
+ .gate input{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;margin:10px 0}
+ .err{color:#b91c1c;font-size:13px}
+ .hint{color:#6b7688;font-size:12px}
+ @media(max-width:760px){table,thead,tbody,th,td,tr{display:block}th{display:none}td{border:0;padding:3px 0}tr{border-bottom:1px solid #e6e9ef;padding:10px 0}}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <div class="b" style="color:#14243f;font-size:18px">Reunvo<span style="color:#e9c98a">.</span> Control</div>
+  <input id="pw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')entrar()">
+  <button class="r" style="width:100%" onclick="entrar()">Entrar</button>
+  <div id="gerr" class="err"></div>
+</div>
+
+<div id="app" style="display:none">
+<header>
+  <div class="b">Reunvo<span>.</span> Control</div>
+  <button class="r" onclick="cargar()">Actualizar</button>
+  <div class="ts" id="ts"></div>
+</header>
+<main>
+  <h2>Requiere tu acción</h2>
+  <div class="box" id="acciones"></div>
+
+  <h2>Clientes</h2>
+  <div class="box" style="overflow-x:auto"><table id="tclientes">
+    <thead><tr><th>Cliente</th><th>Estado</th><th>Cola</th><th>Contactadas</th><th>7 días</th>
+    <th>Aperturas</th><th>Leads</th><th>Gmail</th><th>Su panel</th></tr></thead>
+    <tbody></tbody></table></div>
+
+  <h2>Salud del motor</h2>
+  <div class="cards" id="salud"></div>
+
+  <h2>Negocio</h2>
+  <div class="cards" id="negocio"></div>
+
+  <h2>Respuestas</h2>
+  <div class="cards" id="embudo"></div>
+</main>
+</div>
+
+<script>
+const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
+const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
+let PW=localStorage.getItem("reunvo_admin_pw")||"";
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const f=d=>d?new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):"—";
+const fh=d=>d?new Date(d).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):"—";
+const hace=d=>{if(!d)return"nunca";const h=(Date.now()-new Date(d))/36e5;
+  return h<1?"hace minutos":h<24?"hace "+Math.round(h)+" h":"hace "+Math.round(h/24)+" días";};
+const card=(k,v,cls)=>`<div class="card${cls?' '+cls:''}"><div class="k">${esc(k)}</div><div class="v">${v==null?'—':v}</div></div>`;
+
+function entrar(){const v=document.getElementById("pw").value.trim();if(!v)return;
+  PW=v;localStorage.setItem("reunvo_admin_pw",v);cargar();}
+
+async function cargar(){
+  const r=await fetch(SUPA+"/rest/v1/rpc/reunvo_admin",{method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({p_token:PW})});
+  const d=await r.json();
+  if(!d||d.error){document.getElementById("gerr").textContent="Contraseña incorrecta.";
+    localStorage.removeItem("reunvo_admin_pw");return;}
+  document.getElementById("gate").style.display="none";
+  document.getElementById("app").style.display="block";
+  pinta(d);
+}
+
+function pinta(d){
+  document.getElementById("ts").textContent="Actualizado "+fh(d.ts);
+  const a=d.acciones||{};let h="";
+
+  (a.dossiers_pendientes||[]).forEach(x=>{
+    h+=`<div class="act${x.dias>3?' old':''}"><div><b>Dossier pendiente</b> · ${esc(x.empresa)}
+      <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)} · <b>${x.dias} día${x.dias==1?'':'s'}</b></div></div></div>`;});
+
+  (a.targets_pendientes||[]).forEach(x=>{
+    const t=[x.region,x.sector,(x.rev_min||x.rev_max)?("€"+(x.rev_min||0)+"-"+(x.rev_max||"∞")+"M"):null]
+      .filter(Boolean).join(" · ");
+    h+=`<div class="act"><div><b>Solicitud de target</b> · ${esc(t)}
+      <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)}</div></div></div>`;});
+
+  (a.upgrades_pendientes||[]).forEach(x=>{
+    h+=`<div class="act"><div><b>Quiere subir de plan</b>
+      <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)}</div></div></div>`;});
+
+  document.getElementById("acciones").innerHTML=h||'<div class="none">Nada pendiente. Todo al día.</div>';
+
+  const tb=document.querySelector("#tclientes tbody");tb.innerHTML="";
+  (d.clientes||[]).forEach(c=>{
+    const tokMal=!c.token_expiry;
+    const est=c.is_test?'<span class="pill p-test">prueba</span>'
+      :(c.status==='active'?'<span class="pill p-ok">activo</span>':'<span class="pill p-off">'+esc(c.status)+'</span>');
+    const cola=c.cola+(c.dias_cola!=null?` <span class="hint">(${c.dias_cola} d)</span>`:"");
+    const colaMal=c.status==='active'&&!c.is_test&&c.dias_cola!=null&&c.dias_cola<10;
+    tb.innerHTML+=`<tr>
+      <td class="nm">${esc(c.nombre)}<div class="hint">${esc(c.plan||'—')} · ${c.epd}/día${c.plantilla?'':' · <b style="color:#b91c1c">sin plantilla</b>'}</div></td>
+      <td>${est}</td>
+      <td${colaMal?' style="color:#b91c1c;font-weight:600"':''}>${cola}</td>
+      <td>${c.contactadas}</td>
+      <td>${c.ultimos7}<div class="hint">${hace(c.ultimo_envio)}</div></td>
+      <td>${c.aperturas}</td>
+      <td>${c.leads}</td>
+      <td>${tokMal?'<span class="pill p-bad">sin conectar</span>':'<span class="hint">'+esc(c.gmail||'')+'</span>'}</td>
+      <td>${c.panel_token?`<a class="go" target="_blank" href="panel_cliente.html?t=${encodeURIComponent(c.panel_token)}">Ver su panel</a>`:'<span class="hint">—</span>'}</td>
+    </tr>`;});
+
+  const s=d.salud||{};
+  document.getElementById("salud").innerHTML=
+    card("Último envío",hace(s.ultima_campana),(Date.now()-new Date(s.ultima_campana))/36e5>72?'bad':'')
+   +card("Última respuesta",hace(s.ultima_respuesta))
+   +card("Último lead",hace(s.ultimo_lead))
+   +card("Última apertura",hace(s.ultima_apertura))
+   +card("Tokens vivos",(s.tokens_ok||0)+"/"+(s.tokens_total||0),s.tokens_ok<s.tokens_total?'warn':'')
+   +card("Trabajos programados",s.dedup_cron);
+
+  const n=d.negocio||{};
+  document.getElementById("negocio").innerHTML=
+    card("Empresas",n.empresas)
+   +card("Usables libres",n.usables,n.usables<500?'warn':'')
+   +card("Con email",n.verificadas)
+   +card("Contactadas",n.contactadas)
+   +card("Interesados",n.leads)
+   +card("De red del cliente",n.leads_externos)
+   +card("Compradores",n.compradores,n.compradores<10?'warn':'')
+   +card("Universo compradores",n.universo_compradores)
+   +card("Banderas QA",n.qa_abiertas,n.qa_abiertas>500?'warn':'');
+
+  const e=d.embudo||{};
+  document.getElementById("embudo").innerHTML=
+    Object.keys(e).sort((a,b)=>e[b]-e[a]).map(k=>card(k.replace(/_/g,' '),e[k])).join("")
+    ||'<div class="none">Sin respuestas.</div>';
+}
+
+if(PW) cargar();
+</script>
+</body>
+</html>
