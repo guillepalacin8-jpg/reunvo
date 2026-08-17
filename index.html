@@ -504,6 +504,17 @@
       letter-spacing: 0.05em;
     }
 
+    footer .legal-links {
+      margin-top: 4px;
+    }
+
+    footer .legal-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+    }
+
+    footer .legal-links a:hover { color: var(--gold-lt); }
+
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -643,7 +654,10 @@
   <!-- FOOTER -->
   <footer>
     <div class="logo">Re<span>un</span>vo</div>
-    <p>reunvo.com &mdash; 2026</p>
+    <div>
+      <p>reunvo.com &mdash; 2026</p>
+      <p class="legal-links"><a href="/privacidad.html">Política de privacidad</a> &middot; <a href="/aviso-legal.html">Aviso legal</a></p>
+    </div>
   </footer>
 
   <!-- MODAL -->
