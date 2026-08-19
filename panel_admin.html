@@ -164,9 +164,21 @@ function pinta(d){
    +card("Banderas QA",n.qa_abiertas,n.qa_abiertas>500?'warn':'');
 
   const e=d.embudo||{};
+  // Tasas: denominador SIEMPRE en vivo (n.contactadas). Nunca un número congelado.
+  let tot=0; Object.keys(e).forEach(k=>tot+=e[k]);
+  const reales=tot-(e.autorespuesta||0), D=n.contactadas||0;
+  const pct=(a,b)=>b>0?(100*a/b).toFixed(1).replace('.',',')+"%":"—";
   document.getElementById("embudo").innerHTML=
-    Object.keys(e).sort((a,b)=>e[b]-e[a]).map(k=>card(k.replace(/_/g,' '),e[k])).join("")
-    ||'<div class="none">Sin respuestas.</div>';
+    card("Tasa de respuesta",pct(reales,D))
+   +card("Tasa de interesados",pct(n.leads,D))
+   +card("Respuestas reales",reales)
+   +Object.keys(e).sort((a,b)=>e[b]-e[a]).map(k=>card(k.replace(/_/g,' '),e[k])).join("")
+   +'<p class="hint" style="grid-column:1/-1;margin:10px 0 0">Tasas sobre las <b>'
+   +Number(D).toLocaleString('es-ES')+'</b> contactadas de toda la historia: no hay campo que registre '
+   +'<i>cuándo</i> se contactó cada empresa, así que no se pueden separar cohortes. Es la lectura '
+   +'conservadora — las más recientes aún no han podido responder.<br>'
+   +'<b>Dato congelado para vender:</b> 1-may a 3-jul-2026 — 713 contactados, 56 respuestas (7,9%), '
+   +'14 interesados en valorar. Ese es el citable con fecha; estos se mueven.</p>';
 }
 
 if(PW) cargar();
