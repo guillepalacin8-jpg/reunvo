@@ -37,6 +37,10 @@
   h2.grp{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b95a5;margin:22px 0 9px;font-weight:600}
   .ventana{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#6b7688;margin-left:8px}
   .ventana.abierta{background:#fff6e5;color:#9a6700}
+  .ventana.ok{background:#e9f7ef;color:#15803d}
+  .row.yaap{border-color:#e9c98a;background:#fffdf7}
+  h2.grp.aviso{color:#b45309}
+  .al li.leve{color:#8b6b1f}
   .frm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
   .f{display:flex;flex-direction:column;gap:3px}
   .f label{font-size:11px;color:#6b7688}
@@ -113,21 +117,30 @@ function pinta(d){
     kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
     kpi("Sin avisos",r.limpias||0)+
     kpi("Aprobadas",r.aprobadas||0)+
+    kpi("Aprobadas con aviso",r.aprobadas_con_aviso||0,(r.aprobadas_con_aviso||0)>0)+
     kpi("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),stock!=null&&stock<2);
 
   const emp=d.empresas||[];
-  LIMPIAS=emp.filter(c=>!c.n_alertas).map(c=>c.id);
+  const yaAprob=emp.filter(c=>c.aprobada);
+  const pend=emp.filter(c=>!c.aprobada);
+  LIMPIAS=pend.filter(c=>!c.grave).map(c=>c.id);
 
   let h="";
   if(emp.length){
     h+=`<div class="barra">
       <button class="b-ok" onclick="aprobarLote()" ${LIMPIAS.length?"":"disabled"}>
         Aprobar las ${LIMPIAS.length} sin avisos</button>
-      <span class="hint2">Las ${r.con_alerta||0} con aviso hay que mirarlas una a una.</span>
+      <span class="hint2">Las ${r.con_alerta||0} con aviso 🔴 hay que mirarlas una a una.</span>
     </div>`;
-    const conAviso=emp.filter(c=>c.n_alertas), limpias=emp.filter(c=>!c.n_alertas);
+    if(yaAprob.length){
+      h+=`<h2 class="grp aviso">Ya aprobadas, pero con un aviso sin resolver · ${yaAprob.length}</h2>`
+       + `<p class="nota" style="margin:0 0 10px">Aprobaste estas y el aviso 🔴 sigue ahí. Todavía no
+          han salido, así que estás a tiempo. Si el aviso es un falso positivo, déjalas.</p>`
+       + yaAprob.map(fila).join("");
+    }
+    const conAviso=pend.filter(c=>c.grave), limpias=pend.filter(c=>!c.grave);
     if(conAviso.length) h+=`<h2 class="grp">Requieren tu criterio · ${conAviso.length}</h2>`+conAviso.map(fila).join("");
-    if(limpias.length)  h+=`<h2 class="grp">Sin avisos automáticos · ${limpias.length}</h2>`+limpias.map(fila).join("");
+    if(limpias.length)  h+=`<h2 class="grp">Sin avisos que afecten al saludo · ${limpias.length}</h2>`+limpias.map(fila).join("");
   } else {
     h='<div class="none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
   }
@@ -152,16 +165,17 @@ function fila(c){
   const trato=(c.gender_prefix||'Sr.')+" "+(c.shareholder_last||'—');
   const busca="https://www.google.com/search?q="+
     encodeURIComponent('"'+(c.company_name||'')+'" '+(c.locality||''));
-  return `<div class="row${al.length?' alerta':''}" id="r-${c.id}">
+  return `<div class="row${c.grave?' alerta':''}${c.aprobada?' yaap':''}" id="r-${c.id}">
     <div class="top">
-      <span class="emp">${esc(c.company_name||'')}${c.ventana_cerrada
+      <span class="emp">${esc(c.company_name||'')}${c.aprobada?'<span class="ventana ok">aprobada</span>':''}${c.ventana_cerrada
         ? '<span class="ventana">el cliente ya no puede quitarla</span>'
         : '<span class="ventana abierta">el cliente aún puede quitarla · sale desde '+
           new Date(c.sale_desde).toLocaleDateString('es-ES')+'</span>'}</span>
       <span class="meta">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span>
     </div>
     <div class="meta">${esc(c.contact_email||'')}</div>
-    ${al.length?`<ul class="al">${al.map(a=>`<li>⚠ ${esc(a)}</li>`).join("")}</ul>`:""}
+    ${al.length?`<ul class="al">${al.map(a=>
+      `<li class="${a.indexOf('🔴')===0?'':'leve'}">${esc(a)}</li>`).join("")}</ul>`:""}
     <div class="ficha">
       <div><span class="et">Se dedica a</span> ${esc(c.activity_description||'— sin descripción —')}</div>
       <div><span class="et">Sector</span> ${esc(c.sector_simplified||'—')}
@@ -182,7 +196,8 @@ function fila(c){
         <input id="n-${c.id}" value="${esc(c.shareholder_first||'')}"></div>
       <div class="f"><label>Apellido (el que se usa al saludar)</label>
         <input id="a-${c.id}" value="${esc(c.shareholder_last||'')}"></div>
-      <button class="b-ok" onclick="guardar('${c.id}',true)">Aprobar</button>
+      <button class="b-ok" onclick="guardar('${c.id}',true)">${c.aprobada?'Guardar y dejar aprobada':'Aprobar'}</button>
+      ${c.aprobada?`<button class="b-skip" onclick="guardar('${c.id}',false)">Devolver a la cola</button>`:''}
       <button class="b-skip" onclick="descartar('${c.id}')">Descartar</button>
     </div>
   </div>`;
@@ -191,8 +206,7 @@ async function guardar(id,ap){
   const g=x=>{const e=document.getElementById(x+"-"+id);return e?e.value:null;};
   const r=await rpc("revision_guardar",{p_company_id:id,p_first:g("n"),p_last:g("a"),
     p_prefix:g("p"),p_aprobar:ap});
-  if(r&&r.ok){const el=document.getElementById("r-"+id);if(el)el.remove();flash("Aprobada.");
-    const k=document.querySelector(".kpis");if(k)cargarSilencioso();}
+  if(r&&r.ok){flash(ap?"Aprobada.":"Devuelta a la cola.");cargar();}
   else flash((r&&r.mensaje)||"No se pudo guardar.");
 }
 async function descartar(id){
@@ -208,6 +222,7 @@ async function cargarSilencioso(){
     document.getElementById("kpis").innerHTML=
       kpi("Sin revisar",r.pendientes||0)+kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
       kpi("Sin avisos",r.limpias||0)+kpi("Aprobadas",r.aprobadas||0)+
+      kpi("Aprobadas con aviso",r.aprobadas_con_aviso||0,(r.aprobadas_con_aviso||0)>0)+
       kpi("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),stock!=null&&stock<2);}
 }
 cargar();
