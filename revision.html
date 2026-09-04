@@ -28,6 +28,15 @@
   .al li{color:#b91c1c;font-size:12.5px;padding:2px 0}
   .saludo{margin:9px 0;padding:8px 11px;background:#f7f8fa;border-radius:8px;font-size:13px}
   .saludo b{color:#14243f}
+  .ficha{margin:9px 0;padding:9px 11px;background:#fbfcfd;border:1px solid #eceff4;border-radius:8px;font-size:13px;line-height:1.6}
+  .ficha .et{font-size:10.5px;color:#8b95a5;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+  .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
+  .lupa:hover{border-bottom-color:#1a4b8f}
+  .barra{background:#fff;border:1px solid #e5e8ee;border-radius:11px;padding:12px 15px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .hint2{color:#6b7688;font-size:12.5px}
+  h2.grp{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b95a5;margin:22px 0 9px;font-weight:600}
+  .ventana{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#6b7688;margin-left:8px}
+  .ventana.abierta{background:#fff6e5;color:#9a6700}
   .frm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
   .f{display:flex;flex-direction:column;gap:3px}
   .f label{font-size:11px;color:#6b7688}
@@ -61,7 +70,10 @@
     <div id="lista"></div>
     <p class="nota">Las que tienen aviso salen primero. Corrige el nombre, el apellido o el trato y
     pulsa <b>Aprobar</b>. <b>Nada se envía sin aprobar.</b> Si una no debe contactarse, usa
-    <b>Descartar</b>: se queda fuera del envío sin borrarse.</p>
+    <b>Descartar</b>: se queda fuera del envío sin borrarse.<br>
+    Mira también <b>a qué se dedica</b>: si la descripción no encaja con el nombre de la empresa,
+    compruébalo en Google antes de aprobar. Los avisos automáticos solo cazan el saludo y las
+    descripciones vacías — <b>la coherencia del negocio la juzgas tú.</b></p>
   </div>
 </div>
 <div id="msg" class="msg"></div>
@@ -84,36 +96,81 @@ async function rpc(fn,args){
 async function cargar(){
   if(!PW){document.getElementById("gate").style.display="block";return;}
   document.getElementById("sub").textContent="Cargando…";
-  const d=await rpc("revision_cola",{p_limit:80});
+  const d=await rpc("revision_cola",{p_limit:300});
   if(!d||d.error){localStorage.removeItem("reunvo_admin_pw");PW="";
     document.getElementById("gate").style.display="block";
     document.getElementById("sub").textContent="";return;}
   pinta(d);
 }
+let LIMPIAS=[];   // ids sin ningún aviso, para aprobar de golpe
+
 function pinta(d){
   const r=d.resumen||{};
   document.getElementById("sub").textContent="Datos en vivo · "+new Date(d.ts).toLocaleString('es-ES');
+  const stock=r.dias_de_stock;
   document.getElementById("kpis").innerHTML=
     kpi("Sin revisar",r.pendientes||0)+
     kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
-    kpi("Aprobadas",r.aprobadas||0);
+    kpi("Sin avisos",r.limpias||0)+
+    kpi("Aprobadas",r.aprobadas||0)+
+    kpi("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),stock!=null&&stock<2);
+
   const emp=d.empresas||[];
-  document.getElementById("lista").innerHTML= emp.length? emp.map(fila).join("")
-    : '<div class="none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
+  LIMPIAS=emp.filter(c=>!c.n_alertas).map(c=>c.id);
+
+  let h="";
+  if(emp.length){
+    h+=`<div class="barra">
+      <button class="b-ok" onclick="aprobarLote()" ${LIMPIAS.length?"":"disabled"}>
+        Aprobar las ${LIMPIAS.length} sin avisos</button>
+      <span class="hint2">Las ${r.con_alerta||0} con aviso hay que mirarlas una a una.</span>
+    </div>`;
+    const conAviso=emp.filter(c=>c.n_alertas), limpias=emp.filter(c=>!c.n_alertas);
+    if(conAviso.length) h+=`<h2 class="grp">Requieren tu criterio · ${conAviso.length}</h2>`+conAviso.map(fila).join("");
+    if(limpias.length)  h+=`<h2 class="grp">Sin avisos automáticos · ${limpias.length}</h2>`+limpias.map(fila).join("");
+  } else {
+    h='<div class="none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
+  }
+  document.getElementById("lista").innerHTML=h;
   document.getElementById("cont").style.display="block";
 }
 const kpi=(t,v,w)=>`<div class="k${w?' warn':''}"><div class="t">${esc(t)}</div><div class="v">${v}</div></div>`;
 
+async function aprobarLote(){
+  if(!LIMPIAS.length) return;
+  if(!confirm("Aprobar "+LIMPIAS.length+" empresas sin avisos.\n\nEl detector solo mira el saludo y "+
+     "las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
+  const r=await rpc("revision_aprobar_lote",{p_ids:LIMPIAS});
+  if(r&&r.ok){flash("Aprobadas "+r.aprobadas+".");cargar();}
+  else flash((r&&r.mensaje)||"No se pudo.");
+}
+
+const fact=v=>v==null?"—":(v>=1000?(v/1000).toFixed(1).replace('.',',')+" M€":v+" k€");
+
 function fila(c){
   const al=(c.alertas||[]);
   const trato=(c.gender_prefix||'Sr.')+" "+(c.shareholder_last||'—');
+  const busca="https://www.google.com/search?q="+
+    encodeURIComponent('"'+(c.company_name||'')+'" '+(c.locality||''));
   return `<div class="row${al.length?' alerta':''}" id="r-${c.id}">
     <div class="top">
-      <span class="emp">${esc(c.company_name||'')}</span>
+      <span class="emp">${esc(c.company_name||'')}${c.ventana_cerrada
+        ? '<span class="ventana">el cliente ya no puede quitarla</span>'
+        : '<span class="ventana abierta">el cliente aún puede quitarla · sale desde '+
+          new Date(c.sale_desde).toLocaleDateString('es-ES')+'</span>'}</span>
       <span class="meta">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span>
     </div>
     <div class="meta">${esc(c.contact_email||'')}</div>
     ${al.length?`<ul class="al">${al.map(a=>`<li>⚠ ${esc(a)}</li>`).join("")}</ul>`:""}
+    <div class="ficha">
+      <div><span class="et">Se dedica a</span> ${esc(c.activity_description||'— sin descripción —')}</div>
+      <div><span class="et">Sector</span> ${esc(c.sector_simplified||'—')}
+           <span class="et" style="margin-left:14px">Facturación</span> ${fact(c.revenue_eur)}</div>
+      <div style="margin-top:7px">
+        <a class="lupa" target="_blank" rel="noopener" href="${busca}">Buscar en Google ↗</a>
+        ${c.domain?`<a class="lupa" target="_blank" rel="noopener" href="${esc(c.domain)}">Su web ↗</a>`:""}
+      </div>
+    </div>
     <div class="saludo">Saldrá: «Apreciado/a <b>${esc(trato)}</b>,»</div>
     <div class="frm">
       <div class="f"><label>Trato</label>
@@ -146,11 +203,12 @@ async function descartar(id){
   else flash((r&&r.mensaje)||"No se pudo descartar.");
 }
 async function cargarSilencioso(){
-  const d=await rpc("revision_cola",{p_limit:80});
-  if(d&&!d.error){const r=d.resumen||{};
+  const d=await rpc("revision_cola",{p_limit:300});
+  if(d&&!d.error){const r=d.resumen||{}, stock=r.dias_de_stock;
     document.getElementById("kpis").innerHTML=
       kpi("Sin revisar",r.pendientes||0)+kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
-      kpi("Aprobadas",r.aprobadas||0);}
+      kpi("Sin avisos",r.limpias||0)+kpi("Aprobadas",r.aprobadas||0)+
+      kpi("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),stock!=null&&stock<2);}
 }
 cargar();
 </script>
