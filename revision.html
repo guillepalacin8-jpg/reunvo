@@ -26,8 +26,16 @@
   .meta{color:#6b7688;font-size:12px}
   .al{margin:9px 0 0;padding:0;list-style:none}
   .al li{color:#b91c1c;font-size:12.5px;padding:2px 0}
-  .saludo{margin:9px 0;padding:8px 11px;background:#f7f8fa;border-radius:8px;font-size:13px}
-  .saludo b{color:#14243f}
+  /* El cotejo es lo primero que mira Guille: el email al lado del saludo que saldrá. */
+  .cotejo{margin:10px 0 2px;padding:11px 13px;background:#f4f7fb;border:1px solid #dfe6f0;
+          border-radius:9px;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  .cotejo .cl{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .cotejo .et{font-size:10px;color:#7c879a;text-transform:uppercase;letter-spacing:.06em}
+  .cotejo .mail{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;
+                color:#14243f;font-weight:600;word-break:break-all;line-height:1.3}
+  .cotejo .dice{font-size:15px;color:#14243f;line-height:1.3}
+  .cotejo .dice b{border-bottom:2px solid #c3d2e8}
+  @media(max-width:620px){.cotejo{grid-template-columns:1fr}}
   .ficha{margin:9px 0;padding:9px 11px;background:#fbfcfd;border:1px solid #eceff4;border-radius:8px;font-size:13px;line-height:1.6}
   .ficha .et{font-size:10.5px;color:#8b95a5;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
   .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
@@ -173,7 +181,6 @@ function fila(c){
           new Date(c.sale_desde).toLocaleDateString('es-ES')+'</span>'}</span>
       <span class="meta">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span>
     </div>
-    <div class="meta">${esc(c.contact_email||'')}</div>
     ${al.length?`<ul class="al">${al.map(a=>
       `<li class="${a.indexOf('🔴')===0?'':'leve'}">${esc(a)}</li>`).join("")}</ul>`:""}
     <div class="ficha">
@@ -185,7 +192,12 @@ function fila(c){
         ${c.domain?`<a class="lupa" target="_blank" rel="noopener" href="${esc(c.domain)}">Su web ↗</a>`:""}
       </div>
     </div>
-    <div class="saludo">Saldrá: «Apreciado/a <b>${esc(trato)}</b>,»</div>
+    <div class="cotejo">
+      <div class="cl"><span class="et">Su email</span>
+        <span class="mail">${esc(c.contact_email||'—')}</span></div>
+      <div class="cl"><span class="et">Le diremos</span>
+        <span class="dice">«Apreciado/a <b>${esc(trato)}</b>,»</span></div>
+    </div>
     <div class="frm">
       <div class="f"><label>Trato</label>
         <select id="p-${c.id}">
