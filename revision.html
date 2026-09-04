@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reunvo · Revisión</title>
+<meta name="theme-color" content="#14243f">
+<style>
+  :root{color-scheme:light}
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f6f8;color:#16202f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  h1{font-size:19px;margin:0;color:#14243f;letter-spacing:-.01em}
+  .sub{color:#6b7688;font-size:12.5px;margin:3px 0 0}
+  button{background:#14243f;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0 18px}
+  .k{background:#fff;border:1px solid #e5e8ee;border-radius:10px;padding:11px 13px}
+  .k .t{font-size:10.5px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em}
+  .k .v{font-size:22px;font-weight:650;color:#14243f;letter-spacing:-.02em}
+  .k.warn .v{color:#b91c1c}
+  .row{background:#fff;border:1px solid #e5e8ee;border-radius:11px;padding:13px 15px;margin-bottom:9px}
+  .row.alerta{border-color:#f3c6c6;background:#fffbfb}
+  .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+  .emp{font-weight:650;color:#14243f}
+  .meta{color:#6b7688;font-size:12px}
+  .al{margin:9px 0 0;padding:0;list-style:none}
+  .al li{color:#b91c1c;font-size:12.5px;padding:2px 0}
+  .saludo{margin:9px 0;padding:8px 11px;background:#f7f8fa;border-radius:8px;font-size:13px}
+  .saludo b{color:#14243f}
+  .frm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
+  .f{display:flex;flex-direction:column;gap:3px}
+  .f label{font-size:11px;color:#6b7688}
+  .f input,.f select{padding:7px 9px;border:1px solid #d5d9e1;border-radius:7px;font-size:13.5px;background:#fff}
+  .f input{min-width:150px}
+  .b-ok{background:#15803d}.b-skip{background:#6b7688}
+  .none{background:#fff;border:1px solid #e5e8ee;border-radius:11px;padding:26px;text-align:center;color:#6b7688}
+  .gate{background:#fff;border:1px solid #e5e8ee;border-radius:11px;padding:18px;max-width:330px;margin-top:14px}
+  .gate input{width:100%;padding:9px;border:1px solid #d5d9e1;border-radius:8px;font-size:14px;margin-bottom:9px}
+  .msg{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#14243f;color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;display:none}
+  .nota{color:#6b7688;font-size:12px;margin:16px 0 0;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Revisión antes de enviar</h1>
+      <p class="sub" id="sub">Cargando…</p>
+    </div>
+    <button onclick="cargar()">Actualizar</button>
+  </div>
+
+  <div id="gate" class="gate" style="display:none">
+    <input id="pw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')entrar()">
+    <button onclick="entrar()">Entrar</button>
+  </div>
+
+  <div id="cont" style="display:none">
+    <div class="kpis" id="kpis"></div>
+    <div id="lista"></div>
+    <p class="nota">Las que tienen aviso salen primero. Corrige el nombre, el apellido o el trato y
+    pulsa <b>Aprobar</b>. <b>Nada se envía sin aprobar.</b> Si una no debe contactarse, usa
+    <b>Descartar</b>: se queda fuera del envío sin borrarse.</p>
+  </div>
+</div>
+<div id="msg" class="msg"></div>
+<script>
+const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
+const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
+let PW=localStorage.getItem("reunvo_admin_pw")||"";
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function flash(t){const m=document.getElementById("msg");m.textContent=t;m.style.display="block";
+  clearTimeout(window._f);window._f=setTimeout(()=>m.style.display="none",2200);}
+function entrar(){const v=document.getElementById("pw").value.trim();if(!v)return;
+  PW=v;localStorage.setItem("reunvo_admin_pw",v);document.getElementById("gate").style.display="none";cargar();}
+async function rpc(fn,args){
+  const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+    body:JSON.stringify(Object.assign({p_token:PW},args||{}))});
+  return await r.json();
+}
+async function cargar(){
+  if(!PW){document.getElementById("gate").style.display="block";return;}
+  document.getElementById("sub").textContent="Cargando…";
+  const d=await rpc("revision_cola",{p_limit:80});
+  if(!d||d.error){localStorage.removeItem("reunvo_admin_pw");PW="";
+    document.getElementById("gate").style.display="block";
+    document.getElementById("sub").textContent="";return;}
+  pinta(d);
+}
+function pinta(d){
+  const r=d.resumen||{};
+  document.getElementById("sub").textContent="Datos en vivo · "+new Date(d.ts).toLocaleString('es-ES');
+  document.getElementById("kpis").innerHTML=
+    kpi("Sin revisar",r.pendientes||0)+
+    kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
+    kpi("Aprobadas",r.aprobadas||0);
+  const emp=d.empresas||[];
+  document.getElementById("lista").innerHTML= emp.length? emp.map(fila).join("")
+    : '<div class="none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
+  document.getElementById("cont").style.display="block";
+}
+const kpi=(t,v,w)=>`<div class="k${w?' warn':''}"><div class="t">${esc(t)}</div><div class="v">${v}</div></div>`;
+
+function fila(c){
+  const al=(c.alertas||[]);
+  const trato=(c.gender_prefix||'Sr.')+" "+(c.shareholder_last||'—');
+  return `<div class="row${al.length?' alerta':''}" id="r-${c.id}">
+    <div class="top">
+      <span class="emp">${esc(c.company_name||'')}</span>
+      <span class="meta">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span>
+    </div>
+    <div class="meta">${esc(c.contact_email||'')}</div>
+    ${al.length?`<ul class="al">${al.map(a=>`<li>⚠ ${esc(a)}</li>`).join("")}</ul>`:""}
+    <div class="saludo">Saldrá: «Apreciado/a <b>${esc(trato)}</b>,»</div>
+    <div class="frm">
+      <div class="f"><label>Trato</label>
+        <select id="p-${c.id}">
+          <option${c.gender_prefix==='Sr.'?' selected':''}>Sr.</option>
+          <option${c.gender_prefix==='Sra.'?' selected':''}>Sra.</option>
+        </select></div>
+      <div class="f"><label>Nombre</label>
+        <input id="n-${c.id}" value="${esc(c.shareholder_first||'')}"></div>
+      <div class="f"><label>Apellido (el que se usa al saludar)</label>
+        <input id="a-${c.id}" value="${esc(c.shareholder_last||'')}"></div>
+      <button class="b-ok" onclick="guardar('${c.id}',true)">Aprobar</button>
+      <button class="b-skip" onclick="descartar('${c.id}')">Descartar</button>
+    </div>
+  </div>`;
+}
+async function guardar(id,ap){
+  const g=x=>{const e=document.getElementById(x+"-"+id);return e?e.value:null;};
+  const r=await rpc("revision_guardar",{p_company_id:id,p_first:g("n"),p_last:g("a"),
+    p_prefix:g("p"),p_aprobar:ap});
+  if(r&&r.ok){const el=document.getElementById("r-"+id);if(el)el.remove();flash("Aprobada.");
+    const k=document.querySelector(".kpis");if(k)cargarSilencioso();}
+  else flash((r&&r.mensaje)||"No se pudo guardar.");
+}
+async function descartar(id){
+  // companies tiene RLS: hay que pasar por la función, no escribir directo.
+  const r=await rpc("revision_guardar",{p_company_id:id,p_descartar:true});
+  if(r&&r.ok){const el=document.getElementById("r-"+id);if(el)el.remove();
+    flash("Descartada, no se enviará.");cargarSilencioso();}
+  else flash((r&&r.mensaje)||"No se pudo descartar.");
+}
+async function cargarSilencioso(){
+  const d=await rpc("revision_cola",{p_limit:80});
+  if(d&&!d.error){const r=d.resumen||{};
+    document.getElementById("kpis").innerHTML=
+      kpi("Sin revisar",r.pendientes||0)+kpi("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0)+
+      kpi("Aprobadas",r.aprobadas||0);}
+}
+cargar();
+</script>
+</body>
+</html>
