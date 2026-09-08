@@ -25,7 +25,7 @@
 <header><a href="/">Reunvo<span>.</span></a></header>
 <main>
 <h1>Política de Privacidad</h1>
-<div class="fecha">Última actualización: 16 de agosto de 2026</div>
+<div class="fecha">Última actualización: 8 de septiembre de 2026</div>
 
 <h2>Responsable del tratamiento</h2>
 <p><b>Guillem Palacín Francés</b>, empresario individual (autónomo), con NIF <b>23869301Q</b> y domicilio en Calle Ganduxer 43, 08021 Barcelona (España).
@@ -60,15 +60,67 @@ Google</a> o escribiéndonos. Al revocarlo, dejamos de poder enviar en tu nombre
 tokens asociados.</p>
 </div>
 
+<h2 id="comparticion">Con quién compartimos los datos de tu cuenta de Google</h2>
+<p><b>No vendemos, alquilamos ni cedemos a terceros los datos de tu cuenta de Google, ni los
+compartimos con nadie para sus propios fines.</b> No los usamos para publicidad, ni para elaborar
+perfiles, ni los transferimos a intermediarios de datos.</p>
+<p>Los datos de tu cuenta de Google —tus tokens de OAuth y la dirección de correo de la cuenta
+conectada— se comparten <b>únicamente</b> con los proveedores estrictamente necesarios para prestar
+el servicio, que actúan como <b>encargados del tratamiento</b> siguiendo nuestras instrucciones y sin
+poder usarlos para ningún fin propio:</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+ <tr style="background:#f0f2f6"><th style="text-align:left;padding:7px 9px;border:1px solid #e3e7ee">Proveedor</th><th style="text-align:left;padding:7px 9px;border:1px solid #e3e7ee">Para qué</th><th style="text-align:left;padding:7px 9px;border:1px solid #e3e7ee">¿Recibe datos de tu cuenta de Google?</th></tr>
+ <tr><td style="padding:7px 9px;border:1px solid #e3e7ee"><b>Supabase</b> (base de datos)</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Almacenar de forma cifrada los tokens y la dirección de la cuenta conectada</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Sí</td></tr>
+ <tr><td style="padding:7px 9px;border:1px solid #e3e7ee"><b>n8n</b> (orquestación)</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Usar el token en memoria para llamar a la API de Gmail y enviar el correo que has aprobado</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Sí, de forma transitoria</td></tr>
+ <tr><td style="padding:7px 9px;border:1px solid #e3e7ee"><b>Google</b> (API de Gmail)</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Destino del envío</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Sí, es el origen y destino</td></tr>
+ <tr><td style="padding:7px 9px;border:1px solid #e3e7ee"><b>PDFShift</b> (documentos)</td><td style="padding:7px 9px;border:1px solid #e3e7ee">Convertir a PDF la propuesta comercial</td><td style="padding:7px 9px;border:1px solid #e3e7ee"><b>No.</b> Solo recibe datos de empresas, nunca datos de tu cuenta de Google</td></tr>
+</table>
+<p>Solo revelaríamos estos datos fuera de ese circuito si nos lo exigiera una autoridad competente o
+una obligación legal, y en la medida estrictamente exigida.</p>
+<p><b>No utilizamos los datos obtenidos de las APIs de Google para desarrollar, entrenar ni mejorar
+modelos de inteligencia artificial o de aprendizaje automático</b>, ni generalizados ni propios, ni
+los cedemos a terceros con ese fin.</p>
+
+<h2 id="proteccion">Cómo protegemos estos datos</h2>
+<p>Los tokens de acceso a tu cuenta de Google son el dato más sensible que manejamos y se tratan como
+tal:</p>
+<ul>
+ <li><b>Cifrado en tránsito:</b> toda comunicación viaja por HTTPS con TLS 1.2 o superior. Ningún
+ dato circula en claro.</li>
+ <li><b>Cifrado en reposo:</b> la base de datos cifra la información almacenada mediante AES-256.</li>
+ <li><b>Acceso restringido:</b> los tokens viven en una tabla con seguridad a nivel de fila
+ (<i>Row Level Security</i>) activada, inaccesible desde la aplicación pública. Solo puede leerlos el
+ proceso automatizado que envía tus correos.</li>
+ <li><b>Ningún ojo humano:</b> Reunvo no tiene empleados. El responsable no accede al contenido de
+ tus correos, y el permiso concedido tampoco lo permitiría.</li>
+ <li><b>Permiso mínimo:</b> solicitamos un único scope, <code>gmail.send</code>, el más estrecho que
+ permite enviar en tu nombre. No pedimos acceso de lectura, ni de modificación, ni de gestión de
+ borradores.</li>
+ <li><b>Supresión:</b> al revocar el acceso o darte de baja, los tokens se eliminan y dejamos de
+ poder enviar. No conservamos copia.</li>
+</ul>
+
+<div class="destacado" style="border-color:#c9d8ee;border-left-color:#1a3c6e">
+<h2 style="color:#1a3c6e">Summary in English (for reviewers)</h2>
+<p><b>Data sharing.</b> We do not sell, rent or share Google user data with third parties for their
+own purposes, and we never use it for advertising. Google user data (OAuth tokens and the connected
+account's email address) is shared only with the sub-processors strictly required to operate the
+service, acting on our instructions: <b>Supabase</b> (encrypted storage of tokens), <b>n8n</b>
+(transient use of the token to call the Gmail API), and <b>Google</b> itself. <b>PDFShift receives no
+Google user data.</b> We disclose data outside this circuit only where legally required.</p>
+<p><b>AI/ML.</b> We do not use data obtained from Google APIs to develop, train or improve
+artificial intelligence or machine learning models, whether generalised or our own, nor do we
+transfer it to third parties for that purpose.</p>
+<p><b>Data protection.</b> Encryption in transit (HTTPS, TLS 1.2+) and at rest (AES-256). Tokens are
+stored in a table with Row Level Security enabled, unreachable from the public application and
+readable only by the automated sending process. Reunvo has no employees and no human reads user
+data. We request a single scope, <code>gmail.send</code>, the narrowest that allows sending on the
+user's behalf. Upon revocation or account closure, tokens are deleted.</p>
+</div>
+
 <h2>Base legal</h2>
 <p>Ejecución del contrato o de medidas precontractuales a petición tuya —tu solicitud de información
 o tu alta— y nuestro interés legítimo en gestionar la relación comercial contigo.</p>
-
-<h2>Encargados de tratamiento</h2>
-<p>Para prestar el servicio utilizamos proveedores que tratan datos siguiendo nuestras instrucciones:
-alojamiento y base de datos (Supabase), orquestación de procesos (n8n), generación de documentos
-(PDFShift) e infraestructura de correo (Google). Todos actúan como encargados o corresponsables según
-sus propios términos.</p>
 
 <h2>Conservación</h2>
 <p>Mientras dure la relación y durante los plazos legales aplicables. Después, los datos se suprimen
