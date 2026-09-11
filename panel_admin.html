@@ -29,13 +29,15 @@
  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:600}
  .p-ok{background:#e9f7ef;color:#15803d}.p-off{background:#eef1f6;color:#6b7688}
  .p-test{background:#fff4e5;color:#b7791f}.p-bad{background:#fef2f2;color:#b91c1c}
- .p-send{background:#e6f0ff;color:#1a4b8f}
  a.go{display:inline-block;background:#1a3c6e;color:#fff;text-decoration:none;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600}
  a.go:hover{background:#2a4372}
  .act{border-left:3px solid #e9c98a;padding:9px 12px;margin-bottom:7px;background:#fffdf7;border-radius:0 8px 8px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
  .act.old{border-left-color:#b91c1c;background:#fff7f7}
  .act .d{color:#6b7688;font-size:12px}
  .none{color:#6b7688;font-size:13px;padding:6px 2px}
+ .lrow{cursor:pointer} .lrow:hover{background:#f6f8fb}
+ .lsel{background:#eef4ff;box-shadow:inset 3px 0 0 #2563eb}
+ .lsel td{font-weight:600}
  .gate{max-width:330px;margin:70px auto;background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:22px}
  .gate input{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;margin:10px 0}
  .err{color:#b91c1c;font-size:13px}
@@ -65,8 +67,6 @@
  .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
  .barra{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:12px 15px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
  .rgrp{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b95a5;margin:22px 0 9px;font-weight:600}
- .rgrp-lote{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 9px;font-size:12.5px;color:#14243f;font-weight:600}
- .rgrp-lote .b-ok{padding:4px 10px;font-size:12px}
  .ventana{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#6b7688;margin-left:8px}
  .ventana.abierta{background:#fff6e5;color:#9a6700}.ventana.ok{background:#e9f7ef;color:#15803d}
  .rfrm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
@@ -122,8 +122,7 @@
 
 <div id="v-revision" style="display:none">
   <h2>Revisión antes de enviar</h2>
-  <h2>Lotes</h2>
-  <div class="box" id="rlotes" style="overflow-x:auto"></div>
+  <div class="box" id="rlotes" style="margin-bottom:12px"></div>
   <div class="cards" id="rkpis"></div>
   <div id="rlista"></div>
   <p class="hint" style="margin-top:16px;line-height:1.55">Las que tienen aviso salen primero.
@@ -268,34 +267,25 @@ function pinta(d){
 }
 
 /* ─────────── Revisión antes de enviar ─────────── */
-let LOTES_LIMPIAS={};
+let LIMPIAS=[], REV=null;
+let LOTE=(function(){try{return localStorage.getItem("reunvo_admin_lote")||"";}catch(e){return "";}})();
 const fact=v=>v==null?"—":(v>=1000?(v/1000).toFixed(1).replace('.',',')+" M€":v+" k€");
-const LOTE_ESTADO={
-  cliente:  ['en manos del cliente','p-off'],
-  guille:   ['te toca aprobar','p-test'],
-  listo:    ['aprobado, esperando fecha','p-ok'],
-  enviando: ['enviándose','p-send']
-};
-const loteEstadoPill=e=>{const x=LOTE_ESTADO[e]||[e,'p-off'];return `<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
 
-function pintaLotes(lotes){
-  const el=document.getElementById("rlotes");
-  if(!lotes||!lotes.length){el.innerHTML='<div class="none">No hay lotes activos.</div>';return;}
-  let h='<table><thead><tr><th>Lote</th><th>Estado</th><th>Envío desde</th><th>Empresas</th><th>Aprobadas</th><th>Faltan</th></tr></thead><tbody>';
-  lotes.forEach(l=>{
-    const faltan=Math.max(0,(l.empresas||0)-(l.aprobadas||0));
-    h+=`<tr><td class="nm">${esc(l.periodo)}</td><td>${loteEstadoPill(l.lote_estado)}</td>
-      <td>${f(l.inicio_envio)}</td><td>${l.empresas||0}</td><td>${l.aprobadas||0}</td>
-      <td${faltan>0?' style="font-weight:600"':''}>${faltan}</td></tr>`;
-  });
-  h+='</tbody></table>';
-  el.innerHTML=h;
+// Cambiar de lote NO vuelve a pedir datos: el mes entero ya está cargado.
+function selLote(id){
+  LOTE=(id===LOTE)?"":id;
+  try{localStorage.setItem("reunvo_admin_lote",LOTE);}catch(e){}
+  pintarRevision();
 }
 
 async function cargarRevision(){
-  const d=await rpc("revision_cola",{p_limit:300});
+  const d=await rpc("revision_cola",{p_limit:600});
   if(!d||d.error) return;
-  pintaLotes(d.lotes);
+  REV=d; pintarRevision();
+}
+
+function pintarRevision(){
+  const d=REV; if(!d) return;
   const r=d.resumen||{}, stock=r.dias_de_stock;
   document.getElementById("rkpis").innerHTML=
     card("Sin revisar",r.pendientes||0)+
@@ -306,31 +296,63 @@ async function cargarRevision(){
     card("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),
          (stock!=null&&stock<2)?'bad':'');
 
+  // Los lotes: haz clic en uno para revisar solo ese. Vuelve a hacer clic para verlos todos.
+  const lotes=d.lotes||[];
+  if(LOTE && !lotes.some(l=>l.lote_id===LOTE)) LOTE="";   // el lote que tenías guardado ya no existe
+  document.getElementById("rlotes").innerHTML = lotes.length
+    ? '<div class="hint" style="margin-bottom:6px">Haz clic en un lote para revisar solo ése.</div>'
+      +'<table><thead><tr><th>Lote</th><th>Cliente</th><th>Estado</th><th>Empieza a enviarse</th>'
+      +'<th>Empresas</th><th>Aprobadas</th><th>Falta</th></tr></thead><tbody>'
+      + `<tr class="lrow${LOTE?'':' lsel'}" onclick="selLote('')">
+           <td class="nm">Todos</td><td colspan="3" class="hint">sin filtrar</td>
+           <td>${lotes.reduce((a,l)=>a+(l.empresas||0),0)}</td>
+           <td>${lotes.reduce((a,l)=>a+(l.aprobadas||0),0)}</td><td>—</td></tr>`
+      + lotes.map(l=>{
+          const falta=(l.empresas||0)-(l.aprobadas||0);
+          const est={cliente:'en manos del cliente',guille:'te toca aprobar',
+                     listo:'aprobado, esperando fecha',enviando:'enviándose',
+                     agotado:'agotado'}[l.lote_estado]||l.lote_estado;
+          return `<tr class="lrow${LOTE===l.lote_id?' lsel':''}" onclick="selLote('${l.lote_id}')">
+            <td class="nm">${esc(l.periodo)}</td>
+            <td>${esc(l.cliente||'—')}${l.es_prueba?' <span class="pill p-test">prueba</span>':''}</td>
+            <td><span class="pill ${l.lote_estado==='guille'?'p-test':'p-ok'}">${esc(est)}</span></td>
+            <td>${f(l.inicio_envio)}</td><td>${l.empresas}</td><td>${l.aprobadas}</td>
+            <td${falta?' style="color:#b7791f;font-weight:600"':''}>${falta||'—'}</td></tr>`;
+        }).join("")
+      + '</tbody></table>'
+    : '<div class="none">Ningún lote pendiente de aprobar.</div>';
+
   const b=document.getElementById("bdg"), n=r.pendientes||0;
   if(n>0){b.textContent=n;b.style.display="inline-block";} else b.style.display="none";
 
-  const emp=d.empresas||[];
+  // Por defecto NO se mezclan las de prueba con las reales: solo salen si eliges ese lote.
+  const emp=(d.empresas||[]).filter(c=> LOTE ? c.lote_id===LOTE : !c.es_prueba);
   const yaAprob=emp.filter(c=>c.aprobada), pend=emp.filter(c=>!c.aprobada);
-  LOTES_LIMPIAS={};
-  pend.filter(c=>!c.grave).forEach(c=>{(LOTES_LIMPIAS[c.periodo]=LOTES_LIMPIAS[c.periodo]||[]).push(c.id);});
+  LIMPIAS=pend.filter(c=>!c.grave).map(c=>c.id);
 
+  const sel=LOTE?lotes.find(l=>l.lote_id===LOTE):null;
+  const nAviso=pend.filter(c=>c.grave).length;
   let h="";
   if(emp.length){
-    if((r.con_alerta||0)>0) h+=`<p class="hint" style="margin:0 0 14px">Las ${r.con_alerta} con aviso 🔴 hay que mirarlas una a una.</p>`;
+    h+=`<div class="barra">
+      <button class="b-ok" onclick="aprobarLote()" ${LIMPIAS.length?"":"disabled"}>
+        Aprobar las ${LIMPIAS.length} sin avisos${sel?' de '+esc(sel.periodo):''}</button>
+      <span class="hint">${sel?'Lote '+esc(sel.periodo)+' · '+esc(sel.cliente||'')+'. ':''}Las ${nAviso} con aviso 🔴 hay que mirarlas una a una.${sel?' <a href="#" onclick="selLote(\'\');return false">Ver todos los lotes</a>':''}</span></div>`;
     if(yaAprob.length) h+=`<div class="rgrp" style="color:#b45309">Ya aprobadas, pero con un aviso sin resolver · ${yaAprob.length}</div>`+yaAprob.map(filaRev).join("");
     const ca=pend.filter(c=>c.grave), li=pend.filter(c=>!c.grave);
     if(ca.length) h+=`<div class="rgrp">Requieren tu criterio · ${ca.length}</div>`+ca.map(filaRev).join("");
     if(li.length){
+      // Agrupadas por lote: se aprueba un mes entero, no una lista sin forma
       const porLote={};
-      li.forEach(c=>{(porLote[c.periodo]=porLote[c.periodo]||[]).push(c);});
-      Object.keys(porLote).sort().forEach(per=>{
-        const filas=porLote[per];
-        h+=`<div class="rgrp-lote">Lote ${esc(per)} · sin avisos · ${filas.length}
-          <button class="b-ok" onclick="aprobarLote('${per}')">Aprobar las ${filas.length}</button></div>`
-          +filas.map(filaRev).join("");
+      li.forEach(c=>{const k=(c.periodo||'—')+' · '+(c.cliente||'—');(porLote[k]=porLote[k]||[]).push(c);});
+      Object.keys(porLote).sort().forEach(k=>{
+        h+=`<div class="rgrp">Lote ${esc(k)} · sin avisos · ${porLote[k].length}</div>`
+          +porLote[k].map(filaRev).join("");
       });
     }
-  } else h='<div class="box none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
+  } else h=sel
+      ? `<div class="box none">Nada por revisar en el lote ${esc(sel.periodo)} de ${esc(sel.cliente||'')}. <a href="#" onclick="selLote('');return false">Ver todos</a></div>`
+      : '<div class="box none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
   document.getElementById("rlista").innerHTML=h;
 }
 
@@ -367,11 +389,10 @@ function filaRev(c){
     </div></div>`;
 }
 
-async function aprobarLote(per){
-  const ids=LOTES_LIMPIAS[per]||[];
-  if(!ids.length) return;
-  if(!confirm("Aprobar "+ids.length+" empresas sin avisos del lote "+per+".\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
-  const r=await rpc("revision_aprobar_lote",{p_ids:ids});
+async function aprobarLote(){
+  if(!LIMPIAS.length) return;
+  if(!confirm("Aprobar "+LIMPIAS.length+" empresas sin avisos.\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
+  const r=await rpc("revision_aprobar_lote",{p_ids:LIMPIAS});
   if(r&&r.ok){flash("Aprobadas "+r.aprobadas+".");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo.");
 }
 async function guardarRev(id,ap){
