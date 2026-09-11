@@ -80,7 +80,15 @@
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
-let PW=localStorage.getItem("reunvo_admin_pw")||"";
+/* Acceso desde el correo: si la URL trae #k=…, se guarda y se limpia la barra. */
+let PW=(function(){
+  const m=location.hash.match(/[#&]k=([^&]+)/);
+  if(m){const k=decodeURIComponent(m[1]);
+    try{localStorage.setItem("reunvo_admin_pw",k);}catch(e){}
+    try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+    return k;}
+  try{return localStorage.getItem("reunvo_admin_pw")||"";}catch(e){return "";}
+})();
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const f=d=>d?new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):"—";
 const fh=d=>d?new Date(d).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):"—";
