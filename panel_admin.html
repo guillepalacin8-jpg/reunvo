@@ -29,6 +29,7 @@
  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:600}
  .p-ok{background:#e9f7ef;color:#15803d}.p-off{background:#eef1f6;color:#6b7688}
  .p-test{background:#fff4e5;color:#b7791f}.p-bad{background:#fef2f2;color:#b91c1c}
+ .p-send{background:#e6f0ff;color:#1a4b8f}
  a.go{display:inline-block;background:#1a3c6e;color:#fff;text-decoration:none;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600}
  a.go:hover{background:#2a4372}
  .act{border-left:3px solid #e9c98a;padding:9px 12px;margin-bottom:7px;background:#fffdf7;border-radius:0 8px 8px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
@@ -64,6 +65,8 @@
  .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
  .barra{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:12px 15px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
  .rgrp{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b95a5;margin:22px 0 9px;font-weight:600}
+ .rgrp-lote{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 9px;font-size:12.5px;color:#14243f;font-weight:600}
+ .rgrp-lote .b-ok{padding:4px 10px;font-size:12px}
  .ventana{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#6b7688;margin-left:8px}
  .ventana.abierta{background:#fff6e5;color:#9a6700}.ventana.ok{background:#e9f7ef;color:#15803d}
  .rfrm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
@@ -119,6 +122,8 @@
 
 <div id="v-revision" style="display:none">
   <h2>Revisión antes de enviar</h2>
+  <h2>Lotes</h2>
+  <div class="box" id="rlotes" style="overflow-x:auto"></div>
   <div class="cards" id="rkpis"></div>
   <div id="rlista"></div>
   <p class="hint" style="margin-top:16px;line-height:1.55">Las que tienen aviso salen primero.
@@ -263,12 +268,34 @@ function pinta(d){
 }
 
 /* ─────────── Revisión antes de enviar ─────────── */
-let LIMPIAS=[];
+let LOTES_LIMPIAS={};
 const fact=v=>v==null?"—":(v>=1000?(v/1000).toFixed(1).replace('.',',')+" M€":v+" k€");
+const LOTE_ESTADO={
+  cliente:  ['en manos del cliente','p-off'],
+  guille:   ['te toca aprobar','p-test'],
+  listo:    ['aprobado, esperando fecha','p-ok'],
+  enviando: ['enviándose','p-send']
+};
+const loteEstadoPill=e=>{const x=LOTE_ESTADO[e]||[e,'p-off'];return `<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
+
+function pintaLotes(lotes){
+  const el=document.getElementById("rlotes");
+  if(!lotes||!lotes.length){el.innerHTML='<div class="none">No hay lotes activos.</div>';return;}
+  let h='<table><thead><tr><th>Lote</th><th>Estado</th><th>Envío desde</th><th>Empresas</th><th>Aprobadas</th><th>Faltan</th></tr></thead><tbody>';
+  lotes.forEach(l=>{
+    const faltan=Math.max(0,(l.empresas||0)-(l.aprobadas||0));
+    h+=`<tr><td class="nm">${esc(l.periodo)}</td><td>${loteEstadoPill(l.lote_estado)}</td>
+      <td>${f(l.inicio_envio)}</td><td>${l.empresas||0}</td><td>${l.aprobadas||0}</td>
+      <td${faltan>0?' style="font-weight:600"':''}>${faltan}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  el.innerHTML=h;
+}
 
 async function cargarRevision(){
   const d=await rpc("revision_cola",{p_limit:300});
   if(!d||d.error) return;
+  pintaLotes(d.lotes);
   const r=d.resumen||{}, stock=r.dias_de_stock;
   document.getElementById("rkpis").innerHTML=
     card("Sin revisar",r.pendientes||0)+
@@ -284,18 +311,25 @@ async function cargarRevision(){
 
   const emp=d.empresas||[];
   const yaAprob=emp.filter(c=>c.aprobada), pend=emp.filter(c=>!c.aprobada);
-  LIMPIAS=pend.filter(c=>!c.grave).map(c=>c.id);
+  LOTES_LIMPIAS={};
+  pend.filter(c=>!c.grave).forEach(c=>{(LOTES_LIMPIAS[c.periodo]=LOTES_LIMPIAS[c.periodo]||[]).push(c.id);});
 
   let h="";
   if(emp.length){
-    h+=`<div class="barra">
-      <button class="b-ok" onclick="aprobarLote()" ${LIMPIAS.length?"":"disabled"}>
-        Aprobar las ${LIMPIAS.length} sin avisos</button>
-      <span class="hint">Las ${r.con_alerta||0} con aviso 🔴 hay que mirarlas una a una.</span></div>`;
+    if((r.con_alerta||0)>0) h+=`<p class="hint" style="margin:0 0 14px">Las ${r.con_alerta} con aviso 🔴 hay que mirarlas una a una.</p>`;
     if(yaAprob.length) h+=`<div class="rgrp" style="color:#b45309">Ya aprobadas, pero con un aviso sin resolver · ${yaAprob.length}</div>`+yaAprob.map(filaRev).join("");
     const ca=pend.filter(c=>c.grave), li=pend.filter(c=>!c.grave);
     if(ca.length) h+=`<div class="rgrp">Requieren tu criterio · ${ca.length}</div>`+ca.map(filaRev).join("");
-    if(li.length) h+=`<div class="rgrp">Sin avisos que afecten al saludo · ${li.length}</div>`+li.map(filaRev).join("");
+    if(li.length){
+      const porLote={};
+      li.forEach(c=>{(porLote[c.periodo]=porLote[c.periodo]||[]).push(c);});
+      Object.keys(porLote).sort().forEach(per=>{
+        const filas=porLote[per];
+        h+=`<div class="rgrp-lote">Lote ${esc(per)} · sin avisos · ${filas.length}
+          <button class="b-ok" onclick="aprobarLote('${per}')">Aprobar las ${filas.length}</button></div>`
+          +filas.map(filaRev).join("");
+      });
+    }
   } else h='<div class="box none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
   document.getElementById("rlista").innerHTML=h;
 }
@@ -333,10 +367,11 @@ function filaRev(c){
     </div></div>`;
 }
 
-async function aprobarLote(){
-  if(!LIMPIAS.length) return;
-  if(!confirm("Aprobar "+LIMPIAS.length+" empresas sin avisos.\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
-  const r=await rpc("revision_aprobar_lote",{p_ids:LIMPIAS});
+async function aprobarLote(per){
+  const ids=LOTES_LIMPIAS[per]||[];
+  if(!ids.length) return;
+  if(!confirm("Aprobar "+ids.length+" empresas sin avisos del lote "+per+".\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
+  const r=await rpc("revision_aprobar_lote",{p_ids:ids});
   if(r&&r.ok){flash("Aprobadas "+r.aprobadas+".");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo.");
 }
 async function guardarRev(id,ap){
