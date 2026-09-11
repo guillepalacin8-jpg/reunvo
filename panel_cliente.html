@@ -34,6 +34,8 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .gcard{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:14px 16px}
   .gcard.out{opacity:.45}
+  .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
+  @keyframes entra{0%{background:#fdf6e6}100%{background:#fff}}
   .gcard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .gcard .nm{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .gcard .gmeta{color:#6b7688;font-size:12px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -91,7 +93,7 @@
 
     <section id="s-empresas"><h1>Tu cola de empresas</h1>
       <p class="hint">Estas son las empresas reservadas para ti, en exclusiva. Se irán contactando en tu nombre al ritmo de tu plan. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
-      <div class="panelbox" id="lote-box" style="display:none"></div>
+      <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
 
@@ -163,9 +165,25 @@ function render(d){
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
   document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
-  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
      <div class="top"><div class="nm">${esc(a.empresa)}</div>${accion}</div>
      <div class="gmeta">${esc(a.localidad||'—')} · ${esc(a.sector||'—')}</div></div>`;
+  // Estado del lote: hasta cuándo puede depurar, y el botón para cerrarlo antes
+  const lo=d.lote||null;
+  document.getElementById("lote-estado").innerHTML = lo && lo.estado==='cliente'
+    ? `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7;margin-bottom:14px">
+         <h3 style="color:#b7791f">Lista de ${esc(lo.periodo)} · pendiente de su visto bueno</h3>
+         <p class="hint" style="margin-bottom:12px">Puede quitar empresas hasta el
+         <b>${fecha(lo.limite_cliente)}</b>. A partir de esa fecha preparamos los envíos, que
+         empiezan el <b>${fecha(lo.inicio_envio)}</b>.<br>
+         Si ya la ha revisado entera, díganoslo y pasamos a preparar la siguiente.</p>
+         <button class="act b-gold" onclick="loteOk(this)">Todas verificadas y correctas</button>
+       </div>`
+    : (lo ? `<div class="panelbox" style="margin-bottom:14px">
+         <h3>Lista de ${esc(lo.periodo)}</h3>
+         <p class="hint">Ya revisada. Los envíos empiezan el <b>${fecha(lo.inicio_envio)}</b>.
+         Le avisaremos cuando preparemos la siguiente.</p></div>` : '');
+
   document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   const dosEstado=x=>x.estado==='entregado'?`Enviado a tu email el ${fecha(x.entregado_el)}`:(x.estado==='listo'?'Enviándotelo ahora':'Lo estamos preparando');
@@ -176,34 +194,34 @@ function render(d){
     + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7"><h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
         <p class="hint" style="margin-bottom:12px">Pasa de 10 a <b>20 emails/día</b> personalizados y apunta a <b>6-8 clientes potenciales interesados cada mes</b> (frente a 3-4 del Básico). El mismo sistema, el doble de volumen, el doble de oportunidades.</p>
         <button class="act b-gold" onclick="pedirUpgrade(this)">Quiero subir a Avanzado</button></div>`);
-  pintaLote(d.lote);
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
-const LOTE_CERRADO={guille:'en revisión interna',listo:'aprobado, a la espera de la fecha',enviando:'enviándose ya'};
-function pintaLote(l){
-  const el=document.getElementById("lote-box");
-  if(!l){el.style.display="none";return;}
-  el.style.display="block";
-  if(l.estado==='cliente'){
-    el.innerHTML=`<h3>Tu lote de ${esc(l.periodo)}</h3>
-      <p class="hint" style="margin-bottom:12px">Puedes quitar empresas hasta el <b>${fecha(l.limite_cliente)}</b>.
-      Los envíos de este lote empiezan el <b>${fecha(l.inicio_envio)}</b>.</p>
-      <button class="act b-gold" onclick="verificarLote(this)">Todas verificadas y correctas</button>`;
-  } else {
-    const lbl=LOTE_CERRADO[l.estado]||l.estado;
-    el.innerHTML=`<h3>Tu lote de ${esc(l.periodo)}</h3>
-      <p class="hint" style="margin-bottom:0">Tu revisión de este lote ya se cerró (${esc(lbl)}).
-      Los envíos ${l.estado==='enviando'?'empezaron':'empiezan'} el <b>${fecha(l.inicio_envio)}</b>.</p>`;
-  }
-}
-async function verificarLote(btn){
-  if(!confirm("Vas a dar por buena tu lista de este mes.\n\nDespués ya no podrás quitar empresas de este lote. ¿Seguro que está todo correcto?")) return;
-  btn.disabled=true;
+async function loteOk(btn){
+  if(!confirm("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?")) return;
+  btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
-  if(r&&r.ok){flash(r.mensaje||"Listo.");await load();nav('empresas');}
-  else{btn.disabled=false;flash((r&&r.mensaje)||"No se pudo, reintenta.");}
+  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
+  else{btn.disabled=false;btn.textContent="Todas verificadas y correctas";
+       flash((r&&r.mensaje)||"No se pudo confirmar.");}
 }
-async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});if(r&&r.ok){await load();nav('empresas');}else{btn.disabled=false;flash("No se pudo, reintenta.");}}
+async function toggle(id,ex,btn){
+  // Quitar una empresa la descarta para siempre: se confirma antes.
+  if(ex){
+    const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
+    if(!confirm("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?")) return;
+  }
+  btn.disabled=true; const txt=btn.textContent; btn.textContent="…";
+  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});
+  if(r&&r.ok){
+    await load(); nav('empresas');
+    flash(r.mensaje || (ex?"Quitada.":"Repuesta."));
+    // Resaltar la que ha entrado en su lugar, para que se vea el cambio
+    if(r.nueva&&r.nueva.company_id){
+      const c=document.querySelector('#lista-emp .gcard[data-id="'+r.nueva.company_id+'"]');
+      if(c){c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
+    }
+  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintenta.");}
+}
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
 async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
 async function pedirUpgrade(btn){btn.disabled=true;const r=await rpc("client_request_upgrade",{});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitado.");}else{flash("No se pudo, reintenta.");}}
