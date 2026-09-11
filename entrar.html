@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Acceder — Reunvo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .campo{width:100%;max-width:420px;padding:13px 15px;border:1px solid #d5d9e1;border-radius:10px;
+         font-size:16px;font-family:inherit;margin:0 auto 14px;display:block}
+  .campo:focus{outline:none;border-color:#1a3c6e}
+  .aviso{max-width:420px;margin:18px auto 0;padding:13px 15px;border-radius:10px;
+         background:#f4f7fb;border:1px solid #dfe6f0;font-size:14px;line-height:1.55;display:none}
+  .centro{text-align:center}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="/">Reunvo<span>.</span></a>
+</header>
+
+<main class="wrap centro">
+
+  <p class="eyebrow">Acceso</p>
+  <h1>Entre a su panel.</h1>
+  <p class="lead">Escriba el correo con el que trabaja con nosotros y le enviaremos su enlace de
+  acceso. No hace falta contraseña.</p>
+
+  <form id="f" autocomplete="on">
+    <input class="campo" id="email" type="email" name="email" inputmode="email"
+           placeholder="su@correo.com" required autocomplete="email">
+    <button class="btn btn--block" id="btn" type="submit">Enviarme mi enlace</button>
+  </form>
+
+  <div class="aviso" id="aviso"></div>
+
+  <p class="contacto">¿Problemas para entrar? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
+
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+const f = document.getElementById('f');
+const btn = document.getElementById('btn');
+const aviso = document.getElementById('aviso');
+
+f.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  try {
+    const res = await fetch(REUNVO.SUPABASE_URL + '/rest/v1/rpc/reunvo_pedir_acceso', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': REUNVO.SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + REUNVO.SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ p_email: email })
+    });
+    const d = await res.json();
+    // La respuesta es la misma exista o no el correo: no se revela quién es cliente.
+    aviso.textContent = (d && d.mensaje)
+      ? d.mensaje
+      : 'Si ese correo está dado de alta, en un minuto recibirás tu enlace de acceso.';
+  } catch (e) {
+    aviso.textContent = 'No hemos podido procesar la solicitud. Inténtelo de nuevo o escríbanos a gp@reunvo.com.';
+  }
+
+  aviso.style.display = 'block';
+  btn.textContent = 'Enviado';
+  // Se rehabilita a los 30 s: evita reenvíos por impaciencia.
+  setTimeout(() => { btn.disabled = false; btn.textContent = 'Enviarme mi enlace'; }, 30000);
+});
+</script>
+</body>
+</html>
