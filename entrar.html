@@ -28,8 +28,18 @@
 
   <p class="eyebrow">Acceso</p>
   <h1>Entre a su panel.</h1>
+
+  <!-- Si este navegador ya recuerda el acceso, se entra directo: ni correo ni enlace. -->
+  <div id="directo" style="display:none">
+    <p class="lead">Este navegador recuerda su acceso.</p>
+    <a class="btn btn--block" href="/panel_cliente.html">Entrar a mi panel</a>
+    <p class="contacto" style="margin-top:18px">
+      <a href="#" id="otro" style="color:#6b7688">Entrar con otro correo</a></p>
+  </div>
+
+  <div id="pedir">
   <p class="lead">Escriba el correo con el que trabaja con nosotros y le enviaremos su enlace de
-  acceso. No hace falta contraseña.</p>
+  acceso. Solo hace falta la primera vez: después este navegador lo recordará.</p>
 
   <form id="f" autocomplete="on">
     <input class="campo" id="email" type="email" name="email" inputmode="email"
@@ -38,6 +48,7 @@
   </form>
 
   <div class="aviso" id="aviso"></div>
+  </div>
 
   <p class="contacto">¿Problemas para entrar? <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
 
@@ -45,6 +56,22 @@
 
 <script src="assets/app.js"></script>
 <script>
+// ¿Este navegador ya recuerda un acceso? Entonces no hace falta ni correo ni enlace.
+(function(){
+  let t = null;
+  try { t = localStorage.getItem('reunvo_cliente_t'); } catch(e) {}
+  if (t) {
+    document.getElementById('directo').style.display = 'block';
+    document.getElementById('pedir').style.display = 'none';
+    document.getElementById('otro').addEventListener('click', function(ev){
+      ev.preventDefault();
+      try { localStorage.removeItem('reunvo_cliente_t'); } catch(e) {}
+      document.getElementById('directo').style.display = 'none';
+      document.getElementById('pedir').style.display = 'block';
+    });
+  }
+})();
+
 const f = document.getElementById('f');
 const btn = document.getElementById('btn');
 const aviso = document.getElementById('aviso');
