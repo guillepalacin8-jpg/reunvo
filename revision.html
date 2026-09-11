@@ -92,7 +92,16 @@
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
-let PW=localStorage.getItem("reunvo_admin_pw")||"";
+/* Acceso desde el correo: si la URL trae #k=…, se guarda y se limpia la barra.
+   A partir de ahí este navegador entra solo, igual que el panel del cliente. */
+let PW=(function(){
+  const m=location.hash.match(/[#&]k=([^&]+)/);
+  if(m){const k=decodeURIComponent(m[1]);
+    try{localStorage.setItem("reunvo_admin_pw",k);}catch(e){}
+    try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+    return k;}
+  try{return localStorage.getItem("reunvo_admin_pw")||"";}catch(e){return "";}
+})();
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function flash(t){const m=document.getElementById("msg");m.textContent=t;m.style.display="block";
@@ -170,7 +179,10 @@ const fact=v=>v==null?"—":(v>=1000?(v/1000).toFixed(1).replace('.',',')+" M€
 
 function fila(c){
   const al=(c.alertas||[]);
-  const trato=(c.gender_prefix||'Sr.')+" "+(c.shareholder_last||'—');
+  // El correo dice: «Apreciado{/a} {prefijo} {NOMBRE} {apellido},». El nombre SÍ aparece.
+  const apre=(c.gender_prefix==='Sra.'?'Apreciada':'Apreciado');
+  const trato=[(c.gender_prefix||'Sr.'),(c.shareholder_first||''),(c.shareholder_last||'—')]
+              .filter(Boolean).join(" ");
   const busca="https://www.google.com/search?q="+
     encodeURIComponent('"'+(c.company_name||'')+'" '+(c.locality||''));
   return `<div class="row${c.grave?' alerta':''}${c.aprobada?' yaap':''}" id="r-${c.id}">
@@ -195,8 +207,8 @@ function fila(c){
     <div class="cotejo">
       <div class="cl"><span class="et">Su email</span>
         <span class="mail">${esc(c.contact_email||'—')}</span></div>
-      <div class="cl"><span class="et">Le diremos</span>
-        <span class="dice">«Apreciado/a <b>${esc(trato)}</b>,»</span></div>
+      <div class="cl"><span class="et">Le diremos, literalmente</span>
+        <span class="dice">«${apre} <b>${esc(trato)}</b>,»</span></div>
     </div>
     <div class="frm">
       <div class="f"><label>Trato</label>
