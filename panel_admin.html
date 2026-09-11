@@ -39,6 +39,42 @@
  .gate input{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;margin:10px 0}
  .err{color:#b91c1c;font-size:13px}
  .hint{color:#6b7688;font-size:12px}
+
+ /* Pestañas: todo lo de Guille en un solo sitio */
+ header .tabs{display:flex;gap:6px;margin-left:8px}
+ header .tab{background:transparent;color:#8fa0bd;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-weight:600}
+ header .tab.on{background:#2a4372;color:#fff}
+ header .tab .badge{display:inline-block;background:#e9c98a;color:#14243f;border-radius:999px;font-size:11px;padding:0 7px;margin-left:6px;font-weight:700}
+ /* Fichas de revisión */
+ .rrow{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:13px 15px;margin-bottom:9px}
+ .rrow.alerta{border-color:#f3c6c6;background:#fffbfb}
+ .rrow.yaap{border-color:#e9c98a;background:#fffdf7}
+ .rtop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+ .remp{font-weight:650;color:#14243f}
+ .ral{margin:9px 0 0;padding:0;list-style:none}
+ .ral li{color:#b91c1c;font-size:12.5px;padding:2px 0}.ral li.leve{color:#8b6b1f}
+ .cotejo{margin:10px 0 2px;padding:11px 13px;background:#f4f7fb;border:1px solid #dfe6f0;border-radius:9px;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+ .cotejo .cl{display:flex;flex-direction:column;gap:3px;min-width:0}
+ .cotejo .et{font-size:10px;color:#7c879a;text-transform:uppercase;letter-spacing:.06em}
+ .cotejo .mail{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;color:#14243f;font-weight:600;word-break:break-all;line-height:1.3}
+ .cotejo .dice{font-size:15px;color:#14243f;line-height:1.3}.cotejo .dice b{border-bottom:2px solid #c3d2e8}
+ @media(max-width:620px){.cotejo{grid-template-columns:1fr}}
+ .rficha{margin:9px 0;padding:9px 11px;background:#fbfcfd;border:1px solid #eceff4;border-radius:8px;font-size:13px;line-height:1.6}
+ .rficha .et{font-size:10.5px;color:#8b95a5;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+ .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
+ .barra{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:12px 15px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+ .rgrp{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b95a5;margin:22px 0 9px;font-weight:600}
+ .ventana{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#6b7688;margin-left:8px}
+ .ventana.abierta{background:#fff6e5;color:#9a6700}.ventana.ok{background:#e9f7ef;color:#15803d}
+ .rfrm{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
+ .rf{display:flex;flex-direction:column;gap:3px}
+ .rf label{font-size:11px;color:#6b7688}
+ .rf input,.rf select{padding:7px 9px;border:1px solid #d5d9e1;border-radius:7px;font-size:13.5px;background:#fff}
+ .rf input{min-width:150px}
+ .b-ok{background:#15803d;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+ .b-ok:disabled{opacity:.5;cursor:default}
+ .b-skip{background:#6b7688;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+ .msg{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#14243f;color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;display:none;z-index:9}
  @media(max-width:760px){table,thead,tbody,th,td,tr{display:block}th{display:none}td{border:0;padding:3px 0}tr{border-bottom:1px solid #e6e9ef;padding:10px 0}}
 </style>
 </head>
@@ -52,11 +88,16 @@
 
 <div id="app" style="display:none">
 <header>
-  <div class="b">Reunvo<span>.</span> Control</div>
-  <button class="r" onclick="cargar()">Actualizar</button>
+  <div class="b">Reunvo<span>.</span></div>
+  <div class="tabs">
+    <button class="tab on" id="tab-control"  onclick="ver('control')">Control</button>
+    <button class="tab"    id="tab-revision" onclick="ver('revision')">Revisión<span class="badge" id="bdg" style="display:none"></span></button>
+  </div>
+  <button class="r" onclick="recargar()">Actualizar</button>
   <div class="ts" id="ts"></div>
 </header>
 <main>
+<div id="v-control">
   <h2>Requiere tu acción</h2>
   <div class="box" id="acciones"></div>
 
@@ -74,8 +115,22 @@
 
   <h2>Respuestas</h2>
   <div class="cards" id="embudo"></div>
+</div>
+
+<div id="v-revision" style="display:none">
+  <h2>Revisión antes de enviar</h2>
+  <div class="cards" id="rkpis"></div>
+  <div id="rlista"></div>
+  <p class="hint" style="margin-top:16px;line-height:1.55">Las que tienen aviso salen primero.
+  Corrige el nombre, el apellido o el trato y pulsa <b>Aprobar</b>. <b>Nada se envía sin aprobar.</b>
+  Si una no debe contactarse, usa <b>Descartar</b>: se queda fuera del envío sin borrarse.<br>
+  Mira también <b>a qué se dedica</b>: si la descripción no encaja con el nombre, compruébalo en
+  Google antes de aprobar. Los avisos solo cazan el saludo y las descripciones vacías —
+  <b>la coherencia del negocio la juzgas tú.</b></p>
+</div>
 </main>
 </div>
+<div id="msg" class="msg"></div>
 
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
@@ -99,16 +154,34 @@ const card=(k,v,cls)=>`<div class="card${cls?' '+cls:''}"><div class="k">${esc(k
 function entrar(){const v=document.getElementById("pw").value.trim();if(!v)return;
   PW=v;localStorage.setItem("reunvo_admin_pw",v);cargar();}
 
-async function cargar(){
-  const r=await fetch(SUPA+"/rest/v1/rpc/reunvo_admin",{method:"POST",
+async function rpc(fn,args){
+  const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",
     headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
-    body:JSON.stringify({p_token:PW})});
-  const d=await r.json();
+    body:JSON.stringify(Object.assign({p_token:PW},args||{}))});
+  return await r.json();
+}
+function flash(t){const m=document.getElementById("msg");m.textContent=t;m.style.display="block";
+  clearTimeout(window._f);window._f=setTimeout(()=>m.style.display="none",2400);}
+
+function ver(v){
+  document.getElementById("v-control").style.display  = v==='control' ?'block':'none';
+  document.getElementById("v-revision").style.display = v==='revision'?'block':'none';
+  document.getElementById("tab-control").classList.toggle("on",  v==='control');
+  document.getElementById("tab-revision").classList.toggle("on", v==='revision');
+  try{ localStorage.setItem("reunvo_admin_vista", v); }catch(e){}
+}
+function recargar(){ cargar(); cargarRevision(); }
+
+async function cargar(){
+  const d=await rpc("reunvo_admin",{});
   if(!d||d.error){document.getElementById("gerr").textContent="Contraseña incorrecta.";
     localStorage.removeItem("reunvo_admin_pw");return;}
   document.getElementById("gate").style.display="none";
   document.getElementById("app").style.display="block";
   pinta(d);
+  cargarRevision();
+  let v='control'; try{ v=localStorage.getItem("reunvo_admin_vista")||'control'; }catch(e){}
+  ver(v);
 }
 
 function pinta(d){
@@ -187,6 +260,93 @@ function pinta(d){
    +'conservadora — las más recientes aún no han podido responder.<br>'
    +'<b>Dato congelado para vender:</b> 1-may a 3-jul-2026 — 713 contactados, 56 respuestas (7,9%), '
    +'14 interesados en valorar. Ese es el citable con fecha; estos se mueven.</p>';
+}
+
+/* ─────────── Revisión antes de enviar ─────────── */
+let LIMPIAS=[];
+const fact=v=>v==null?"—":(v>=1000?(v/1000).toFixed(1).replace('.',',')+" M€":v+" k€");
+
+async function cargarRevision(){
+  const d=await rpc("revision_cola",{p_limit:300});
+  if(!d||d.error) return;
+  const r=d.resumen||{}, stock=r.dias_de_stock;
+  document.getElementById("rkpis").innerHTML=
+    card("Sin revisar",r.pendientes||0)+
+    card("Con aviso",r.con_alerta||0,(r.con_alerta||0)>0?'bad':'')+
+    card("Sin avisos",r.limpias||0)+
+    card("Aprobadas",r.aprobadas||0)+
+    card("Aprobadas con aviso",r.aprobadas_con_aviso||0,(r.aprobadas_con_aviso||0)>0?'warn':'')+
+    card("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),
+         (stock!=null&&stock<2)?'bad':'');
+
+  const b=document.getElementById("bdg"), n=r.pendientes||0;
+  if(n>0){b.textContent=n;b.style.display="inline-block";} else b.style.display="none";
+
+  const emp=d.empresas||[];
+  const yaAprob=emp.filter(c=>c.aprobada), pend=emp.filter(c=>!c.aprobada);
+  LIMPIAS=pend.filter(c=>!c.grave).map(c=>c.id);
+
+  let h="";
+  if(emp.length){
+    h+=`<div class="barra">
+      <button class="b-ok" onclick="aprobarLote()" ${LIMPIAS.length?"":"disabled"}>
+        Aprobar las ${LIMPIAS.length} sin avisos</button>
+      <span class="hint">Las ${r.con_alerta||0} con aviso 🔴 hay que mirarlas una a una.</span></div>`;
+    if(yaAprob.length) h+=`<div class="rgrp" style="color:#b45309">Ya aprobadas, pero con un aviso sin resolver · ${yaAprob.length}</div>`+yaAprob.map(filaRev).join("");
+    const ca=pend.filter(c=>c.grave), li=pend.filter(c=>!c.grave);
+    if(ca.length) h+=`<div class="rgrp">Requieren tu criterio · ${ca.length}</div>`+ca.map(filaRev).join("");
+    if(li.length) h+=`<div class="rgrp">Sin avisos que afecten al saludo · ${li.length}</div>`+li.map(filaRev).join("");
+  } else h='<div class="box none">No queda nada por revisar. Todo lo que puede salir está aprobado.</div>';
+  document.getElementById("rlista").innerHTML=h;
+}
+
+function filaRev(c){
+  const al=(c.alertas||[]);
+  // El correo dice: «Apreciado{/a} {prefijo} {NOMBRE} {apellido},». El nombre SÍ aparece.
+  const apre=(c.gender_prefix==='Sra.'?'Apreciada':'Apreciado');
+  const trato=[(c.gender_prefix||'Sr.'),(c.shareholder_first||''),(c.shareholder_last||'—')].filter(Boolean).join(" ");
+  const busca="https://www.google.com/search?q="+encodeURIComponent('"'+(c.company_name||'')+'" '+(c.locality||''));
+  return `<div class="rrow${c.grave?' alerta':''}${c.aprobada?' yaap':''}" id="r-${c.id}">
+    <div class="rtop"><span class="remp">${esc(c.company_name||'')}${c.aprobada?'<span class="ventana ok">aprobada</span>':''}${c.ventana_cerrada?'<span class="ventana">el cliente ya no puede quitarla</span>':'<span class="ventana abierta">el cliente aún puede quitarla · sale desde '+new Date(c.sale_desde).toLocaleDateString('es-ES')+'</span>'}</span>
+    <span class="hint">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span></div>
+    ${al.length?`<ul class="ral">${al.map(a=>`<li class="${a.indexOf('🔴')===0?'':'leve'}">${esc(a)}</li>`).join("")}</ul>`:""}
+    <div class="rficha">
+      <div><span class="et">Se dedica a</span> ${esc(c.activity_description||'— sin descripción —')}</div>
+      <div><span class="et">Sector</span> ${esc(c.sector_simplified||'—')}
+           <span class="et" style="margin-left:14px">Facturación</span> ${fact(c.revenue_eur)}</div>
+      <div style="margin-top:7px"><a class="lupa" target="_blank" rel="noopener" href="${busca}">Buscar en Google ↗</a>
+      ${c.domain?`<a class="lupa" target="_blank" rel="noopener" href="${esc(c.domain)}">Su web ↗</a>`:""}</div>
+    </div>
+    <div class="cotejo">
+      <div class="cl"><span class="et">Su email</span><span class="mail">${esc(c.contact_email||'—')}</span></div>
+      <div class="cl"><span class="et">Le diremos, literalmente</span><span class="dice">«${apre} <b>${esc(trato)}</b>,»</span></div>
+    </div>
+    <div class="rfrm">
+      <div class="rf"><label>Trato</label><select id="p-${c.id}">
+        <option${c.gender_prefix==='Sr.'?' selected':''}>Sr.</option>
+        <option${c.gender_prefix==='Sra.'?' selected':''}>Sra.</option></select></div>
+      <div class="rf"><label>Nombre</label><input id="n-${c.id}" value="${esc(c.shareholder_first||'')}"></div>
+      <div class="rf"><label>Apellido (el que se usa al saludar)</label><input id="a-${c.id}" value="${esc(c.shareholder_last||'')}"></div>
+      <button class="b-ok" onclick="guardarRev('${c.id}',true)">${c.aprobada?'Guardar y dejar aprobada':'Aprobar'}</button>
+      ${c.aprobada?`<button class="b-skip" onclick="guardarRev('${c.id}',false)">Devolver a la cola</button>`:''}
+      <button class="b-skip" onclick="descartarRev('${c.id}')">Descartar</button>
+    </div></div>`;
+}
+
+async function aprobarLote(){
+  if(!LIMPIAS.length) return;
+  if(!confirm("Aprobar "+LIMPIAS.length+" empresas sin avisos.\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
+  const r=await rpc("revision_aprobar_lote",{p_ids:LIMPIAS});
+  if(r&&r.ok){flash("Aprobadas "+r.aprobadas+".");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo.");
+}
+async function guardarRev(id,ap){
+  const g=x=>{const e=document.getElementById(x+"-"+id);return e?e.value:null;};
+  const r=await rpc("revision_guardar",{p_company_id:id,p_first:g("n"),p_last:g("a"),p_prefix:g("p"),p_aprobar:ap});
+  if(r&&r.ok){flash(ap?"Aprobada.":"Devuelta a la cola.");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo guardar.");
+}
+async function descartarRev(id){
+  const r=await rpc("revision_guardar",{p_company_id:id,p_descartar:true});
+  if(r&&r.ok){flash("Descartada, no se enviará.");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo descartar.");
 }
 
 if(PW) cargar();
