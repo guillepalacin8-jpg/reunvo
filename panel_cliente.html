@@ -102,13 +102,35 @@
     <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
 
     <section id="s-ajustes"><h1>Ajustes</h1><div id="ajustes"></div>
-      <p class="hint" style="margin-top:12px">Para cambiar tu plan o preferencias de envío, escríbenos a gp@reunvo.com.</p></section>
+      <p class="hint" style="margin-top:12px">Para cambiar tu plan o preferencias de envío, escríbenos a gp@reunvo.com.</p>
+      <div class="panelbox" style="margin-top:18px">
+        <h3>Acceso</h3>
+        <p class="hint" style="margin-bottom:10px">Este navegador recuerda tu acceso, así que puedes
+        entrar desde <b>reunvo.com</b> sin buscar ningún enlace. Si usas un ordenador compartido,
+        cierra la sesión al terminar.</p>
+        <button class="act b-info" onclick="salir()">Cerrar sesión en este navegador</button>
+      </div></section>
   </main>
 </div>
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
-const T=new URLSearchParams(location.search).get('t')||'';
+/* Acceso recordado: la primera vez se entra con el enlace del correo (?t=…); a partir de ahí
+   el navegador lo recuerda y basta con abrir reunvo.com. El token se borra de la barra de
+   direcciones para que no salga en capturas ni al compartir pantalla. */
+const T = (function(){
+  const q = new URLSearchParams(location.search).get('t');
+  if (q) {
+    try { localStorage.setItem('reunvo_cliente_t', q); } catch(e) {}
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch(e) {}
+    return q;
+  }
+  try { return localStorage.getItem('reunvo_cliente_t') || ''; } catch(e) { return ''; }
+})();
+function salir(){
+  try { localStorage.removeItem('reunvo_cliente_t'); } catch(e) {}
+  location.href = '/entrar.html';
+}
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const mEur=k=>k?("€"+(k/1000).toFixed(1)+"M"):"—";
 const fecha=d=>d?new Date(d).toLocaleDateString('es-ES'):"";
