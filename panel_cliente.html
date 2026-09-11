@@ -91,6 +91,7 @@
 
     <section id="s-empresas"><h1>Tu cola de empresas</h1>
       <p class="hint">Estas son las empresas reservadas para ti, en exclusiva. Se irán contactando en tu nombre al ritmo de tu plan. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
+      <div class="panelbox" id="lote-box" style="display:none"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
 
@@ -175,7 +176,32 @@ function render(d){
     + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7"><h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
         <p class="hint" style="margin-bottom:12px">Pasa de 10 a <b>20 emails/día</b> personalizados y apunta a <b>6-8 clientes potenciales interesados cada mes</b> (frente a 3-4 del Básico). El mismo sistema, el doble de volumen, el doble de oportunidades.</p>
         <button class="act b-gold" onclick="pedirUpgrade(this)">Quiero subir a Avanzado</button></div>`);
+  pintaLote(d.lote);
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
+}
+const LOTE_CERRADO={guille:'en revisión interna',listo:'aprobado, a la espera de la fecha',enviando:'enviándose ya'};
+function pintaLote(l){
+  const el=document.getElementById("lote-box");
+  if(!l){el.style.display="none";return;}
+  el.style.display="block";
+  if(l.estado==='cliente'){
+    el.innerHTML=`<h3>Tu lote de ${esc(l.periodo)}</h3>
+      <p class="hint" style="margin-bottom:12px">Puedes quitar empresas hasta el <b>${fecha(l.limite_cliente)}</b>.
+      Los envíos de este lote empiezan el <b>${fecha(l.inicio_envio)}</b>.</p>
+      <button class="act b-gold" onclick="verificarLote(this)">Todas verificadas y correctas</button>`;
+  } else {
+    const lbl=LOTE_CERRADO[l.estado]||l.estado;
+    el.innerHTML=`<h3>Tu lote de ${esc(l.periodo)}</h3>
+      <p class="hint" style="margin-bottom:0">Tu revisión de este lote ya se cerró (${esc(lbl)}).
+      Los envíos ${l.estado==='enviando'?'empezaron':'empiezan'} el <b>${fecha(l.inicio_envio)}</b>.</p>`;
+  }
+}
+async function verificarLote(btn){
+  if(!confirm("Vas a dar por buena tu lista de este mes.\n\nDespués ya no podrás quitar empresas de este lote. ¿Seguro que está todo correcto?")) return;
+  btn.disabled=true;
+  const r=await rpc("client_lote_verificado",{});
+  if(r&&r.ok){flash(r.mensaje||"Listo.");await load();nav('empresas');}
+  else{btn.disabled=false;flash((r&&r.mensaje)||"No se pudo, reintenta.");}
 }
 async function toggle(id,ex,btn){btn.disabled=true;const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});if(r&&r.ok){await load();nav('empresas');}else{btn.disabled=false;flash("No se pudo, reintenta.");}}
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
