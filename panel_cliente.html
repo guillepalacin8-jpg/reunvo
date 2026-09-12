@@ -188,7 +188,9 @@ function render(d){
 
   document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
-  const dosEstado=x=>x.estado==='entregado'?`Enviado a tu email el ${fecha(x.entregado_el)}`:(x.estado==='listo'?'Enviándotelo ahora':'Lo estamos preparando');
+  // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
+  // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
+  const dosEstado=x=>x.status==='entregado'?`Enviado a tu email el ${fecha(x.delivered_at)}`:(x.status==='listo'?'Enviándotelo ahora':'Lo estamos preparando');
   document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">Pedido ${fecha(x.fecha)} · ${esc(dosEstado(x))}</span></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier. Pídelos desde Contactadas.</p>';
   const gm=d.gmail||{};
   const gmailLink=OAUTH_START_URL+"?t="+encodeURIComponent(T);
