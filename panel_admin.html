@@ -206,6 +206,14 @@ function pinta(d){
     h+=`<div class="act"><div><b>Quiere subir de plan</b>
       <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)}</div></div></div>`;});
 
+  // El cliente quitó una empresa y no había con qué reponerla. Antes esto no lo recogía nadie.
+  const rep=(a.reposiciones_pendientes||[]);
+  rep.forEach(x=>{
+    h+=`<div class="act${x.dias>3?' old':''}"><div><b>Sin reemplazo</b> · quitó ${esc(x.empresa)}
+      <div class="d">${esc(x.cliente)} · lote ${esc(x.lote||'—')} · ${f(x.pedido)} · <b>${x.dias} día${x.dias==1?'':'s'}</b> · su lista va corta</div></div></div>`;});
+  if(rep.length) h+=`<div class="barra"><button class="b-ok" onclick="reponerAhora(this)">Reponer las ${rep.length} ahora</button>
+    <span class="hint">Reintenta con el inventario libre de hoy. Si sigue sin haberlo, no hace nada.</span></div>`;
+
   document.getElementById("acciones").innerHTML=h||'<div class="none">Nada pendiente. Todo al día.</div>';
 
   const tb=document.querySelector("#tclientes tbody");tb.innerHTML="";
@@ -389,6 +397,12 @@ function filaRev(c){
     </div></div>`;
 }
 
+async function reponerAhora(btn){
+  btn.disabled=true; btn.textContent="…";
+  const r=await rpc("reposicion_reintentar",{});
+  flash((r&&r.mensaje)||"No se pudo.");
+  recargar();
+}
 async function aprobarLote(){
   if(!LIMPIAS.length) return;
   if(!confirm("Aprobar "+LIMPIAS.length+" empresas sin avisos.\n\nEl detector solo mira el saludo y las descripciones vacías: la coherencia del negocio no la ha comprobado nadie.\n\n¿Seguir?")) return;
