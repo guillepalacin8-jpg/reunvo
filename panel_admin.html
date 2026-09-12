@@ -200,7 +200,9 @@ function pinta(d){
     const t=[x.region,x.sector,(x.rev_min||x.rev_max)?("€"+(x.rev_min||0)+"-"+(x.rev_max||"∞")+"M"):null]
       .filter(Boolean).join(" · ");
     h+=`<div class="act"><div><b>Solicitud de target</b> · ${esc(t)}
-      <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)}</div></div></div>`;});
+      <div class="d">${esc(x.cliente)} · pedido ${f(x.pedido)}</div></div>
+      <div><button class="b-ok" onclick="aplicarTarget('${x.id}',this)">Aplicar</button>
+      <button class="b-skip" onclick="descartarTarget('${x.id}',this)">Descartar</button></div></div>`;});
 
   (a.upgrades_pendientes||[]).forEach(x=>{
     h+=`<div class="act"><div><b>Quiere subir de plan</b>
@@ -403,6 +405,22 @@ async function reponerAhora(btn){
   const r=await rpc("reposicion_reintentar",{});
   flash((r&&r.mensaje)||"No se pudo.");
   recargar();
+}
+async function aplicarTarget(id,btn){
+  if(!confirm("Aplicar esta solicitud de target al cliente.\n\n¿Seguir?")) return;
+  btn.disabled=true; btn.textContent="…";
+  const r=await rpc("reunvo_aplicar_target",{p_request_id:id});
+  if(r&&r.aviso) alert(r.aviso);
+  if(r&&r.ok){flash("Target aplicado.");recargar();}
+  else{flash((r&&r.mensaje)||"No se pudo aplicar.");btn.disabled=false;btn.textContent="Aplicar";}
+}
+async function descartarTarget(id,btn){
+  if(!confirm("Descartar esta solicitud de target sin tocar al cliente.\n\n¿Seguir?")) return;
+  btn.disabled=true; btn.textContent="…";
+  const r=await rpc("reunvo_descartar_target",{p_request_id:id});
+  if(r&&r.aviso) alert(r.aviso);
+  if(r&&r.ok){flash("Descartada.");recargar();}
+  else{flash((r&&r.mensaje)||"No se pudo descartar.");btn.disabled=false;btn.textContent="Descartar";}
 }
 async function aprobarLote(){
   if(!LIMPIAS.length) return;
