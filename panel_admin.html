@@ -301,6 +301,7 @@ function pintarRevision(){
     card("Sin avisos",r.limpias||0)+
     card("Aprobadas",r.aprobadas||0)+
     card("Aprobadas con aviso",r.aprobadas_con_aviso||0,(r.aprobadas_con_aviso||0)>0?'warn':'')+
+    card("Sin tramo confirmado",r.sin_tramo_confirmado||0)+
     card("Días de envío cubiertos",stock==null?"—":String(stock).replace('.',','),
          (stock!=null&&stock<2)?'bad':'');
 
