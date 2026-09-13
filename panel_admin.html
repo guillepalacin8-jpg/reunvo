@@ -193,7 +193,7 @@ function pinta(d){
   const a=d.acciones||{};let h="";
 
   (a.solicitudes_acceso||[]).forEach(x=>{
-    h+=`<div class="act${x.dias>=2?' old':''}"><div><b>Solicitud de acceso</b> · ${esc(x.empresa||'—')}
+    h+=`<div class="act${x.dias>=2?' old':''}"><div><b>Solicitud de acceso</b> · ${esc(x.firma||'—')}
       <div class="d">${esc(x.nombre)} · ${esc(x.email)}${x.telefono?' · '+esc(x.telefono):''} · pedido ${f(x.pedido)} · <b>${x.dias} día${x.dias==1?'':'s'}</b></div></div>
       <div><a class="b-ok" style="display:inline-block;text-decoration:none" href="mailto:${esc(x.email)}">Escribirle</a></div></div>`;});
 
