@@ -733,28 +733,23 @@
       btn.textContent = 'Enviando...';
       errorEl.style.display = 'none';
 
-      const data = {
-        name:    document.getElementById('nombre').value.trim(),
-        company: document.getElementById('empresa').value.trim(),
-        email:   document.getElementById('email').value.trim(),
-        phone:   document.getElementById('telefono').value.trim(),
-        status:  'pending',
-        created_at: new Date().toISOString()
-      };
-
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/clients`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/reunvo_solicitar_acceso`, {
           method: 'POST',
           headers: {
             'Content-Type':  'application/json',
             'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Prefer':        'return=minimal'
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           },
-          body: JSON.stringify(data)
+          body: JSON.stringify({
+            p_name:    document.getElementById('nombre').value.trim(),
+            p_company: document.getElementById('empresa').value.trim(),
+            p_email:   document.getElementById('email').value.trim(),
+            p_phone:   document.getElementById('telefono').value.trim()
+          })
         });
-
-        if (!res.ok) throw new Error('Supabase error');
+        const out = await res.json();
+        if (!res.ok || !out || out.ok !== true) throw new Error((out && out.mensaje) || 'Supabase error');
 
         document.getElementById('form-container').style.display = 'none';
         document.getElementById('form-success').style.display = 'block';
@@ -769,6 +764,7 @@
         }, 5000);
 
       } catch (err) {
+        errorEl.textContent = err.message || 'Algo ha ido mal. Inténtalo de nuevo.';
         errorEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'Enviar solicitud';
