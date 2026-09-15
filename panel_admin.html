@@ -374,9 +374,10 @@ function pintarRevision(){
 
 function filaRev(c){
   const al=(c.alertas||[]);
-  // El correo dice: «Apreciado{/a} {prefijo} {NOMBRE} {apellido},». El nombre SÍ aparece.
+  // Desde el 15-sep el correo dice: «Apreciado{/a} {prefijo} {APELLIDO},».
+  // El nombre de pila YA NO se imprime. Verificado leyendo dos correos reales (Sr. y Sra.).
   const apre=(c.gender_prefix==='Sra.'?'Apreciada':'Apreciado');
-  const trato=[(c.gender_prefix||'Sr.'),(c.shareholder_first||''),(c.shareholder_last||'—')].filter(Boolean).join(" ");
+  const trato=[(c.gender_prefix||'Sr.'),(c.shareholder_last||'—')].filter(Boolean).join(" ");
   const busca="https://www.google.com/search?q="+encodeURIComponent('"'+(c.company_name||'')+'" '+(c.locality||''));
   return `<div class="rrow${c.grave?' alerta':''}${c.aprobada?' yaap':''}" id="r-${c.id}">
     <div class="rtop"><span class="remp">${esc(c.company_name||'')}${c.aprobada?'<span class="ventana ok">aprobada</span>':''}${c.ventana_cerrada?'<span class="ventana">el cliente ya no puede quitarla</span>':'<span class="ventana abierta">el cliente aún puede quitarla · sale desde '+new Date(c.sale_desde).toLocaleDateString('es-ES')+'</span>'}</span>
