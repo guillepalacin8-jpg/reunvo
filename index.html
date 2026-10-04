@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="GVaX9X0eX4qaXtGgb1b4ZzOdSaQc5x85nhJMNjYqesk" />
-  <title>Reunvo — Propietarios interesados en vender, para firmas de M&amp;A</title>
-  <meta name="description" content="Contactamos cada mes con propietarios de pymes en nombre de su firma de M&amp;A, desde su correo y con un dossier personalizado. Usted aprueba la lista." />
-  <meta property="og:title" content="Reunvo — Propietarios interesados en vender, cada mes" />
+  <title>Reunvo — Contactamos por usted a propietarios de pymes que podrían vender</title>
+  <meta name="description" content="Para firmas de M&amp;A. Cada mes le proponemos una lista de empresas; usted la aprueba y enviamos a cada propietario un email y un dossier personalizados, desde su propio correo." />
+  <meta property="og:title" content="Reunvo — Contactamos por usted a propietarios de pymes que podrían vender su empresa" />
   <meta property="og:description" content="Para firmas de M&amp;A. Piloto de 30 días sin coste. Tres plazas." />
   <meta property="og:url" content="https://reunvo.com/" />
   <meta property="og:type" content="website" />
@@ -539,6 +539,48 @@
       footer { flex-direction: column; gap: 12px; text-align: center; padding: 32px 24px; }
       .modal { padding: 40px 28px; }
     }
+
+    /* ── FASE 2: contraste y lectura ── */
+    :root { --text-dim: #AEBCCD; }
+    .hero-sub { font-size: 1.08rem; font-weight: 400; }
+    .step-body span, .benefit-desc, .how > p, .cta-section p { font-size: 1rem; font-weight: 400; line-height: 1.75; }
+    .step-body strong { font-size: 1.3rem; }
+
+    /* ── FASE 2: ejemplo email + dossier ── */
+    .ejemplo { padding: 110px 48px; max-width: 1160px; margin: 0 auto; text-align: center; }
+    .ejemplo h2, .compromisos h2 { max-width: 640px; margin-left: auto; margin-right: auto; font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 300; line-height: 1.2; margin-bottom: 56px; }
+    .ejemplo-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; text-align: left; align-items: start; }
+    .mock { background: #FFFFFF; color: #1d2733; border-radius: 6px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); overflow: hidden; }
+    .mock-bar { background: #F1F3F6; padding: 10px 16px; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5b6878; border-bottom: 1px solid #E2E6EB; }
+    .mail-head { padding: 18px 24px 12px; border-bottom: 1px solid #EEF0F3; font-size: 0.85rem; color: #4a5664; line-height: 1.7; }
+    .mail-head b { color: #1d2733; font-weight: 500; }
+    .mail-subject { font-size: 1.05rem; color: #1d2733; font-weight: 500; margin-bottom: 6px; }
+    .mail-body { padding: 18px 24px 8px; font-family: Arial, sans-serif; font-size: 0.9rem; line-height: 1.65; color: #222; }
+    .mail-body p { margin-bottom: 12px; }
+    .mail-sign { color: #444; font-size: 0.85rem; }
+    .attach { margin: 6px 24px 22px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #DADFE5; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #333; }
+    .attach i { font-style: normal; background: #C5463A; color: #fff; font-size: 0.65rem; font-weight: 600; padding: 3px 6px; border-radius: 3px; }
+    .doc-head { background: var(--navy); color: #fff; padding: 22px 24px; }
+    .doc-head small { display: block; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 6px; }
+    .doc-head div { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; line-height: 1.25; }
+    .doc-body { padding: 20px 24px 24px; font-size: 0.84rem; line-height: 1.6; color: #2b3540; }
+    .ficha { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .ficha td { padding: 7px 0; border-bottom: 1px solid #ECEEF1; vertical-align: top; }
+    .ficha td:first-child { color: var(--gold); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; width: 92px; padding-top: 9px; }
+    .doc-body h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--navy); margin: 4px 0 6px; }
+    .doc-foot { font-size: 0.7rem; color: #8a94a0; padding: 0 24px 16px; }
+    .ejemplo-nota { margin-top: 32px; font-size: 0.95rem; color: var(--text-dim); text-align: center; }
+
+    /* ── FASE 2: compromisos ── */
+    .compromisos { padding: 110px 48px; max-width: 1100px; margin: 0 auto; text-align: center; }
+    .compromisos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); text-align: left; }
+    .compromisos-grid .benefit-card { padding: 44px 40px; }
+
+    @media (max-width: 768px) {
+      .ejemplo, .compromisos { padding: 80px 20px; }
+      .ejemplo-grid, .compromisos-grid { grid-template-columns: 1fr; }
+      .compromisos-grid .benefit-card { padding: 36px 28px; }
+    }
   </style>
 </head>
 <body>
@@ -575,6 +617,49 @@
     </p>
   </div>
 
+  <!-- EJEMPLO EMAIL + DOSSIER -->
+  <section class="ejemplo" id="ejemplo">
+    <p class="section-label">Lo que recibe cada propietario</p>
+    <h2>Un email personal y un dossier sobre su empresa</h2>
+    <div class="ejemplo-grid">
+      <div class="mock">
+        <div class="mock-bar">Email</div>
+        <div class="mail-head">
+          <div class="mail-subject">Industrias Ejemplo, S.L. — Propuesta confidencial</div>
+          <b>De:</b> Ramon Palacín · M&amp;A Fusiones y Adquisiciones<br>
+          <b>Para:</b> Sr. Martínez · Industrias Ejemplo, S.L.
+        </div>
+        <div class="mail-body">
+          <p>Apreciado Sr. Martínez,</p>
+          <p>Me pongo en contacto con usted porque Industrias Ejemplo, S.L. encaja en el perfil de empresas con las que trabajamos habitualmente en procesos de venta.</p>
+          <p>Le adjunto un documento con información sobre nuestro enfoque y cómo podríamos colaborar.</p>
+          <p>Si le parece oportuno, estaré encantado de mantener una conversación breve y confidencial. Puede responder a este email para coordinar una llamada.</p>
+          <p class="mail-sign">Un cordial saludo,<br>Ramon Palacín · Director General<br>M&amp;A Fusiones y Adquisiciones, S.L.</p>
+        </div>
+        <div class="attach"><i>PDF</i> Propuesta confidencial · Industrias Ejemplo, S.L. · 3 páginas</div>
+      </div>
+      <div class="mock">
+        <div class="mock-bar">Dossier PDF · página 2 de 3</div>
+        <div class="doc-head">
+          <small>Propuesta confidencial</small>
+          <div>Por qué hemos puesto el foco en Industrias Ejemplo, S.L.</div>
+        </div>
+        <div class="doc-body">
+          <table class="ficha">
+            <tr><td>Empresa</td><td>Industrias Ejemplo, S.L.</td></tr>
+            <tr><td>Ubicación</td><td>Barcelona, España</td></tr>
+            <tr><td>Actividad</td><td>Fabricación de componentes eléctricos industriales</td></tr>
+            <tr><td>Sector</td><td>Industrial</td></tr>
+          </table>
+          <h4>¿Qué vemos en Industrias Ejemplo, S.L.?</h4>
+          <p>Una empresa especializada en fabricación de componentes eléctricos industriales con sede en Barcelona es un perfil que genera interés entre compradores que buscan incorporar capacidad operativa, acceso a mercado o conocimiento técnico en este ámbito.</p>
+        </div>
+        <div class="doc-foot">Empresa ficticia, solo a modo de ejemplo.</div>
+      </div>
+    </div>
+    <p class="ejemplo-nota">Ejemplo con una empresa ficticia. Para su firma, el email y el dossier llevan su nombre, su marca y sus datos.</p>
+  </section>
+
   <!-- HOW IT WORKS -->
   <section class="how" id="como-funciona">
     <p class="section-label">Cómo funciona</p>
@@ -607,6 +692,34 @@
           <strong>Cada día laborable salen los envíos</strong>
           <span>Cada email lleva un dossier PDF personalizado para esa empresa. Las respuestas le llegan directamente a usted.</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPROMISOS -->
+  <section class="compromisos" id="compromisos">
+    <p class="section-label">Nuestros compromisos</p>
+    <h2>Usted mantiene el control</h2>
+    <div class="compromisos-grid">
+      <div class="benefit-card">
+        <span class="benefit-number">01</span>
+        <h3 class="benefit-title">Usted aprueba cada empresa</h3>
+        <p class="benefit-desc">Ninguna empresa recibe un email sin su aprobación previa.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-number">02</span>
+        <h3 class="benefit-title">No leemos su correo</h3>
+        <p class="benefit-desc">Solo enviamos en su nombre. Las respuestas llegan a su bandeja y las gestiona usted.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-number">03</span>
+        <h3 class="benefit-title">Ritmo moderado</h3>
+        <p class="benefit-desc">10 o 20 envíos por día laborable, según su plan, uno a uno y desde su dirección.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-number">04</span>
+        <h3 class="benefit-title">Funciona con su Gmail</h3>
+        <p class="benefit-desc">Requiere una cuenta de Gmail o de Google Workspace.</p>
       </div>
     </div>
   </section>
