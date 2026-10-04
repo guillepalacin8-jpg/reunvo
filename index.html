@@ -585,6 +585,73 @@
     .cta-alt { margin-top: 22px; font-size: 0.95rem; color: var(--text-dim); }
     .cta-section p.cta-alt { margin-bottom: 0; }
     .cta-alt a { color: var(--gold-lt); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── FASE 3: método, embudo, reparto, caso ── */
+    .metodo, .embudo, .reparto, .caso { padding: 110px 48px; max-width: 1160px; margin: 0 auto; }
+    .sec-h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.7rem); font-weight: 300; line-height: 1.2; text-align: center; max-width: 720px; margin: 0 auto 64px; text-wrap: balance; }
+    .metodo-steps { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+    .metodo-steps::before { content: ''; position: absolute; top: 22px; left: 8%; right: 8%; height: 1px; background: var(--gold); opacity: 0.45; }
+    .metodo-steps li { position: relative; padding: 0 14px; text-align: center; min-width: 0; }
+    .m-num { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gold); background: var(--navy); font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--gold-lt); margin-bottom: 22px; }
+    .m-usted .m-num { background: var(--gold); color: var(--navy); }
+    .metodo-steps h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1.3rem; color: var(--white); margin-bottom: 10px; }
+    .m-usted h3 { color: var(--gold-lt); }
+    .metodo-steps p { font-size: 0.92rem; line-height: 1.65; color: var(--text-dim); }
+
+    .embudo { max-width: 900px; }
+    .filtros { display: grid; gap: 10px; justify-items: center; }
+    .f-row { width: var(--w); max-width: 100%; }
+    .f-bar { display: flex; align-items: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--border); background: rgba(154,123,91,0.07); min-width: 0; }
+    .f-n { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--gold-lt); line-height: 1; flex: none; }
+    .f-t { font-size: 1rem; color: var(--white); min-width: 0; }
+    .f-usted .f-bar { background: var(--gold); border-color: var(--gold); }
+    .f-usted .f-n, .f-usted .f-t { color: var(--navy); font-weight: 500; }
+    .embudo-rows { display: grid; gap: 22px; }
+    .e-row { display: grid; grid-template-columns: 260px 1fr; align-items: center; gap: 28px; }
+    .e-label { display: flex; flex-direction: column; text-align: right; }
+    .e-label b { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 2.1rem; line-height: 1; color: var(--white); font-variant-numeric: tabular-nums; }
+    .e-label span { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-top: 6px; }
+    .e-track { height: 14px; background: rgba(154,123,91,0.12); }
+    .e-bar { height: 100%; background: var(--text-dim); opacity: 0.75; }
+    .e-track-none { background: none; border-top: 1px dashed var(--gold); height: 0; opacity: 0.6; }
+    .e-final .e-label b { color: var(--gold-lt); }
+    .nota { text-align: center; margin-top: 36px; font-size: 0.85rem; color: var(--text-dim); }
+
+    .reparto { max-width: 980px; }
+    .reparto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+    .r-col { background: var(--navy); padding: 44px 44px 48px; min-width: 0; }
+    .r-col h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.6rem; margin-bottom: 22px; color: var(--white); }
+    .r-usted h3 { color: var(--gold-lt); }
+    .r-col ul { list-style: none; display: grid; gap: 14px; }
+    .r-col li { font-size: 1rem; color: var(--text-dim); padding-left: 22px; position: relative; }
+    .r-col li::before { content: ''; position: absolute; left: 0; top: 0.7em; width: 10px; height: 1px; background: var(--gold); }
+
+    .caso-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+    .caso-grid > div { background: var(--navy); padding: 36px 32px; min-width: 0; }
+    .caso-grid h3 { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 14px; }
+    .caso-grid p { font-size: 1rem; line-height: 1.7; color: var(--text-dim); }
+    .caso-excl { text-align: center; max-width: 640px; margin: 40px auto 0; font-size: 1rem; color: var(--text-dim); }
+    .caso-contacto { text-align: center; margin-top: 18px; font-size: 1rem; color: var(--text-dim); }
+    .caso-contacto a { color: var(--gold-lt); }
+
+    @media (max-width: 900px) {
+      .metodo-steps { grid-template-columns: 1fr; gap: 30px; }
+      .metodo-steps::before { top: 22px; bottom: 22px; left: 21px; right: auto; width: 1px; height: auto; }
+      .metodo-steps li { display: grid; grid-template-columns: 44px 1fr; column-gap: 20px; text-align: left; padding: 0; }
+      .m-num { grid-row: span 2; margin-bottom: 0; }
+      .metodo-steps h3 { margin-bottom: 4px; }
+      .caso-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .metodo, .embudo, .reparto, .caso { padding: 80px 20px; }
+      .e-row { grid-template-columns: 1fr; gap: 10px; }
+      .f-row { width: calc(60% + var(--w) * 0.4); }
+      .f-bar { padding: 16px 18px; }
+      .e-label { text-align: left; flex-direction: row; align-items: baseline; gap: 12px; }
+      .e-label span { margin-top: 0; }
+      .reparto-grid { grid-template-columns: 1fr; }
+      .r-col { padding: 32px 26px; }
+    }
   </style>
 </head>
 <body>
@@ -619,42 +686,82 @@
       De cada 100 empresas contactadas, <span style="color:var(--gold);">9 responden</span> y <span style="color:var(--gold);">2 quieren hablar de vender</span>
     </p>
     <p style="font-size:0.85rem; font-weight:300; color:var(--text-dim); margin-top:20px;">
-      Caso real: M&amp;A Fusiones y Adquisiciones, firma de compraventa de empresas. 1.635 empresas contactadas desde mayo de 2026.
+      Caso real: M&amp;A Fusiones y Adquisiciones, firma de compraventa de empresas, desde mayo de 2026.
     </p>
   </div>
 
-  <!-- HOW IT WORKS -->
-  <section class="how" id="como-funciona">
-    <p class="section-label">Cómo funciona</p>
-    <h2>Usted decide a quién se escribe.<br>Nosotros hacemos el resto.</h2>
-    <div class="steps">
-      <div class="step">
-        <span class="step-num">1</span>
-        <div class="step-body">
-          <strong>Nos cuenta qué busca</strong>
-          <span>Zona, sectores y tamaño de las empresas que quiere contactar.</span>
-        </div>
+  <!-- METODO -->
+  <section class="metodo" id="como-funciona">
+    <p class="section-label">El método</p>
+    <h2 class="sec-h2">Seis pasos entre sus criterios y el primer email</h2>
+    <ol class="metodo-steps">
+      <li>
+        <span class="m-num">1</span>
+        <h3>Criterios</h3>
+        <p>Usted nos dice zona, sectores, tamaño y a qué propietarios quiere llegar.</p>
+      </li>
+      <li>
+        <span class="m-num">2</span>
+        <h3>Selección</h3>
+        <p>Filtramos empresas de España y Portugal en bases de datos mercantiles según sus criterios.</p>
+      </li>
+      <li>
+        <span class="m-num">3</span>
+        <h3>Propietario</h3>
+        <p>Identificamos al propietario o accionista principal de cada empresa.</p>
+      </li>
+      <li>
+        <span class="m-num">4</span>
+        <h3>Verificación</h3>
+        <p>Localizamos su email, lo verificamos y revisamos nombre, tratamiento y datos de la empresa.</p>
+      </li>
+      <li class="m-usted">
+        <span class="m-num">5</span>
+        <h3>Su aprobación</h3>
+        <p>Usted revisa la lista. Solo seguimos con las empresas que aprueba.</p>
+      </li>
+      <li>
+        <span class="m-num">6</span>
+        <h3>Envío personalizado</h3>
+        <p>Cada propietario recibe un email y un dossier sobre su empresa, desde su correo y con su firma.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- EMBUDO -->
+  <section class="embudo" id="trabajo">
+    <p class="section-label">El trabajo detrás de cada lista</p>
+    <h2 class="sec-h2">Cada empresa pasa cuatro filtros antes de recibir un email</h2>
+    <div class="filtros">
+      <div class="f-row" style="--w:100%"><div class="f-bar"><span class="f-n">1</span><span class="f-t">Empresas de España y Portugal que encajan con sus criterios</span></div></div>
+      <div class="f-row" style="--w:84%"><div class="f-bar"><span class="f-n">2</span><span class="f-t">Con su propietario identificado</span></div></div>
+      <div class="f-row" style="--w:68%"><div class="f-bar"><span class="f-n">3</span><span class="f-t">Con su email verificado y sus datos revisados</span></div></div>
+      <div class="f-row f-usted" style="--w:52%"><div class="f-bar"><span class="f-n">4</span><span class="f-t">Aprobadas por usted</span></div></div>
+    </div>
+  </section>
+
+  <!-- NOSOTROS / USTED -->
+  <section class="reparto" id="reparto">
+    <p class="section-label">Quién hace qué</p>
+    <h2 class="sec-h2">Nosotros hacemos el trabajo. Usted decide y conversa.</h2>
+    <div class="reparto-grid">
+      <div class="r-col">
+        <h3>Nosotros</h3>
+        <ul>
+          <li>Seleccionamos las empresas</li>
+          <li>Identificamos a cada propietario</li>
+          <li>Verificamos cada email</li>
+          <li>Redactamos el email</li>
+          <li>Preparamos un dossier para cada empresa</li>
+          <li>Enviamos cada día laborable</li>
+        </ul>
       </div>
-      <div class="step">
-        <span class="step-num">2</span>
-        <div class="step-body">
-          <strong>Preparamos la lista y usted la aprueba</strong>
-          <span>Empresas de España y Portugal, con su propietario identificado, que encajan con lo que su firma ofrece. Solo se contacta a las que usted aprueba.</span>
-        </div>
-      </div>
-      <div class="step">
-        <span class="step-num">3</span>
-        <div class="step-body">
-          <strong>Conecta su Gmail en un clic</strong>
-          <span>Los emails salen de su dirección y con su firma.</span>
-        </div>
-      </div>
-      <div class="step">
-        <span class="step-num">4</span>
-        <div class="step-body">
-          <strong>Cada día laborable salen los envíos</strong>
-          <span>Cada email lleva un dossier PDF personalizado para esa empresa. Las respuestas le llegan directamente a usted.</span>
-        </div>
+      <div class="r-col r-usted">
+        <h3>Usted</h3>
+        <ul>
+          <li>Aprueba la lista</li>
+          <li>Responde a los propietarios interesados</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -687,21 +794,28 @@
     </div>
   </section>
 
-  <!-- QUIEN ESTA DETRAS -->
-  <section class="how" id="quien">
-    <p class="section-label">Quién está detrás</p>
-    <h2>Probado en una firma de M&amp;A real</h2>
-    <p>
-      Reunvo nace dentro de M&amp;A Fusiones y Adquisiciones, firma de compraventa de pymes
-      desde 1988, donde se usa cada día.
-    </p>
-    <p>
-      Cada empresa se asigna a una sola firma: nunca la contacta otra, tampoco M&amp;A Fusiones y
-      Adquisiciones, y su lista no se comparte con nadie.
-    </p>
-    <p>
-      Guillem Palacín &middot; <a href="mailto:gp@reunvo.com" style="color:var(--gold);">gp@reunvo.com</a>
-      &middot; <a href="tel:+34628917456" style="color:var(--gold);">628 917 456</a>
+  <!-- CASO REAL -->
+  <section class="caso" id="quien">
+    <p class="section-label">Caso real</p>
+    <h2 class="sec-h2">Probado en una firma de M&amp;A real</h2>
+    <div class="caso-grid">
+      <div>
+        <h3>La firma</h3>
+        <p>M&amp;A Fusiones y Adquisiciones. Compraventa de empresas desde 1988, con oficinas en Barcelona y Madrid. Reunvo nace dentro de esta firma y se usa cada día.</p>
+      </div>
+      <div>
+        <h3>Qué hacemos</h3>
+        <p>Selección de empresas por zona y tamaño, identificación del propietario, email y dossier con su marca, y envíos diarios desde su correo.</p>
+      </div>
+      <div>
+        <h3>Resultado</h3>
+        <p>Desde mayo de 2026, el 9&nbsp;% de los propietarios contactados responde y el 2&nbsp;% quiere hablar de vender su empresa.</p>
+      </div>
+    </div>
+    <p class="caso-excl">Cada empresa se asigna a una sola firma: nunca la contacta otra, tampoco M&amp;A Fusiones y Adquisiciones, y su lista no se comparte con nadie.</p>
+    <p class="caso-contacto">
+      Guillem Palacín &middot; <a href="mailto:gp@reunvo.com">gp@reunvo.com</a>
+      &middot; <a href="tel:+34628917456">628 917 456</a>
     </p>
   </section>
 
