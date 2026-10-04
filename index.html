@@ -581,6 +581,10 @@
       .ejemplo-grid, .compromisos-grid { grid-template-columns: 1fr; }
       .compromisos-grid .benefit-card { padding: 36px 28px; }
     }
+
+    .cta-alt { margin-top: 22px; font-size: 0.95rem; color: var(--text-dim); }
+    .cta-section p.cta-alt { margin-bottom: 0; }
+    .cta-alt a { color: var(--gold-lt); text-decoration: underline; text-underline-offset: 3px; }
   </style>
 </head>
 <body>
@@ -604,7 +608,8 @@
       desde su propio correo. Las respuestas le llegan a usted.
     </p>
     <div class="hero-cta">
-      <button class="btn-primary" onclick="openModal()">Solicitar una llamada de 15 minutos</button>
+      <a class="btn-primary" href="mailto:gp@reunvo.com?subject=Reunvo%20%E2%80%94%20Llamada%20de%2015%20minutos">Escríbanos</a>
+      <p class="cta-alt">o llámenos al <a href="tel:+34628917456">628 917 456</a> &middot; <a href="#" onclick="openModal(); return false;">déjenos sus datos</a></p>
     </div>
   </section>
 
@@ -704,7 +709,8 @@
   <section class="cta-section">
     <h2>Piloto de 30 días sin coste.<br>Tres plazas.</h2>
     <p>Si no le convence, no continúa y no paga nada.<br>Después del piloto, cuota mensual fija según volumen. Se la detallamos en la llamada.</p>
-    <button class="btn-primary" onclick="openModal()">Solicitar una llamada de 15 minutos</button>
+    <a class="btn-primary" href="mailto:gp@reunvo.com?subject=Reunvo%20%E2%80%94%20Llamada%20de%2015%20minutos">Escríbanos</a>
+      <p class="cta-alt">o llámenos al <a href="tel:+34628917456">628 917 456</a> &middot; <a href="#" onclick="openModal(); return false;">déjenos sus datos</a></p>
   </section>
 
   <!-- FOOTER -->
