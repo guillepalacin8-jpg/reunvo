@@ -251,34 +251,52 @@ function pinta(d){
    +card("Tokens vivos",(s.tokens_ok||0)+"/"+(s.tokens_total||0),s.tokens_ok<s.tokens_total?'warn':'')
    +card("Trabajos programados",s.dedup_cron);
 
+  const k=d.kpis;
+  // Formato solamente. NO se calcula nada aquí: las cifras y tasas vienen de reunvo_kpis().
+  const fmtP=x=>x==null?'—':Number(x).toFixed(1).replace('.',',')+'%';
+  const con=(n,p)=>n+' · '+fmtP(p);
   const n=d.negocio||{};
   document.getElementById("negocio").innerHTML=
     card("Empresas",n.empresas)
    +card("Usables libres",n.usables,n.usables<500?'warn':'')
    +card("Con email",n.verificadas)
-   +card("Contactadas",n.contactadas)
-   +card("Interesados",n.leads)
+   +card("Contactadas",k?k.contactadas:null,k?'':'bad')
+   +card("Leads registrados",k?k.leads_registrados:null)
    +card("De red del cliente",n.leads_externos)
    +card("Compradores",n.compradores,n.compradores<10?'warn':'')
    +card("Universo compradores",n.universo_compradores)
    +card("Banderas QA",n.qa_abiertas,n.qa_abiertas>500?'warn':'');
 
-  const e=d.embudo||{};
-  // Tasas: denominador SIEMPRE en vivo (n.contactadas). Nunca un número congelado.
-  let tot=0; Object.keys(e).forEach(k=>tot+=e[k]);
-  const reales=tot-(e.autorespuesta||0), D=n.contactadas||0;
-  const pct=(a,b)=>b>0?(100*a/b).toFixed(1).replace('.',',')+"%":"—";
-  document.getElementById("embudo").innerHTML=
-    card("Tasa de respuesta",pct(reales,D))
-   +card("Tasa de interesados",pct(n.leads,D))
-   +card("Respuestas reales",reales)
-   +Object.keys(e).sort((a,b)=>e[b]-e[a]).map(k=>card(k.replace(/_/g,' '),e[k])).join("")
-   +'<p class="hint" style="grid-column:1/-1;margin:10px 0 0">Tasas sobre las <b>'
-   +Number(D).toLocaleString('es-ES')+'</b> contactadas de toda la historia: no hay campo que registre '
-   +'<i>cuándo</i> se contactó cada empresa, así que no se pueden separar cohortes. Es la lectura '
-   +'conservadora — las más recientes aún no han podido responder.<br>'
-   +'<b>Dato congelado para vender:</b> 1-may a 3-jul-2026 — 713 contactados, 56 respuestas (7,9%), '
-   +'14 interesados en valorar. Ese es el citable con fecha; estos se mueven.</p>';
+  // fuente única: reunvo_kpis() · 5-oct-2026
+  if(!k){
+    document.getElementById("embudo").innerHTML=
+      card("KPIs no disponibles","reunvo_admin no devolvió «kpis»",'bad');
+  } else {
+    const e=k.embudo||{}, se=k.sin_empresa||{};
+    document.getElementById("embudo").innerHTML=
+      card("Respondieron",con(k.respondieron,k.tasa_respuesta))
+     +card("Interesados (total)",con(k.interesados,k.tasa_interesados))
+     /* El desglose va SIEMPRE pegado al total, en la fila inmediatamente inferior (grid-column:1/-1). */
+     +'<div class="cards" style="grid-column:1/-1;margin:0">'
+       +card("↳ Quieren hablar ahora",con(k.quieren_hablar_ahora,k.tasa_quieren_hablar_ahora))
+       +card("↳ Más adelante",con(k.mas_adelante,k.tasa_mas_adelante))
+     +'</div>'
+     +card("No interesado",e.no_interesado)
+     +card("Otro",e.otro)
+     +card("Autorrespuestas (aparte)",e.autorespuesta)
+     +(e.otra_clase>0?card("Otra clase",e.otra_clase,'warn'):'')
+     +card("Sin clasificar",k.sin_clasificar,k.sin_clasificar>0?'bad':'')
+     +card("Respuestas sin empresa",se.filas,se.filas>0?'warn':'')
+     +card("Respondieron sin contacto registrado",k.respuestas_sin_contacto,k.respuestas_sin_contacto>0?'warn':'')
+     +(k.sin_clasificar>0?'<p class="hint" style="grid-column:1/-1;margin:6px 0 0;color:#b91c1c"><b>Hay respuestas sin clasificar: las tasas están incompletas.</b></p>':'')
+     +'<p class="hint" style="grid-column:1/-1;margin:10px 0 0">Todo por <b>empresa</b>, sobre las <b>'
+     +Number(k.contactadas).toLocaleString('es-ES')+'</b> contactadas de toda la historia (sin pruebas DEMO ni respuestas de pruebas). '
+     +'<b>Interesados</b> = quieren hablar ahora + más adelante. <i>contacted_at</i> existe desde el 19-ago, pero la mayoría de las contactadas antes '
+     +'no tiene fecha: no se pueden separar cohortes. Lectura conservadora — las más recientes aún no han podido responder. '
+     +'Las respuestas sin empresa asociada y las de empresas sin contacto registrado <b>no entran</b> en las tasas.<br>'
+     +'<b>Dato congelado para vender:</b> 1-may a 3-jul-2026 — 713 contactados, 56 respuestas (7,9%), '
+     +'14 interesados en valorar. Ese es el citable con fecha; estos se mueven.</p>';
+  }
 }
 
 /* ─────────── Revisión antes de enviar ─────────── */
