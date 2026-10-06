@@ -243,13 +243,20 @@ function pinta(d){
     </tr>`;});
 
   const s=d.salud||{};
+  // Estado, cifras y causa vienen de reunvo_salud_envios() (vía reunvo_admin). Aquí solo se da formato y color.
+  const estC=x=>!x?'bad':(x.estado==='rojo'?'bad':(x.estado==='aviso'?'warn':''));
+  const ep=s.envios_piloto, br=s.borradores_ramon;
+  const causaH=(t,x)=>(x&&x.estado&&x.estado!=='ok')?'<p class="hint" style="grid-column:1/-1;margin:2px 0 0;color:'+(x.estado==='rojo'?'#b91c1c':'#b7791f')+'"><b>'+esc(t)+':</b> '+esc(x.causa)+'</p>':'';
   document.getElementById("salud").innerHTML=
-    card("Último envío",hace(s.ultima_campana),(Date.now()-new Date(s.ultima_campana))/36e5>72?'bad':'')
+    card("Último envío piloto",hace(s.ultima_campana))
+   +card("Envíos piloto · ayer",ep?ep.ayer:null,estC(ep))
+   +card("Borradores Ramón · ayer",br?br.ayer+' · '+br.anteayer:null,estC(br))
    +card("Última respuesta",hace(s.ultima_respuesta))
    +card("Último lead",hace(s.ultimo_lead))
    +card("Última apertura",hace(s.ultima_apertura))
    +card("Tokens vivos",(s.tokens_ok||0)+"/"+(s.tokens_total||0),s.tokens_ok<s.tokens_total?'warn':'')
-   +card("Trabajos programados",s.dedup_cron);
+   +card("Trabajos programados",s.dedup_cron)
+   +causaH("Piloto",ep)+causaH("Ramón",br);
 
   const k=d.kpis;
   // Formato solamente. NO se calcula nada aquí: las cifras y tasas vienen de reunvo_kpis().
