@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reunvo · Tu panel</title>
+<title>Reunvo · Su panel</title>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reunvo"><meta name="theme-color" content="#1a3c6e">
 <style>
   :root{color-scheme:light}*{box-sizing:border-box}
@@ -58,11 +58,11 @@
     <div class="who" id="who">…</div>
     <button class="nav active" data-s="resumen" onclick="nav('resumen')">Resumen</button>
     <button class="nav" data-s="target" onclick="nav('target')">Mi target</button>
-    <button class="nav" data-s="empresas" onclick="nav('empresas')">Tu cola <span class="badge" id="b-emp"></span></button>
+    <button class="nav" data-s="empresas" onclick="nav('empresas')">Su cola <span class="badge" id="b-emp"></span></button>
     <button class="nav" data-s="contactadas" onclick="nav('contactadas')">Contactadas <span class="badge" id="b-con"></span></button>
     <button class="nav" data-s="dossiers" onclick="nav('dossiers')">Dossiers</button>
     <button class="nav" data-s="ajustes" onclick="nav('ajustes')">Ajustes</button>
-    <div class="foot">Nunca leemos tu correo · no se contacta a nadie que no apruebes</div>
+    <div class="foot">Nunca leemos su correo · no se contacta a nadie que no apruebe</div>
   </nav>
   <main class="main">
     <div id="err" class="err"></div>
@@ -72,16 +72,16 @@
     <section id="s-resumen"><h1>Resumen</h1>
       <p class="lead" id="lead"></p>
       <div class="cards" id="kpis"></div>
-      <div class="panelbox"><h3>Panorama de tus contactadas</h3>
+      <div class="panelbox"><h3>Panorama de sus contactadas</h3>
         <div class="stats2">
           <div><div class="k">Sectores</div><div id="secbars"></div></div>
           <div><div class="k">Dónde</div><div id="citybars"></div></div>
         </div></div>
-      <div class="panelbox"><h3>Tu target</h3><div id="target-mini"></div></div>
+      <div class="panelbox"><h3>Su target</h3><div id="target-mini"></div></div>
     </section>
 
     <section id="s-target"><h1>Mi target</h1>
-      <p class="hint">Define a quién quieres contactar. Al guardar, <b>nos llega una solicitud</b> y te confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por tus empresas.</p>
+      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
       <div id="target-pend"></div>
       <div class="panelbox"><div class="frm">
         <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
@@ -91,27 +91,27 @@
         <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
-    <section id="s-empresas"><h1>Tu cola de empresas</h1>
-      <p class="hint">Estas son las empresas reservadas para ti, en exclusiva. Se irán contactando en tu nombre al ritmo de tu plan. <b>Quita las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
+    <section id="s-empresas"><h1>Su cola de empresas</h1>
+      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
       <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
 
     <section id="s-contactadas"><h1>Contactadas</h1>
-      <p class="hint">Todas a las que ya se ha escrito. Cuando una te responda con interés, <b>búscala y pide el dossier</b> — te llega al email.</p>
+      <p class="hint">Todas a las que ya se ha escrito. Cuando una le responda con interés, <b>búsquela y pida el dossier</b> — le llega al email.</p>
       <input class="search" id="q-con" placeholder="Buscar empresa…" oninput="filtrar('con')">
       <div class="grid" id="lista-con"></div></section>
 
     <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
 
     <section id="s-ajustes"><h1>Ajustes</h1><div id="ajustes"></div>
-      <p class="hint" style="margin-top:12px">Para cambiar tu plan o preferencias de envío, escríbenos a gp@reunvo.com.</p>
+      <p class="hint" style="margin-top:12px">Para cambiar de plan, escríbanos a gp@reunvo.com.</p>
       <div id="gmail-estado" style="margin-top:18px"></div>
       <div class="panelbox" style="margin-top:18px">
         <h3>Acceso</h3>
-        <p class="hint" style="margin-bottom:10px">Este navegador recuerda tu acceso, así que puedes
-        entrar desde <b>reunvo.com</b> sin buscar ningún enlace. Si usas un ordenador compartido,
-        cierra la sesión al terminar.</p>
+        <p class="hint" style="margin-bottom:10px">Este navegador recuerda su acceso, así que puede
+        entrar desde <b>reunvo.com</b> sin buscar ningún enlace. Si usa un ordenador compartido,
+        cierre la sesión al terminar.</p>
         <button class="act b-info" onclick="salir()">Cerrar sesión en este navegador</button>
       </div></section>
   </main>
@@ -156,7 +156,7 @@ function render(d){
   document.getElementById("s-resumen").classList.add("on");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
   const cupo=(k.cupo_mes==null?k.en_cola:k.cupo_mes)||0;
-  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en tu nombre, de tu cola de "+(k.en_cola||0)+". Revísalas, ajusta tu target y pide el dossier de quien te responda.";
+  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en su nombre, de su cola de "+(k.en_cola||0)+". Revíselas, ajuste su target y pida el dossier de quien le responda.";
   document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
     .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
   document.getElementById("secbars").innerHTML=bars(st.sectores);
@@ -190,15 +190,15 @@ function render(d){
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
   // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
-  const dosEstado=x=>x.status==='entregado'?`Enviado a tu email el ${fecha(x.delivered_at)}`:(x.status==='listo'?'Enviándotelo ahora':'Lo estamos preparando');
-  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">Pedido ${fecha(x.fecha)} · ${esc(dosEstado(x))}</span></div>`).join("")||'<p class="hint">Todavía no has pedido ningún dossier. Pídelos desde Contactadas.</p>';
+  const dosEstado=x=>x.status==='entregado'?`Enviado a su email el ${fecha(x.delivered_at)}`:(x.status==='listo'?'Enviándoselo ahora':'Lo estamos preparando');
+  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">Pedido ${fecha(x.fecha)} · ${esc(dosEstado(x))}</span></div>`).join("")||'<p class="hint">Todavía no ha pedido ningún dossier. Pídalos desde Contactadas.</p>';
   const gm=d.gmail||{};
   const gmailLink=OAUTH_START_URL+"?t="+encodeURIComponent(T);
-  const gmailNota='<p class="hint" style="margin-top:8px">Solo escribimos en tu nombre. Nunca leemos tu bandeja de entrada.</p>';
+  const gmailNota='<p class="hint" style="margin-top:8px">Solo escribimos en su nombre. Nunca leemos su bandeja de entrada.</p>';
   document.getElementById("gmail-estado").innerHTML = gm.caducado
     ? `<div class="panelbox" style="border-color:#fecaca;background:#fef2f2">
          <h3 style="color:#b91c1c">Conexión de Gmail caducada</h3>
-         <p class="hint" style="color:#b91c1c;margin-bottom:12px">Google ha revocado o caducado el permiso para enviar en tu nombre. Hasta que la reconectes, no podemos enviar tus correos.</p>
+         <p class="hint" style="color:#b91c1c;margin-bottom:12px">Google ha revocado o caducado el permiso para enviar en su nombre. Hasta que la reconecte, no podemos enviar sus correos.</p>
          <button class="act b-gold" onclick="location.href='${gmailLink}'">Volver a conectar Gmail</button>
          ${gmailNota}
        </div>`
@@ -211,16 +211,12 @@ function render(d){
          </div>`
       : `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7">
            <h3 style="color:#b7791f">Gmail sin conectar</h3>
-           <p class="hint" style="margin-bottom:12px">Aún no hemos conectado tu Gmail, así que no podemos enviar correos en tu nombre.</p>
+           <p class="hint" style="margin-bottom:12px">Aún no hemos conectado su Gmail, así que no podemos enviar correos en su nombre.</p>
            <button class="act b-gold" onclick="location.href='${gmailLink}'">Conectar mi Gmail</button>
            ${gmailNota}
          </div>`);
-  const avanzado=(c.plan||'').toLowerCase().includes('avanz')||(c.plan||'').toLowerCase().includes('premium');
   document.getElementById("ajustes").innerHTML=
-    [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("")
-    + (avanzado?'':`<div class="panelbox" style="margin-top:16px;border-color:#e9c98a;background:#fffdf7"><h3 style="color:#b7791f">⬆ Sube al Plan Avanzado</h3>
-        <p class="hint" style="margin-bottom:12px">Pasa de 10 a <b>20 emails/día</b> personalizados y apunta a <b>6-8 clientes potenciales interesados cada mes</b> (frente a 3-4 del Básico). El mismo sistema, el doble de volumen, el doble de oportunidades.</p>
-        <button class="act b-gold" onclick="pedirUpgrade(this)">Quiero subir a Avanzado</button></div>`);
+    [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function loteOk(btn){
@@ -247,11 +243,10 @@ async function toggle(id,ex,btn){
       const c=document.querySelector('#lista-emp .gcard[data-id="'+r.nueva.company_id+'"]');
       if(c){c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
     }
-  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintenta.");}
+  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintente.");}
 }
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
 async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
-async function pedirUpgrade(btn){btn.disabled=true;const r=await rpc("client_request_upgrade",{});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitado.");}else{flash("No se pudo, reintenta.");}}
 function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}
 load();
 </script>

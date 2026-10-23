@@ -67,7 +67,7 @@ function fmtFecha(iso) {
 }
 
 const ESTADOS = {
-  draft_created: "Borrador",
+  draft_created: "Enviado",
   pending:       "En preparación",
   sent:          "Enviado",
   error:         "Incidencia"

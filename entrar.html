@@ -98,7 +98,7 @@ f.addEventListener('submit', async (ev) => {
     // La respuesta es la misma exista o no el correo: no se revela quién es cliente.
     aviso.textContent = (d && d.mensaje)
       ? d.mensaje
-      : 'Si ese correo está dado de alta, en un minuto recibirás tu enlace de acceso.';
+      : 'Si ese correo está dado de alta, en un minuto recibirá su enlace de acceso.';
   } catch (e) {
     aviso.textContent = 'No hemos podido procesar la solicitud. Inténtelo de nuevo o escríbanos a gp@reunvo.com.';
   }
