@@ -32,7 +32,13 @@
 
 <script src="assets/app.js"></script>
 <script>
-(() => { const t = getToken(); propagarToken(t); propagarTokenQS(t); })();
+(() => {
+  const t = getToken();
+  propagarToken(t);
+  propagarTokenQS(t);
+  // Sin token (ni fragmento ni sessionStorage): el panel no puede identificar al cliente, así que vamos a entrar.html
+  if (!t) document.querySelector('a[data-keep-token-qs]')?.setAttribute('href','entrar.html');
+})();
 </script>
 </body>
 </html>
