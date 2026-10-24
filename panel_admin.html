@@ -82,14 +82,15 @@
  .nsf{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
  .nsf button{background:#fff;color:#1a3c6e;border:1px solid #d6dae2;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer}
  .nsf button.on{background:#1a3c6e;color:#fff;border-color:#1a3c6e}
- .nrow{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:11px 15px;margin-bottom:8px}
+ .nrow{background:#fff;border:1px solid #e3e7ee;border-radius:10px;padding:6px 12px;margin-bottom:5px}
  .ntop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
  .nt{font-weight:600;color:#14243f}
- .nm2{color:#6b7688;font-size:12px;margin-top:2px}
+ .nm2{color:#6b7688;font-size:12px}
  .nm2 .venc{color:#b91c1c;font-weight:600}
- .nrow details{margin-top:6px}.nrow summary{cursor:pointer;color:#1a4b8f;font-size:12px}
- .nrow details p{margin:6px 0 0;font-size:13px;line-height:1.55;white-space:pre-wrap}
- .nbtn{display:flex;gap:6px;flex-shrink:0}
+ .nrow .ndet{display:none;margin:5px 0 3px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nrow.ab .ndet{display:block}
+ .nrow.cl .ntop{cursor:pointer}
+ .nbtn{display:flex;gap:6px;flex-shrink:0}.nbtn button{padding:3px 10px;font-size:12px}
+ .npri summary{cursor:pointer}
  .nhech summary{cursor:pointer;font-size:14px;color:#14243f;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin:26px 0 10px}
  .nhech .hrow{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px solid #f0f2f6;font-size:13px}
  @media(max-width:760px){table,thead,tbody,th,td,tr{display:block}th{display:none}td{border:0;padding:3px 0}tr{border-bottom:1px solid #e6e9ef;padding:10px 0}}
@@ -117,24 +118,6 @@
 </header>
 <main>
 <div id="v-control">
-  <h2>Next steps</h2>
-  <div class="cards" id="nskpis"></div>
-
-  <h2>Requiere tu acción</h2>
-  <div class="box" id="acciones"></div>
-
-  <h2>Next steps abiertos</h2>
-  <div class="nsf" id="nsfiltro"></div>
-  <div id="nslista"><div class="none">Cargando…</div></div>
-  <details class="nhech"><summary>Hechos últimos 14 días <span class="hint" id="nshn"></span></summary>
-    <div class="box" id="nshechos"></div></details>
-
-  <h2>Clientes</h2>
-  <div class="box" style="overflow-x:auto"><table id="tclientes">
-    <thead><tr><th>Cliente</th><th>Estado</th><th>Cola</th><th>Contactadas</th><th>7 días</th>
-    <th>Aperturas</th><th>Leads</th><th>Gmail</th><th>Su panel</th></tr></thead>
-    <tbody></tbody></table></div>
-
   <h2>Salud del motor</h2>
   <div class="cards" id="salud"></div>
 
@@ -143,6 +126,22 @@
 
   <h2>Respuestas</h2>
   <div class="cards" id="embudo"></div>
+
+  <h2>Requiere tu acción</h2>
+  <div class="box" id="acciones"></div>
+
+  <h2>Clientes</h2>
+  <div class="box" style="overflow-x:auto"><table id="tclientes">
+    <thead><tr><th>Cliente</th><th>Estado</th><th>Cola</th><th>Contactadas</th><th>7 días</th>
+    <th>Aperturas</th><th>Leads</th><th>Gmail</th><th>Su panel</th></tr></thead>
+    <tbody></tbody></table></div>
+
+  <h2>Next steps</h2>
+  <div class="cards" id="nskpis"></div>
+  <div class="nsf" id="nsfiltro"></div>
+  <div id="nslista"><div class="none">Cargando…</div></div>
+  <details class="nhech"><summary>Hechos últimos 14 días <span class="hint" id="nshn"></span></summary>
+    <div class="box" id="nshechos"></div></details>
 </div>
 
 <div id="v-revision" style="display:none">
@@ -498,9 +497,10 @@ async function descartarRev(id){
 /* ─────────── Next steps (tabla next_steps vía reunvo_next_steps / reunvo_next_step_cerrar) ─────────── */
 let NS=null, NSRESP="";
 const NS_RESP=["Guille","Ramón","Claude Code"];
-const NS_PRIO={1:"Prioridad 1 · alta",2:"Prioridad 2 · media",3:"Prioridad 3 · baja"};
+const NS_ABIERTO={1:true};   // solo la prioridad 1 desplegada por defecto; lo que abras se recuerda mientras no recargues
+const NS_PRIO={1:"Prioridad 1",2:"Prioridad 2",3:"Prioridad 3"};
 const hoyISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
-const fISO=d=>d?new Date(d+"T00:00:00").toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}):"sin fecha";
+const fISO=d=>d?new Date(d+"T00:00:00").toLocaleDateString('es-ES',d.slice(0,4)===String(new Date().getFullYear())?{day:'2-digit',month:'short'}:{day:'2-digit',month:'short',year:'numeric'}):"sin fecha";
 
 async function cargarNS(){
   let d=null;
@@ -532,7 +532,7 @@ function pintarNS(){
   let h="";
   [1,2,3].forEach(p=>{
     const g=vis.filter(x=>x.prioridad===p);
-    if(g.length) h+=`<div class="rgrp">${NS_PRIO[p]} · ${g.length}</div>`+g.map(filaNS).join("");
+    if(g.length) h+=`<details class="npri"${NS_ABIERTO[p]?' open':''} ontoggle="NS_ABIERTO[${p}]=this.open"><summary class="rgrp">${NS_PRIO[p]} · ${g.length}</summary>`+g.map(filaNS).join("")+`</details>`;
   });
   const otros=vis.filter(x=>![1,2,3].includes(x.prioridad));
   if(otros.length) h+=`<div class="rgrp">Sin prioridad · ${otros.length}</div>`+otros.map(filaNS).join("");
@@ -549,14 +549,14 @@ function pintarNS(){
 function filaNS(x){
   const venc=x.fecha_objetivo&&x.fecha_objetivo<hoyISO();
   const enc=x.estado==='en_curso';
-  return `<div class="nrow" id="ns-${x.id}">
-    <div class="ntop"><div>
-      <div class="nt">${esc(x.titulo)}${enc?' <span class="pill p-test">en curso</span>':''}</div>
-      <div class="nm2">${esc(x.responsable||'—')} · <span${venc?' class="venc"':''}>${fISO(x.fecha_objetivo)}${venc?' · vencido':''}</span>${x.area?' · '+esc(x.area):''}${x.depende_de?` · <span class="hint">depende de: ${esc(x.depende_de)}</span>`:''}</div>
-    </div>
-    <div class="nbtn"><button class="b-ok" onclick="hechoNS('${x.id}')">Hecho</button>
-      <button class="b-skip" onclick="cerrarNS('${x.id}','${enc?'pendiente':'en_curso'}')">${enc?'Volver a pendiente':'En curso'}</button></div></div>
-    ${x.detalle?`<details><summary>Detalle</summary><p>${esc(x.detalle)}</p></details>`:''}
+  const det=[x.detalle,x.area?'Área: '+x.area:'',x.depende_de?'Depende de: '+x.depende_de:''].filter(Boolean);
+  return `<div class="nrow${det.length?' cl':''}" id="ns-${x.id}">
+    <div class="ntop"${det.length?` onclick="this.parentNode.classList.toggle('ab')"`:''}>
+      <div><span class="nt">${esc(x.titulo)}</span>${enc?' <span class="pill p-test">en curso</span>':''}
+        <span class="nm2"> · ${esc(x.responsable||'—')} · <span${venc?' class="venc"':''}>${fISO(x.fecha_objetivo)}${venc?' · vencido':''}</span></span></div>
+      <div class="nbtn"><button class="b-ok" onclick="event.stopPropagation();hechoNS('${x.id}')">Hecho</button>
+        <button class="b-skip" onclick="event.stopPropagation();cerrarNS('${x.id}','${enc?'pendiente':'en_curso'}')">${enc?'Volver a pendiente':'En curso'}</button></div></div>
+    ${det.length?`<div class="ndet">${det.map(esc).join("\n")}</div>`:''}
   </div>`;
 }
 
