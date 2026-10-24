@@ -78,6 +78,20 @@
  .b-ok:disabled{opacity:.5;cursor:default}
  .b-skip{background:#6b7688;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
  .msg{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#14243f;color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;display:none;z-index:9}
+ /* Next steps */
+ .nsf{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+ .nsf button{background:#fff;color:#1a3c6e;border:1px solid #d6dae2;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer}
+ .nsf button.on{background:#1a3c6e;color:#fff;border-color:#1a3c6e}
+ .nrow{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:11px 15px;margin-bottom:8px}
+ .ntop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+ .nt{font-weight:600;color:#14243f}
+ .nm2{color:#6b7688;font-size:12px;margin-top:2px}
+ .nm2 .venc{color:#b91c1c;font-weight:600}
+ .nrow details{margin-top:6px}.nrow summary{cursor:pointer;color:#1a4b8f;font-size:12px}
+ .nrow details p{margin:6px 0 0;font-size:13px;line-height:1.55;white-space:pre-wrap}
+ .nbtn{display:flex;gap:6px;flex-shrink:0}
+ .nhech summary{cursor:pointer;font-size:14px;color:#14243f;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin:26px 0 10px}
+ .nhech .hrow{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px solid #f0f2f6;font-size:13px}
  @media(max-width:760px){table,thead,tbody,th,td,tr{display:block}th{display:none}td{border:0;padding:3px 0}tr{border-bottom:1px solid #e6e9ef;padding:10px 0}}
 </style>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -103,8 +117,17 @@
 </header>
 <main>
 <div id="v-control">
+  <h2>Next steps</h2>
+  <div class="cards" id="nskpis"></div>
+
   <h2>Requiere tu acción</h2>
   <div class="box" id="acciones"></div>
+
+  <h2>Next steps abiertos</h2>
+  <div class="nsf" id="nsfiltro"></div>
+  <div id="nslista"><div class="none">Cargando…</div></div>
+  <details class="nhech"><summary>Hechos últimos 14 días <span class="hint" id="nshn"></span></summary>
+    <div class="box" id="nshechos"></div></details>
 
   <h2>Clientes</h2>
   <div class="box" style="overflow-x:auto"><table id="tclientes">
@@ -176,7 +199,7 @@ function ver(v){
   document.getElementById("tab-revision").classList.toggle("on", v==='revision');
   try{ localStorage.setItem("reunvo_admin_vista", v); }catch(e){}
 }
-function recargar(){ cargar(); cargarRevision(); }
+function recargar(){ cargar(); cargarRevision(); cargarNS(); }
 
 async function cargar(){
   const d=await rpc("reunvo_admin",{});
@@ -186,6 +209,7 @@ async function cargar(){
   document.getElementById("app").style.display="block";
   pinta(d);
   cargarRevision();
+  cargarNS();
   let v='control'; try{ v=localStorage.getItem("reunvo_admin_vista")||'control'; }catch(e){}
   ver(v);
 }
@@ -469,6 +493,84 @@ async function guardarRev(id,ap){
 async function descartarRev(id){
   const r=await rpc("revision_guardar",{p_company_id:id,p_descartar:true});
   if(r&&r.ok){flash("Descartada, no se enviará.");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo descartar.");
+}
+
+/* ─────────── Next steps (tabla next_steps vía reunvo_next_steps / reunvo_next_step_cerrar) ─────────── */
+let NS=null, NSRESP="";
+const NS_RESP=["Guille","Ramón","Claude Code"];
+const NS_PRIO={1:"Prioridad 1 · alta",2:"Prioridad 2 · media",3:"Prioridad 3 · baja"};
+const hoyISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const fISO=d=>d?new Date(d+"T00:00:00").toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}):"sin fecha";
+
+async function cargarNS(){
+  let d=null;
+  try{ d=await rpc("reunvo_next_steps",{}); }catch(e){}
+  if(!d||d.error||!Array.isArray(d.abiertos)){
+    document.getElementById("nskpis").innerHTML=card("Next steps","no disponibles",'bad');
+    document.getElementById("nslista").innerHTML='<div class="box none">No se pudieron cargar los next steps.</div>';
+    return;
+  }
+  NS=d; pintarNS();
+}
+
+function selResp(r){ NSRESP=(r===NSRESP)?"":r; pintarNS(); }
+
+function pintarNS(){
+  const d=NS; if(!d) return;
+  const ab=d.abiertos, hc=d.hechos_14d||[];
+  // «Esta semana» = desde el lunes 00:00 (hora local).
+  const lun=new Date(); lun.setHours(0,0,0,0); lun.setDate(lun.getDate()-((lun.getDay()+6)%7));
+  document.getElementById("nskpis").innerHTML=
+    card("Abiertos",ab.length)
+   +card("Prioridad 1",ab.filter(x=>x.prioridad===1).length,ab.some(x=>x.prioridad===1)?'warn':'')
+   +card("Hechos esta semana",hc.filter(x=>x.hecho_at&&new Date(x.hecho_at)>=lun).length);
+
+  document.getElementById("nsfiltro").innerHTML=
+    ['',...NS_RESP].map(r=>`<button class="${r===NSRESP?'on':''}" onclick="selResp('${r}')">${r?esc(r):'Todos'}</button>`).join("");
+
+  const vis=ab.filter(x=>!NSRESP||x.responsable===NSRESP);
+  let h="";
+  [1,2,3].forEach(p=>{
+    const g=vis.filter(x=>x.prioridad===p);
+    if(g.length) h+=`<div class="rgrp">${NS_PRIO[p]} · ${g.length}</div>`+g.map(filaNS).join("");
+  });
+  const otros=vis.filter(x=>![1,2,3].includes(x.prioridad));
+  if(otros.length) h+=`<div class="rgrp">Sin prioridad · ${otros.length}</div>`+otros.map(filaNS).join("");
+  document.getElementById("nslista").innerHTML=h||'<div class="box none">'+(NSRESP?'Nada abierto para '+esc(NSRESP)+'.':'No hay next steps abiertos.')+'</div>';
+
+  const hv=hc.filter(x=>!NSRESP||x.responsable===NSRESP);
+  document.getElementById("nshn").textContent="· "+hv.length;
+  document.getElementById("nshechos").innerHTML=hv.length
+    ? hv.map(x=>`<div class="hrow"><span>${esc(x.titulo)}${x.nota_cierre?`<div class="hint">${esc(x.nota_cierre)}</div>`:''}</span>
+        <span class="hint" style="white-space:nowrap">${esc(x.responsable||'')} · ${fh(x.hecho_at)} · <a href="#" onclick="cerrarNS('${x.id}','pendiente');return false">Reabrir</a></span></div>`).join("")
+    : '<div class="none">Nada cerrado en los últimos 14 días.</div>';
+}
+
+function filaNS(x){
+  const venc=x.fecha_objetivo&&x.fecha_objetivo<hoyISO();
+  const enc=x.estado==='en_curso';
+  return `<div class="nrow" id="ns-${x.id}">
+    <div class="ntop"><div>
+      <div class="nt">${esc(x.titulo)}${enc?' <span class="pill p-test">en curso</span>':''}</div>
+      <div class="nm2">${esc(x.responsable||'—')} · <span${venc?' class="venc"':''}>${fISO(x.fecha_objetivo)}${venc?' · vencido':''}</span>${x.area?' · '+esc(x.area):''}${x.depende_de?` · <span class="hint">depende de: ${esc(x.depende_de)}</span>`:''}</div>
+    </div>
+    <div class="nbtn"><button class="b-ok" onclick="hechoNS('${x.id}')">Hecho</button>
+      <button class="b-skip" onclick="cerrarNS('${x.id}','${enc?'pendiente':'en_curso'}')">${enc?'Volver a pendiente':'En curso'}</button></div></div>
+    ${x.detalle?`<details><summary>Detalle</summary><p>${esc(x.detalle)}</p></details>`:''}
+  </div>`;
+}
+
+function hechoNS(id){
+  const nota=prompt("Nota de cierre (opcional):","");
+  if(nota===null) return;   // cancelar = no hacer nada
+  cerrarNS(id,'hecho',nota.trim()||null);
+}
+async function cerrarNS(id,estado,nota){
+  const r=await rpc("reunvo_next_step_cerrar",{p_id:id,p_estado:estado,p_nota:nota||null});
+  if(r&&r.ok){
+    flash(estado==='hecho'?"Hecho.":estado==='en_curso'?"En curso.":"Vuelve a pendiente.");
+    await cargarNS();   // la lista sale siempre de la función: sin estado local que se desincronice
+  } else flash((r&&r.mensaje)||"No se pudo actualizar.");
 }
 
 if(PW) cargar();
