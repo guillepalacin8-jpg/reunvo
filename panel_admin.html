@@ -63,6 +63,9 @@
  .cotejo .dice{font-size:15px;color:#14243f;line-height:1.3}.cotejo .dice b{border-bottom:2px solid #c3d2e8}
  @media(max-width:620px){.cotejo{grid-template-columns:1fr}}
  .rficha{margin:9px 0;padding:9px 11px;background:#fbfcfd;border:1px solid #eceff4;border-radius:8px;font-size:13px;line-height:1.6}
+ .rficha .redit{font:inherit;font-size:13px;border:1px solid #cfd6e2;border-radius:6px;padding:5px 8px;background:#fff;color:#1b2536}
+ .rficha textarea.redit{width:100%;max-width:640px;resize:vertical;display:block;margin-top:3px}
+ .rficha .hint{margin:2px 0 6px}
  .rficha .et{font-size:10.5px;color:#8b95a5;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
  .lupa{display:inline-block;margin-right:10px;font-size:12.5px;color:#1a4b8f;text-decoration:none;border-bottom:1px solid #c9d8ee}
  .barra{background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:12px 15px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -434,8 +437,10 @@ function filaRev(c){
     <span class="hint">${esc(c.locality||'')} · ${esc(c.cliente||'')}</span></div>
     ${al.length?`<ul class="ral">${al.map(a=>`<li class="${a.indexOf('🔴')===0?'':'leve'}">${esc(a)}</li>`).join("")}</ul>`:""}
     <div class="rficha">
-      <div><span class="et">Se dedica a</span> ${esc(c.activity_description||'— sin descripción —')}</div>
-      <div><span class="et">Sector</span> ${esc(c.sector_simplified||'—')}
+      <div><span class="et">Se dedica</span>
+        <textarea class="redit" id="d-${c.id}" rows="2" maxlength="120" oninput="vistaDedica('${c.id}')">${esc(c.activity_description||'')}</textarea>
+        <div class="hint" id="dv-${c.id}" data-loc="${esc(c.locality||'')}">${esc(leeDedica(c.activity_description,c.locality))}</div></div>
+      <div><span class="et">Sector</span> <select class="redit" id="s-${c.id}">${opcionesSector(c.sector_simplified)}</select>
            <span class="et" style="margin-left:14px">Facturación</span> ${fact(c.revenue_eur)}</div>
       <div style="margin-top:7px"><a class="lupa" target="_blank" rel="noopener" href="${busca}">Buscar en Google ↗</a>
       ${c.domain?`<a class="lupa" target="_blank" rel="noopener" href="${esc(c.domain)}">Su web ↗</a>`:""}</div>
@@ -484,9 +489,33 @@ async function aprobarLote(){
   const r=await rpc("revision_aprobar_lote",{p_ids:LIMPIAS});
   if(r&&r.ok){flash("Aprobadas "+r.aprobadas+".");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo.");
 }
+/* La actividad se usa en dos frases y debe encajar en ambas:
+   «Se dedica a …» (ficha; a+el → al) y «Una empresa especializada en … con sede en …» (PDF, página 2). */
+function leeDedica(t,loc){
+  t=String(t||"").replace(/\s+/g," ").trim();
+  if(!t) return "— sin descripción —";
+  return "Debe encajar tras «Se dedica a» y tras «especializada en». Se lee: «Se dedica "+(/^el\s/i.test(t)?"al "+t.slice(3):"a "+t)+"» · «Una empresa especializada en "+t+(loc?" con sede en "+loc:"")+"»";
+}
+function vistaDedica(id){
+  const e=document.getElementById("d-"+id), v=document.getElementById("dv-"+id);
+  if(e&&v) v.textContent=leeDedica(e.value,v.getAttribute("data-loc"));
+}
+/* Los 14 sectores estándar (el resto de valores de la columna son restos de pruebas, 1 fila cada uno). Si la empresa trae otro, se añade para no perderlo. */
+const SECTORES=["Agroalimentario","Alimentación y bebidas","Comunicación y medios","Construcción e ingeniería","Distribución y logística","Educación y formación","Financiero y legal","Hostelería y turismo","Industrial","Medioambiente","Retail y consumo","Salud y bienestar","Servicios","Tecnología"];
+function opcionesSector(actual){
+  const l=SECTORES.slice(); if(actual&&l.indexOf(actual)<0) l.unshift(actual);
+  return (actual?'':'<option value="" selected>— sin sector —</option>')+l.map(s=>`<option${s===actual?' selected':''}>${esc(s)}</option>`).join("");
+}
 async function guardarRev(id,ap){
   const g=x=>{const e=document.getElementById(x+"-"+id);return e?e.value:null;};
-  const r=await rpc("revision_guardar",{p_company_id:id,p_first:g("n"),p_last:g("a"),p_prefix:g("p"),p_aprobar:ap});
+  const args={p_company_id:id,p_first:g("n"),p_last:g("a"),p_prefix:g("p"),p_aprobar:ap};
+  // Actividad/sector: solo se mandan si cambiaron (un solo clic guarda y aprueba).
+  const c=((REV&&REV.empresas)||[]).find(x=>x.id===id)||{};
+  const nuevaAct=(g("d")||"").replace(/\s+/g," ").trim(), nuevoSec=g("s");
+  if(nuevaAct.length>120){flash("La actividad no puede pasar de 120 caracteres.");return;}
+  if(nuevaAct&&nuevaAct!==(c.activity_description||"")) args.p_actividad=nuevaAct;
+  if(nuevoSec&&nuevoSec!==(c.sector_simplified||"")) args.p_sector=nuevoSec;
+  const r=await rpc("revision_guardar",args);
   if(r&&r.ok){flash(ap?"Aprobada.":"Devuelta a la cola.");cargarRevision();} else flash((r&&r.mensaje)||"No se pudo guardar.");
 }
 async function descartarRev(id){
