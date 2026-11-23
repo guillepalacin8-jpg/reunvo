@@ -287,11 +287,11 @@
   <h2 data-r>Pide una llamada</h2>
   <p class="sub" data-r style="--i:1">Te llamamos, fijamos tus filtros y te explicamos cómo trabajamos.</p>
  </div>
- <form class="cta-form" id="form-contacto" data-r style="--i:2" action="#contacto" method="post" data-endpoint="" data-mailto="gp@reunvo.com" novalidate>
+ <form class="cta-form" id="form-contacto" data-r style="--i:2" action="#contacto" method="post" data-key="78a65b6f-3d42-4cc5-9a56-abd748e5899c" data-mailto="gp@reunvo.com" novalidate>
   <!-- VARIABLES DEL FORMULARIO (ver PENDIENTES-V28.md):
        data-endpoint: URL del servicio de formularios (POST JSON). Vacío = se abre el correo del usuario con el mensaje preparado hacia data-mailto (no hay envío desde la web).
        data-mailto: dirección de contacto (gp@reunvo.com). -->
-  <div class="fld"><label for="f-nombre">Nombre</label><input id="f-nombre" name="nombre" type="text" autocomplete="name" required><p class="f-err" id="err-nombre" hidden>Escribe tu nombre.</p></div>
+  <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px"><div class="fld"><label for="f-nombre">Nombre</label><input id="f-nombre" name="nombre" type="text" autocomplete="name" required><p class="f-err" id="err-nombre" hidden>Escribe tu nombre.</p></div>
   <div class="fld"><label for="f-email">Correo electrónico</label><input id="f-email" name="email" type="email" autocomplete="email" required><p class="f-err" id="err-email" hidden>Escribe un correo válido, por ejemplo nombre@firma.com.</p></div>
   <div class="fld"><label for="f-firma">Tu firma <span class="opc">(opcional)</span></label><input id="f-firma" name="firma" type="text" autocomplete="organization"></div>
   <button class="btn gold" type="submit">Pedir una llamada</button>

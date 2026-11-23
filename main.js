@@ -316,9 +316,8 @@
   }
 })();
 
-/* Formulario de contacto. Variables en el HTML (ver PENDIENTES-V28.md):
-   data-endpoint = URL de un servicio de formularios (POST JSON). Vacío: no hay envío desde la web; se abre el
-   correo del usuario con el mensaje preparado hacia data-mailto (gp@reunvo.com) y se avisa de que aún no se ha enviado. */
+/* Formulario de contacto. Envío por fetch a api.web3forms.com con la clave pública data-key; destino gp@reunvo.com
+   (configurado en Web3Forms). Honeypot: campo botcheck. data-mailto solo se usa en el mensaje de error. */
 (() => {
   const f = document.getElementById('form-contacto');
   if (!f) return;
@@ -341,17 +340,27 @@
     });
     if (primero) { primero.focus(); return; }
     const datos = Object.fromEntries(new FormData(f).entries());
-    const url = f.dataset.endpoint;
-    if (url) {
-      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) })
-        .then((r) => { if (!r.ok) throw new Error(); show('Solicitud enviada. Te escribiremos al correo que has indicado.', 'ok'); f.reset(); })
-        .catch(() => show('No se ha podido enviar. Escríbenos a <a href="mailto:' + esc(f.dataset.mailto || '') + '">' + esc(f.dataset.mailto || '') + '</a>.', 'warn'));
-      return;
-    }
+    if (datos.botcheck) return; // honeypot: un bot lo rellena, una persona no lo ve
+    const clave = f.dataset.key;
     const dir = f.dataset.mailto || '';
-    const cuerpo = 'Nombre: ' + datos.nombre + '\nCorreo: ' + datos.email + (datos.firma ? '\nFirma: ' + datos.firma : '') + '\n\nQuiero pedir una llamada.';
-    const href = 'mailto:' + dir + '?subject=' + encodeURIComponent('Pedir una llamada') + '&body=' + encodeURIComponent(cuerpo);
-    show('Se abre tu programa de correo con el mensaje preparado. <b>Todavía no se ha enviado:</b> envíalo desde ahí, o escribe a <a href="' + esc(href) + '">' + esc(dir) + '</a>.', 'ok');
-    location.href = href;
+    const fallo = () => show('No se ha podido enviar. Escríbenos a <a href="mailto:' + esc(dir) + '">' + esc(dir) + '</a>.', 'warn');
+    if (!clave) { fallo(); return; }
+    const btn = f.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    const fd = new FormData();
+    fd.append('access_key', clave);
+    fd.append('subject', 'Reunvo · Pedir una llamada');
+    fd.append('from_name', 'Web de Reunvo');
+    fd.append('name', datos.nombre);
+    fd.append('email', datos.email);
+    fd.append('firma', datos.firma || '');
+    fd.append('message', 'Quiero pedir una llamada.');
+    fd.append('botcheck', '');
+    // FormData sin cabeceras propias: petición simple, sin preflight CORS.
+    fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd })
+      .then((r) => r.json().then((j) => { if (!r.ok || !j.success) throw new Error(); }))
+      .then(() => { show('Gracias, hemos recibido tu mensaje.', 'ok'); f.reset(); })
+      .catch(fallo)
+      .finally(() => { if (btn) btn.disabled = false; });
   });
 })();
