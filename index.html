@@ -1,954 +1,316 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="google-site-verification" content="GVaX9X0eX4qaXtGgb1b4ZzOdSaQc5x85nhJMNjYqesk" />
-  <title>Reunvo — Contactamos por usted a propietarios de empresas en España y Portugal</title>
-  <meta name="description" content="Para firmas que trabajan con propietarios de empresas. Cada mes le proponemos una lista; usted la aprueba y enviamos a cada propietario un email y un dossier personalizados, desde su propio correo." />
-  <meta property="og:title" content="Reunvo — Contactamos por usted a propietarios de empresas en España y Portugal" />
-  <meta property="og:description" content="Para firmas que trabajan con propietarios de empresas. Piloto de 30 días sin coste. Tres plazas." />
-  <meta property="og:url" content="https://reunvo.com/" />
-  <meta property="og:type" content="website" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --navy:     #1B2E44;
-      --navy-mid: #1f3349;
-      --navy-lt:  #2A4060;
-      --gold:     #9A7B5B;
-      --gold-lt:  #B8966F;
-      --cream:    #F5F0E8;
-      --white:    #FFFFFF;
-      --text-dim: #7A8FA8;
-      --border:   rgba(154, 123, 91, 0.2);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy);
-      color: var(--white);
-      line-height: 1.65;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── HEADER ── */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 28px 64px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: rgba(27, 46, 68, 0.95);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-    }
-
-    .logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      color: var(--white);
-    }
-
-    .logo span { color: var(--gold); }
-
-    nav a {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    nav a:hover { color: var(--gold-lt); }
-
-    /* ── HERO ── */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 140px 24px 120px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 90% 70% at 50% -10%, rgba(154,123,91,0.1) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 32px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.1s forwards;
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 7vw, 5rem);
-      font-weight: 300;
-      line-height: 1.1;
-      max-width: 820px;
-      color: var(--white);
-      margin-bottom: 32px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.2s forwards;
-    }
-
-    h1 em {
-      font-style: italic;
-      color: var(--gold-lt);
-    }
-
-    .hero-sub {
-      font-size: 1rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      max-width: 520px;
-      line-height: 1.85;
-      margin-bottom: 56px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.3s forwards;
-    }
-
-    .hero-cta {
-      opacity: 0;
-      animation: fadeUp 0.8s 0.4s forwards;
-    }
-
-    .btn-primary {
-      display: inline-block;
-      background: var(--gold);
-      color: var(--navy);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      text-decoration: none;
-      padding: 18px 48px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    }
-
-    .btn-primary:hover {
-      background: var(--gold-lt);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(154,123,91,0.25);
-    }
-
-    /* ── DIVIDER ── */
-    .divider {
-      width: 1px;
-      height: 80px;
-      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-      margin: 0 auto;
-    }
-
-    /* ── STATS ── */
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stat {
-      flex: 1;
-      max-width: 280px;
-      text-align: center;
-      padding: 48px 32px;
-      border-right: 1px solid var(--border);
-    }
-
-    .stat:last-child { border-right: none; }
-
-    .stat-number {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3rem;
-      font-weight: 300;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 10px;
-    }
-
-    .stat-number span { color: var(--gold); }
-
-    .stat-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    /* ── BENEFITS ── */
-    .benefits {
-      padding: 120px 64px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      text-align: center;
-      margin-bottom: 72px;
-    }
-
-    .benefits-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-    }
-
-    .benefit-card {
-      background: var(--navy);
-      padding: 56px 44px;
-      position: relative;
-      transition: background 0.3s;
-    }
-
-    .benefit-card:hover { background: var(--navy-mid); }
-
-    .benefit-number {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      margin-bottom: 28px;
-      display: block;
-    }
-
-    .benefit-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
-      font-weight: 400;
-      color: var(--white);
-      line-height: 1.25;
-      margin-bottom: 18px;
-    }
-
-    .benefit-desc {
-      font-size: 0.875rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      line-height: 1.8;
-    }
-
-    /* ── HOW IT WORKS ── */
-    .how {
-      padding: 120px 64px;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .how h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-      font-weight: 300;
-      margin-bottom: 20px;
-      line-height: 1.2;
-    }
-
-    .how > p {
-      font-size: 0.95rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      line-height: 1.85;
-      margin-bottom: 72px;
-    }
-
-    .steps {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-    }
-
-    .step {
-      display: flex;
-      gap: 40px;
-      align-items: flex-start;
-      padding: 36px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .step:first-child { border-top: 1px solid var(--border); }
-
-    .step-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
-      font-weight: 300;
-      color: var(--gold);
-      min-width: 36px;
-      line-height: 1;
-      padding-top: 2px;
-    }
-
-    .step-body strong {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem;
-      font-weight: 400;
-      color: var(--white);
-      margin-bottom: 8px;
-    }
-
-    .step-body span {
-      font-size: 0.875rem;
-      font-weight: 300;
-      color: var(--text-dim);
-    }
-
-    /* ── CTA SECTION ── */
-    .cta-section {
-      padding: 120px 24px;
-      text-align: center;
-      background: var(--navy-mid);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(154,123,91,0.07) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .cta-section h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      font-weight: 300;
-      margin-bottom: 16px;
-      line-height: 1.15;
-    }
-
-    .cta-section p {
-      font-size: 0.9rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      margin-bottom: 48px;
-    }
-
-    /* ── MODAL ── */
-    .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(8, 16, 26, 0.88);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .overlay.active { display: flex; }
-
-    .modal {
-      background: var(--navy-mid);
-      border: 1px solid var(--border);
-      width: 100%;
-      max-width: 460px;
-      padding: 52px 48px;
-      position: relative;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 24px;
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      font-size: 1.4rem;
-      cursor: pointer;
-      transition: color 0.2s;
-      line-height: 1;
-    }
-
-    .modal-close:hover { color: var(--white); }
-
-    .modal h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.7rem;
-      font-weight: 400;
-      margin-bottom: 8px;
-    }
-
-    .modal > p {
-      font-size: 0.85rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      margin-bottom: 40px;
-      line-height: 1.7;
-    }
-
-    .form-group { margin-bottom: 22px; }
-
-    .form-group label {
-      display: block;
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 10px;
-    }
-
-    .form-group input {
-      width: 100%;
-      background: var(--navy-lt);
-      border: 1px solid var(--border);
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 300;
-      padding: 13px 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input::placeholder { color: rgba(122,143,168,0.5); }
-    .form-group input:focus { border-color: var(--gold); }
-
-    .btn-submit {
-      width: 100%;
-      margin-top: 8px;
-      background: var(--gold);
-      color: var(--navy);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      border: none;
-      padding: 17px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-submit:hover { background: var(--gold-lt); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .form-success {
-      display: none;
-      text-align: center;
-      padding: 32px 0;
-    }
-
-    .form-success .check {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3rem;
-      color: var(--gold);
-      margin-bottom: 20px;
-    }
-
-    .form-success h4 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin-bottom: 12px;
-    }
-
-    .form-success p {
-      font-size: 0.875rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      margin-bottom: 0;
-    }
-
-    .form-error {
-      font-size: 0.8rem;
-      color: #e07070;
-      margin-top: 12px;
-      display: none;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 40px 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--border);
-    }
-
-    footer .logo { font-size: 1.1rem; }
-
-    footer p {
-      font-size: 0.75rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      letter-spacing: 0.05em;
-    }
-
-    footer .legal-links {
-      margin-top: 4px;
-    }
-
-    footer .legal-links a {
-      color: var(--text-dim);
-      text-decoration: none;
-    }
-
-    footer .legal-links a:hover { color: var(--gold-lt); }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      header { padding: 22px 24px; }
-      nav { display: none; }
-      .benefits { padding: 80px 24px; }
-      .benefits-grid { grid-template-columns: 1fr; }
-      .how { padding: 80px 24px; }
-      .stats { flex-wrap: wrap; }
-      .stat { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
-      footer { flex-direction: column; gap: 12px; text-align: center; padding: 32px 24px; }
-      .modal { padding: 40px 28px; }
-    }
-
-    /* ── FASE 2: contraste y lectura ── */
-    :root { --text-dim: #AEBCCD; }
-    .hero-sub { font-size: 1.08rem; font-weight: 400; }
-    .step-body span, .benefit-desc, .how > p, .cta-section p { font-size: 1rem; font-weight: 400; line-height: 1.75; }
-    .step-body strong { font-size: 1.3rem; }
-
-    /* ── FASE 2: ejemplo email + dossier ── */
-    .ejemplo { padding: 110px 48px; max-width: 1160px; margin: 0 auto; text-align: center; }
-    .ejemplo h2, .compromisos h2 { max-width: 640px; margin-left: auto; margin-right: auto; font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 300; line-height: 1.2; margin-bottom: 56px; }
-    .ejemplo-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; text-align: left; align-items: start; }
-    .mock { background: #FFFFFF; color: #1d2733; border-radius: 6px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); overflow: hidden; }
-    .mock-bar { background: #F1F3F6; padding: 10px 16px; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5b6878; border-bottom: 1px solid #E2E6EB; }
-    .mail-head { padding: 18px 24px 12px; border-bottom: 1px solid #EEF0F3; font-size: 0.85rem; color: #4a5664; line-height: 1.7; }
-    .mail-head b { color: #1d2733; font-weight: 500; }
-    .mail-subject { font-size: 1.05rem; color: #1d2733; font-weight: 500; margin-bottom: 6px; }
-    .mail-body { padding: 18px 24px 8px; font-family: Arial, sans-serif; font-size: 0.9rem; line-height: 1.65; color: #222; }
-    .mail-body p { margin-bottom: 12px; }
-    .mail-sign { color: #444; font-size: 0.85rem; }
-    .attach { margin: 6px 24px 22px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #DADFE5; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #333; }
-    .attach i { font-style: normal; background: #C5463A; color: #fff; font-size: 0.65rem; font-weight: 600; padding: 3px 6px; border-radius: 3px; }
-    .doc-head { background: var(--navy); color: #fff; padding: 22px 24px; }
-    .doc-head small { display: block; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 6px; }
-    .doc-head div { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; line-height: 1.25; }
-    .doc-body { padding: 20px 24px 24px; font-size: 0.84rem; line-height: 1.6; color: #2b3540; }
-    .ficha { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    .ficha td { padding: 7px 0; border-bottom: 1px solid #ECEEF1; vertical-align: top; }
-    .ficha td:first-child { color: var(--gold); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; width: 92px; padding-top: 9px; }
-    .doc-body h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--navy); margin: 4px 0 6px; }
-    .doc-foot { font-size: 0.7rem; color: #8a94a0; padding: 0 24px 16px; }
-    .ejemplo-nota { margin-top: 32px; font-size: 0.95rem; color: var(--text-dim); text-align: center; }
-
-    /* ── FASE 2: compromisos ── */
-    .compromisos { padding: 110px 48px; max-width: 1100px; margin: 0 auto; text-align: center; }
-    .compromisos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); text-align: left; }
-    .compromisos-grid .benefit-card { padding: 44px 40px; }
-
-    @media (max-width: 768px) {
-      .ejemplo, .compromisos { padding: 80px 20px; }
-      .ejemplo-grid, .compromisos-grid { grid-template-columns: 1fr; }
-      .compromisos-grid .benefit-card { padding: 36px 28px; }
-    }
-
-    .cta-alt { margin-top: 22px; font-size: 0.95rem; color: var(--text-dim); }
-    .cta-section p.cta-alt { margin-bottom: 0; }
-    .cta-alt a { color: var(--gold-lt); text-decoration: underline; text-underline-offset: 3px; }
-
-    /* ── FASE 3: método, embudo, reparto, caso ── */
-    .metodo, .embudo, .reparto, .caso { padding: 110px 48px; max-width: 1160px; margin: 0 auto; }
-    .sec-h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.7rem); font-weight: 300; line-height: 1.2; text-align: center; max-width: 720px; margin: 0 auto 64px; text-wrap: balance; }
-    .metodo-steps { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
-    .metodo-steps::before { content: ''; position: absolute; top: 22px; left: 8%; right: 8%; height: 1px; background: var(--gold); opacity: 0.45; }
-    .metodo-steps li { position: relative; padding: 0 14px; text-align: center; min-width: 0; }
-    .m-num { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gold); background: var(--navy); font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--gold-lt); margin-bottom: 22px; }
-    .m-usted .m-num { background: var(--gold); color: var(--navy); }
-    .metodo-steps h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1.3rem; color: var(--white); margin-bottom: 10px; }
-    .m-usted h3 { color: var(--gold-lt); }
-    .metodo-steps p { font-size: 0.92rem; line-height: 1.65; color: var(--text-dim); }
-
-    .embudo { max-width: 900px; }
-    .filtros { display: grid; gap: 10px; justify-items: center; }
-    .f-row { width: var(--w); max-width: 100%; }
-    .f-bar { display: flex; align-items: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--border); background: rgba(154,123,91,0.07); min-width: 0; }
-    .f-n { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--gold-lt); line-height: 1; flex: none; }
-    .f-t { font-size: 1rem; color: var(--white); min-width: 0; }
-    .f-usted .f-bar { background: var(--gold); border-color: var(--gold); }
-    .f-usted .f-n, .f-usted .f-t { color: var(--navy); font-weight: 500; }
-    .embudo-rows { display: grid; gap: 22px; }
-    .e-row { display: grid; grid-template-columns: 260px 1fr; align-items: center; gap: 28px; }
-    .e-label { display: flex; flex-direction: column; text-align: right; }
-    .e-label b { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 2.1rem; line-height: 1; color: var(--white); font-variant-numeric: tabular-nums; }
-    .e-label span { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-top: 6px; }
-    .e-track { height: 14px; background: rgba(154,123,91,0.12); }
-    .e-bar { height: 100%; background: var(--text-dim); opacity: 0.75; }
-    .e-track-none { background: none; border-top: 1px dashed var(--gold); height: 0; opacity: 0.6; }
-    .e-final .e-label b { color: var(--gold-lt); }
-    .nota { text-align: center; margin-top: 36px; font-size: 0.85rem; color: var(--text-dim); }
-
-    .reparto { max-width: 980px; }
-    .reparto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
-    .r-col { background: var(--navy); padding: 44px 44px 48px; min-width: 0; }
-    .r-col h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.6rem; margin-bottom: 22px; color: var(--white); }
-    .r-usted h3 { color: var(--gold-lt); }
-    .r-col ul { list-style: none; display: grid; gap: 14px; }
-    .r-col li { font-size: 1rem; color: var(--text-dim); padding-left: 22px; position: relative; }
-    .r-col li::before { content: ''; position: absolute; left: 0; top: 0.7em; width: 10px; height: 1px; background: var(--gold); }
-
-    .caso-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
-    .caso-grid > div { background: var(--navy); padding: 36px 32px; min-width: 0; }
-    .caso-grid h3 { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 14px; }
-    .caso-grid p { font-size: 1rem; line-height: 1.7; color: var(--text-dim); }
-    .caso-excl { text-align: center; max-width: 640px; margin: 40px auto 0; font-size: 1rem; color: var(--text-dim); }
-    .caso-contacto { text-align: center; margin-top: 18px; font-size: 1rem; color: var(--text-dim); }
-    .caso-contacto a { color: var(--gold-lt); }
-
-    @media (max-width: 900px) {
-      .metodo-steps { grid-template-columns: 1fr; gap: 30px; }
-      .metodo-steps::before { top: 22px; bottom: 22px; left: 21px; right: auto; width: 1px; height: auto; }
-      .metodo-steps li { display: grid; grid-template-columns: 44px 1fr; column-gap: 20px; text-align: left; padding: 0; }
-      .m-num { grid-row: span 2; margin-bottom: 0; }
-      .metodo-steps h3 { margin-bottom: 4px; }
-      .caso-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-      .metodo, .embudo, .reparto, .caso { padding: 80px 20px; }
-      .e-row { grid-template-columns: 1fr; gap: 10px; }
-      .f-row { width: calc(60% + var(--w) * 0.4); }
-      .f-bar { padding: 16px 18px; }
-      .e-label { text-align: left; flex-direction: row; align-items: baseline; gap: 12px; }
-      .e-label span { margin-top: 0; }
-      .reparto-grid { grid-template-columns: 1fr; }
-      .r-col { padding: 32px 26px; }
-    }
-  </style>
-  <script data-goatcounter="https://reunvo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reunvo · Captación de vendedores y mandatos de venta M&amp;A</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Captación de vendedores para firmas de M&amp;A y asesores de pymes: buscamos empresas con tus filtros, contactamos al propietario y te traemos reuniones.">
+<link rel="canonical" href="https://reunvo.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Reunvo">
+<meta property="og:locale" content="es_ES">
+<meta property="og:title" content="Reunvo · Captación de vendedores y mandatos de venta M&amp;A">
+<meta property="og:description" content="Captación de vendedores para firmas de M&amp;A y asesores de pymes: buscamos empresas con tus filtros, contactamos al propietario y te traemos reuniones.">
+<meta property="og:url" content="https://reunvo.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Reunvo · Captación de vendedores y mandatos de venta M&amp;A">
+<meta name="twitter:description" content="Captación de vendedores para firmas de M&amp;A y asesores de pymes: buscamos empresas con tus filtros, contactamos al propietario y te traemos reuniones.">
+<meta name="theme-color" content="#1B2E44">
+<link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add('js')</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://reunvo.com/#org","name":"Reunvo","url":"https://reunvo.com/","areaServed":[{"@type":"Country","name":"España"},{"@type":"Country","name":"Portugal"}],"description":"Captación de vendedores y mandatos de venta para firmas de M&A y asesores de compraventa de empresas."},{"@type":"WebSite","@id":"https://reunvo.com/#website","url":"https://reunvo.com/","name":"Reunvo","inLanguage":"es","publisher":{"@id":"https://reunvo.com/#org"}},{"@type":"Service","serviceType":"Originación de mandatos M&A","provider":{"@id":"https://reunvo.com/#org"},"audience":{"@type":"Audience","audienceType":"Firmas de M&A y asesores de compraventa"},"areaServed":[{"@type":"Country","name":"España"},{"@type":"Country","name":"Portugal"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Qué es la originación de mandatos M&A y cómo ayuda Reunvo?","acceptedAnswer":{"@type":"Answer","text":"Es encontrar empresas cuyos dueños quieren vender antes de que lo haga otra firma. Reunvo hace la prospección completa y los propietarios interesados te responden directamente a ti."}},{"@type":"Question","name":"¿Cómo encontráis las empresas y el correo del propietario?","acceptedAnswer":{"@type":"Answer","text":"Aplicamos tus filtros (sector, provincia, resultado del ejercicio y más) a nuestra base, revisamos la lista y verificamos cada correo antes de enviar. Tu firma aprueba la lista antes del primer envío."}},{"@type":"Question","name":"¿Desde qué correo se envía?","acceptedAnswer":{"@type":"Answer","text":"Desde el Gmail de tu firma, con un permiso solo de envío. Las respuestas llegan a tu bandeja: responde tu firma, no Reunvo."}},{"@type":"Question","name":"¿Qué lleva el PDF personalizado?","acceptedAnswer":{"@type":"Answer","text":"La empresa del propietario en cifras, quién compra empresas de su sector y qué ha hecho tu firma en operaciones parecidas."}}]}]}</script>
 </head>
 <body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top"><div class="wrap">
+ <a class="logo" href="#main" aria-label="Reunvo, inicio" translate="no">Reunvo</a>
+ <nav aria-label="Principal">
+  <a href="#como">Cómo trabajamos</a>
+  <a href="#flujo">El proceso</a>
+  <a href="#planes">Planes</a>
+  <a href="#preguntas">Preguntas</a>
+  <a class="btn sm" href="#contacto">Pedir una llamada</a>
+ </nav>
+</div></header>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">Re<span>un</span>vo</div>
-    <nav>
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="entrar.html" style="margin-left: 28px;">Acceso clientes</a>
-    </nav>
-  </header>
+<main id="main">
 
-  <!-- HERO -->
-  <section class="hero">
-    <p class="eyebrow">Para firmas que trabajan con propietarios de empresas</p>
-    <h1>Contactamos por usted a <em>propietarios de empresas</em> en España y Portugal</h1>
-    <p class="hero-sub">
-      Cada mes le proponemos una lista de empresas a las que su firma quiere ofrecer sus servicios.
-      Usted la aprueba y nosotros enviamos a cada propietario un email y un dossier personalizados,
-      desde su propio correo. Las respuestas le llegan a usted.
-    </p>
-    <div class="hero-cta">
-      <a class="btn-primary" href="mailto:gp@reunvo.com?subject=Reunvo%20%E2%80%94%20Llamada%20de%2015%20minutos">Escríbanos</a>
-      <p class="cta-alt">o llámenos al <a href="tel:+34628917456">628 917 456</a> &middot; <a href="#" onclick="openModal(); return false;">déjenos sus datos</a></p>
-    </div>
-  </section>
-
-  <!-- PRUEBA -->
-  <div style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:56px 24px; text-align:center;">
-    <p style="font-family:'Cormorant Garamond', serif; font-weight:300; font-size:clamp(1.7rem, 4vw, 2.6rem); line-height:1.25; color:var(--white); max-width:760px; margin:0 auto;">
-      De cada 100 empresas contactadas, <span style="color:var(--gold);">9 responden</span> y <span style="color:var(--gold);">2 quieren hablar de vender</span>
-    </p>
-    <p style="font-size:0.85rem; font-weight:300; color:var(--text-dim); margin-top:20px;">
-      Caso real: M&amp;A Fusiones y Adquisiciones, firma de compraventa de empresas, desde mayo de 2026.
-    </p>
+<!-- HERO -->
+<section class="hero"><div class="wrap hero-grid">
+ <div class="hero-copy">
+  <h1>Conseguimos <span class="mark">clientes</span> para tu firma de M&amp;A.</h1>
+  <p class="lead" data-r style="--i:1">Reuniones con propietarios de empresas que podrían vender, para que tu firma consiga nuevos mandatos de venta. Tú solo atiendes las que te interesan.</p>
+  <div class="acts" data-r style="--i:2">
+   <a class="btn" href="#contacto">Pedir una llamada</a>
+   <a class="lnk" href="#como">Ver cómo trabajamos <span aria-hidden="true">→</span></a>
   </div>
+ </div>
 
-  <!-- METODO -->
-  <section class="metodo" id="como-funciona">
-    <p class="section-label">El método</p>
-    <h2 class="sec-h2">Seis pasos entre sus criterios y el primer email</h2>
-    <ol class="metodo-steps">
-      <li>
-        <span class="m-num">1</span>
-        <h3>Criterios</h3>
-        <p>Usted nos dice zona, sectores, tamaño y a qué propietarios quiere llegar.</p>
-      </li>
-      <li>
-        <span class="m-num">2</span>
-        <h3>Selección</h3>
-        <p>Filtramos empresas de España y Portugal en bases de datos mercantiles según sus criterios.</p>
-      </li>
-      <li>
-        <span class="m-num">3</span>
-        <h3>Propietario</h3>
-        <p>Identificamos al propietario o accionista principal de cada empresa.</p>
-      </li>
-      <li>
-        <span class="m-num">4</span>
-        <h3>Verificación</h3>
-        <p>Localizamos su email, lo verificamos y revisamos nombre, tratamiento y datos de la empresa.</p>
-      </li>
-      <li class="m-usted">
-        <span class="m-num">5</span>
-        <h3>Su aprobación</h3>
-        <p>Usted revisa la lista. Solo seguimos con las empresas que aprueba.</p>
-      </li>
-      <li>
-        <span class="m-num">6</span>
-        <h3>Envío personalizado</h3>
-        <p>Cada propietario recibe un email y un dossier sobre su empresa, desde su correo y con su firma.</p>
-      </li>
-    </ol>
-  </section>
-
-  <!-- EMBUDO -->
-  <section class="embudo" id="trabajo">
-    <p class="section-label">El trabajo detrás de cada lista</p>
-    <h2 class="sec-h2">Cada empresa pasa cuatro filtros antes de recibir un email</h2>
-    <div class="filtros">
-      <div class="f-row" style="--w:100%"><div class="f-bar"><span class="f-n">1</span><span class="f-t">Empresas de España y Portugal que encajan con sus criterios</span></div></div>
-      <div class="f-row" style="--w:84%"><div class="f-bar"><span class="f-n">2</span><span class="f-t">Con su propietario identificado</span></div></div>
-      <div class="f-row" style="--w:68%"><div class="f-bar"><span class="f-n">3</span><span class="f-t">Con su email verificado y sus datos revisados</span></div></div>
-      <div class="f-row f-usted" style="--w:52%"><div class="f-bar"><span class="f-n">4</span><span class="f-t">Aprobadas por usted</span></div></div>
+ <figure class="app" data-r style="--i:1" data-ui aria-label="Ejemplo ilustrativo: la bandeja de entrada de tu firma, con respuestas de propietarios y reuniones en el calendario">
+  <div class="app-bar"><span class="app-t">Tu correo · Bandeja de entrada</span><span class="tag">Ejemplo</span></div>
+  <div class="app-body">
+   <ul class="app-side">
+    <li><span>Respuestas este mes</span><b data-k="rep">6</b></li>
+    <li class="hot"><span>Reuniones esta semana</span><b data-k="meet">2</b></li>
+   </ul>
+   <div class="app-main">
+    <ul class="app-list">
+     <li class="unread new"><time data-t="time">11:40</time><b data-t="name0">Marta Iglesias</b><span data-t="subj">Re: Conservas do Morrazo · «¿Lo hablamos el jueves?»</span></li>
+     <li class="unread"><time>ayer</time><b>Luis Otero</b><span>Re: Miño Logística · «Mis socios y yo queremos salir»</span></li>
+     <li><time>ayer</time><b>Ana Lorenzo</b><span>Re: Frío Industrial Lérez · «¿Tienes hueco esta semana?»</span></li>
+     <li><time>lun</time><b>Carmen Souto</b><span>Re: Panificadora Ulla · «Escríbeme en primavera»</span></li>
+     <li><time>lun</time><b>Rosa Vázquez</b><span>Re: Aceros Tambre · «¿Qué valoración tendría?»</span></li>
+    </ul>
+    <div class="meet">
+     <div class="meet-d"><b data-t="day">Jue</b><span data-t="hour">10:00</span></div>
+     <div><p><b>Reunión con <span data-t="name">Marta Iglesias</span></b></p><p class="meet-s">En tu calendario · 45 min</p></div>
+     <span class="ok">Agendada</span>
     </div>
-  </section>
-
-  <!-- NOSOTROS / USTED -->
-  <section class="reparto" id="reparto">
-    <p class="section-label">Quién hace qué</p>
-    <h2 class="sec-h2">Nosotros hacemos el trabajo. Usted decide y conversa.</h2>
-    <div class="reparto-grid">
-      <div class="r-col">
-        <h3>Nosotros</h3>
-        <ul>
-          <li>Seleccionamos las empresas</li>
-          <li>Identificamos a cada propietario</li>
-          <li>Verificamos cada email</li>
-          <li>Redactamos el email</li>
-          <li>Preparamos un dossier para cada empresa</li>
-          <li>Enviamos cada día laborable</li>
-        </ul>
-      </div>
-      <div class="r-col r-usted">
-        <h3>Usted</h3>
-        <ul>
-          <li>Aprueba la lista</li>
-          <li>Responde a los propietarios interesados</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- COMPROMISOS -->
-  <section class="compromisos" id="compromisos">
-    <p class="section-label">Nuestros compromisos</p>
-    <h2>Usted mantiene el control</h2>
-    <div class="compromisos-grid">
-      <div class="benefit-card">
-        <span class="benefit-number">01</span>
-        <h3 class="benefit-title">Usted aprueba cada empresa</h3>
-        <p class="benefit-desc">Ninguna empresa recibe un email sin su aprobación previa.</p>
-      </div>
-      <div class="benefit-card">
-        <span class="benefit-number">02</span>
-        <h3 class="benefit-title">No leemos su correo</h3>
-        <p class="benefit-desc">Solo enviamos en su nombre. Las respuestas llegan a su bandeja y las gestiona usted.</p>
-      </div>
-      <div class="benefit-card">
-        <span class="benefit-number">03</span>
-        <h3 class="benefit-title">Ritmo moderado</h3>
-        <p class="benefit-desc">10 o 20 envíos por día laborable, según su plan, uno a uno y desde su dirección.</p>
-      </div>
-      <div class="benefit-card">
-        <span class="benefit-number">04</span>
-        <h3 class="benefit-title">Funciona con su Gmail</h3>
-        <p class="benefit-desc">Requiere una cuenta de Gmail o de Google Workspace.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CASO REAL -->
-  <section class="caso" id="quien">
-    <p class="section-label">Caso real</p>
-    <h2 class="sec-h2">Probado en una firma de M&amp;A real</h2>
-    <div class="caso-grid">
-      <div>
-        <h3>La firma</h3>
-        <p>M&amp;A Fusiones y Adquisiciones. Compraventa de empresas desde 1988, con oficinas en Barcelona y Madrid. Reunvo nace dentro de esta firma y se usa cada día.</p>
-      </div>
-      <div>
-        <h3>Qué hacemos</h3>
-        <p>Selección de empresas por zona y tamaño, identificación del propietario, email y dossier con su marca, y envíos diarios desde su correo.</p>
-      </div>
-      <div>
-        <h3>Resultado</h3>
-        <p>Desde mayo de 2026, el 9&nbsp;% de los propietarios contactados responde y el 2&nbsp;% quiere hablar de vender su empresa.</p>
-      </div>
-    </div>
-    <p class="caso-excl">Cada empresa se asigna a una sola firma: nunca la contacta otra, tampoco M&amp;A Fusiones y Adquisiciones, y su lista no se comparte con nadie.</p>
-    <p class="caso-contacto">
-      Guillem Palacín &middot; <a href="mailto:gp@reunvo.com">gp@reunvo.com</a>
-      &middot; <a href="tel:+34628917456">628 917 456</a>
-    </p>
-  </section>
-
-  <!-- CTA SECTION -->
-  <section class="cta-section">
-    <h2>Piloto de 30 días sin coste.<br>Tres plazas.</h2>
-    <p>Si no le convence, no continúa y no paga nada.<br>Después del piloto, cuota mensual fija según volumen. Se la detallamos en la llamada.</p>
-    <a class="btn-primary" href="mailto:gp@reunvo.com?subject=Reunvo%20%E2%80%94%20Llamada%20de%2015%20minutos">Escríbanos</a>
-      <p class="cta-alt">o llámenos al <a href="tel:+34628917456">628 917 456</a> &middot; <a href="#" onclick="openModal(); return false;">déjenos sus datos</a></p>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="logo">Re<span>un</span>vo</div>
-    <div>
-      <p>Reunvo &middot; Barcelona &middot; gp@reunvo.com &middot; 628 917 456</p>
-      <p class="legal-links"><a href="/privacidad.html">Política de privacidad</a> &middot; <a href="/aviso-legal.html">Aviso legal</a></p>
-    </div>
-  </footer>
-
-  <!-- MODAL -->
-  <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-    <div class="modal" id="modal">
-      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">&times;</button>
-
-      <div id="form-container">
-        <h3>Solicitar una llamada</h3>
-        <p>Le contactaremos en menos de 48 horas.</p>
-
-        <form id="access-form" onsubmit="handleSubmit(event)">
-          <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Nombre y apellidos" required />
-          </div>
-          <div class="form-group">
-            <label for="empresa">Empresa</label>
-            <input type="text" id="empresa" name="empresa" placeholder="Nombre de su firma" required />
-          </div>
-          <div class="form-group">
-            <label for="email">Email profesional</label>
-            <input type="email" id="email" name="email" placeholder="nombre@firma.com" required />
-          </div>
-          <div class="form-group">
-            <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" name="telefono" placeholder="+34 600 000 000" required />
-          </div>
-          <button type="submit" class="btn-submit" id="btn-submit">Enviar solicitud</button>
-          <p class="form-error" id="form-error">No se ha podido enviar. Inténtelo de nuevo o escriba a gp@reunvo.com.</p>
-        </form>
-      </div>
-
-      <div class="form-success" id="form-success">
-        <div class="check">✦</div>
-        <h4>Solicitud recibida</h4>
-        <p>Le contactaremos<br>en menos de 48 horas.</p>
-      </div>
-    </div>
+   </div>
   </div>
+ </figure>
+</div></section>
 
-  <script>
-    // ── SUPABASE CONFIG ──
-    const SUPABASE_URL = 'https://quywrltqzoyyorbsuiwc.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp';
+<!-- 1. CÓMO TRABAJAMOS (con el método) -->
+<section class="how" id="como"><div class="wrap">
+ <div class="sec-head">
+  <h2 data-r>Cómo trabajamos</h2>
+  <p class="sub" data-r style="--i:1">Tecnología propia para encontrar y escribir, y un equipo que revisa cada envío. Todo sale desde tu correo.</p>
+ </div>
+ <div class="how-grid">
+ <div class="how-pin">
+  <ol class="steps">
+   <li class="step is-active" data-step="0">
+    <button class="step-h" type="button" aria-controls="m0"><span class="tick" aria-hidden="true"><i></i></span>Escribimos cada día, desde tu propio correo</button>
+    <p>Los correos salen uno a uno desde el Gmail de tu firma, con un permiso solo de envío, a propietarios que encajan con tus filtros. Responde tu firma, no Reunvo.</p>
+    <ul class="chips"><li>Permiso solo de envío</li><li>Lista aprobada por ti</li><li>De lunes a viernes</li></ul>
+    <div class="mock-slot">
+     <div class="mock m-out" id="m0" data-ui role="img" aria-label="Ejemplo: carpeta de enviados del correo de tu firma">
+      <div class="mk-bar"><span>Tu correo · Enviados hoy</span></div>
+      <ul class="out"><li><time>09:02</time><b>Marta Iglesias</b><span>Conservas do Morrazo</span><i>PDF</i></li><li><time>09:31</time><b>Xosé Pereira</b><span>Talleres Arnoia</span><i>PDF</i></li><li><time>09:58</time><b>Ana Lorenzo</b><span>Frío Industrial Lérez</span><i>PDF</i></li><li><time>10:26</time><b>Manuel Castro</b><span>Maderas do Sar</span><i>PDF</i></li><li><time>10:55</time><b>Carmen Souto</b><span>Panificadora Ulla</span><i>PDF</i></li><li><time>11:23</time><b>Luis Otero</b><span>Miño Logística</span><i>PDF</i></li><li><time>11:50</time><b>Rosa Vázquez</b><span>Aceros Tambre</span><i>PDF</i></li><li><time>12:18</time><b>Pablo Rial</b><span>Clínica Berbés</span><i>PDF</i></li><li><time>12:47</time><b>Elena Varela</b><span>Envases Ourense</span><i>PDF</i></li></ul>
+      <p class="mk-foot">Ejemplo ilustrativo</p>
+     </div>
+    </div>
+   </li>
+   <li class="step" data-step="1">
+    <button class="step-h" type="button" aria-controls="m1"><span class="tick" aria-hidden="true"><i></i></span>Las respuestas llegan a tu bandeja</button>
+    <p>El propietario te contesta a ti: responde tu firma, no Reunvo. Tú decides a quién llamar y cuándo.</p>
+    <ul class="chips"><li>Tu bandeja</li><li>Tu conversación</li></ul>
+    <div class="mock-slot">
+     <div class="mock m-in" id="m1" data-ui role="img" aria-label="Ejemplo: respuestas de propietarios en la bandeja de entrada de tu firma">
+      <div class="mk-bar"><span>Tu correo · Bandeja de entrada</span></div>
+      <ul class="inbox"><li class="unread"><time>11:40</time><b>Marta Iglesias</b><span>Re: Conservas do Morrazo · «Llevo tiempo pensándolo. ¿Lo hablamos el jueves?»</span></li><li class="unread"><time>10:12</time><b>Luis Otero</b><span>Re: Miño Logística · «Mis socios y yo queremos salir.»</span></li><li class=""><time>ayer</time><b>Ana Lorenzo</b><span>Re: Frío Industrial Lérez · «Buen momento. ¿Tienes hueco?»</span></li><li class=""><time>ayer</time><b>Carmen Souto</b><span>Re: Panificadora Ulla · «Ahora no, escríbeme en primavera.»</span></li><li class=""><time>lun</time><b>Rosa Vázquez</b><span>Re: Aceros Tambre · «¿Qué valoración tendría?»</span></li></ul>
+      <p class="mk-foot">Ejemplo ilustrativo</p>
+     </div>
+    </div>
+   </li>
+   <li class="step" data-step="2">
+    <button class="step-h" type="button" aria-controls="m2"><span class="tick" aria-hidden="true"><i></i></span>Un correo corto con su PDF</button>
+    <p>Cada propietario recibe un correo breve y un PDF que explica por qué tu firma le escribe a él.</p>
+    <ul class="chips"><li>Breve</li><li>Firmado por ti</li><li>PDF adjunto</li></ul>
+    <div class="mock-slot">
+     <div class="mock m-mail" id="m2" data-ui role="img" aria-label="Ejemplo: correo al propietario con el PDF personalizado adjunto">
+      <div class="mk-bar"><span>Mensaje enviado desde tu correo</span></div>
+      <dl class="mail-h">
+       <div><dt>De</dt><dd>[Nombre] · <mark>Tu firma</mark></dd></div>
+       <div><dt>Para</dt><dd>Sr. [Apellido] · <mark>[Empresa]</mark></dd></div>
+       <div><dt>Asunto</dt><dd>[Empresa] · información adjunta</dd></div>
+      </dl>
+      <div class="mail-b">
+       <p>Apreciado Sr. [Apellido],</p>
+       <p>Me pongo en contacto con usted porque [Empresa] encaja en el perfil de empresas con las que trabajamos habitualmente en procesos de venta.</p>
+       <p>Le adjunto un documento con información sobre nuestro enfoque y cómo podríamos colaborar.</p>
+       <p>Si le parece oportuno, estaré encantado de mantener una conversación breve y confidencial. Puede responder a este email para coordinar una llamada. Si por el contrario prefiere no recibir más comunicaciones, indíquelo y lo respetaré de inmediato.</p>
+       <p class="sig">Un cordial saludo,<br><span>[Firma]</span></p>
+      </div>
+      <div class="pdf-att"><span class="pdf-ic" aria-hidden="true">PDF</span><div><b>[Empresa]_Propuesta.pdf</b><span>3 páginas</span></div></div>
+      <p class="mk-foot">Ejemplo ilustrativo. El texto lo adaptamos a cada cliente.</p>
+     </div>
+    </div>
+   </li>
+   <li class="step" data-step="3">
+    <button class="step-h" type="button" aria-controls="m3"><span class="tick" aria-hidden="true"><i></i></span>Un PDF hecho para cada empresa</button>
+    <p>Su nombre y sus cifras, junto a la marca de tu firma. Así se ve la maqueta, con datos de ejemplo.</p>
+    <ul class="chips"><li>Su empresa</li><li>Sus cifras</li><li>Tu firma</li></ul>
+    <div class="mock-slot">
+     <div class="mock viewer" id="m3" data-ui data-viewer aria-roledescription="visor de documento" aria-label="Ejemplo: maqueta de la propuesta en PDF, 3 páginas">
+      <div class="vw-pages"><div class="vw-page is-on" data-p="1"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/propuesta-1.webp" width="1408" height="1991" alt="Ejemplo de propuesta en PDF para el propietario de una empresa, página 1 de 3" loading="lazy"></button></div><div class="vw-page" data-p="2"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/propuesta-2.webp" width="1408" height="1991" alt="Ejemplo de propuesta en PDF para el propietario de una empresa, página 2 de 3" loading="lazy"></button></div><div class="vw-page" data-p="3"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/propuesta-3.webp" width="1408" height="1991" alt="Ejemplo de propuesta en PDF para el propietario de una empresa, página 3 de 3" loading="lazy"></button></div></div>
+      <div class="vw-nav"><button type="button" class="vw-prev" aria-label="Página anterior">←</button><span class="vw-n" aria-live="polite">1/3</span><button type="button" class="vw-next" aria-label="Página siguiente">→</button></div>
+      <p class="mk-foot">Ejemplo de formato: lo defines tú</p>
+     </div>
+    </div>
+   </li>
+   <li class="step" data-step="4">
+    <button class="step-h" type="button" aria-controls="m4"><span class="tick" aria-hidden="true"><i></i></span>Y si lo pides, el dossier</button>
+    <p>Antes de una llamada importante, te preparamos un dossier de la empresa: finanzas, competidores y posibles compradores.</p>
+    <ul class="chips"><li>Finanzas</li><li>Competidores</li><li>Compradores</li></ul>
+    <div class="mock-slot">
+     <div class="mock viewer" id="m4" data-ui data-viewer aria-roledescription="visor de documento" aria-label="Ejemplo: maqueta del dossier en PDF, 3 páginas">
+      <div class="vw-pages"><div class="vw-page is-on" data-p="1"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/dossier-1.webp" width="1408" height="1991" alt="Ejemplo de dossier en PDF con datos de una empresa y posibles compradores, página 1 de 3" loading="lazy"></button></div><div class="vw-page" data-p="2"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/dossier-2.webp" width="1408" height="1991" alt="Ejemplo de dossier en PDF con datos de una empresa y posibles compradores, página 2 de 3" loading="lazy"></button></div><div class="vw-page" data-p="3"><button type="button" class="vw-zoom" aria-label="Ampliar la página" aria-haspopup="dialog"><img class="ex-pg" src="ejemplos/dossier-3.webp" width="1408" height="1991" alt="Ejemplo de dossier en PDF con datos de una empresa y posibles compradores, página 3 de 3" loading="lazy"></button></div></div>
+      <div class="vw-nav"><button type="button" class="vw-prev" aria-label="Página anterior">←</button><span class="vw-n" aria-live="polite">1/3</span><button type="button" class="vw-next" aria-label="Página siguiente">→</button></div>
+      <p class="mk-foot">Ejemplo con datos ficticios</p>
+     </div>
+    </div>
+   </li>
+  </ol>
+  <div class="stage" data-r style="--i:2"><div class="stage-in" aria-live="polite"></div><div class="stage-nav"><button type="button" class="st-prev" aria-label="Paso anterior">←</button><div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><button type="button" class="st-next" aria-label="Paso siguiente">→</button></div></div>
+ </div>
+ </div>
+</div></section>
 
-    function openModal() {
-      document.getElementById('overlay').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
+<!-- 2. MAPA -->
+<section class="map-sec" id="mapa"><div class="wrap map-grid">
+ <figure class="map" data-r role="img" aria-label="Mapa de Europa: España y Portugal activos; el resto, próximamente">
+  <svg viewBox="-100 0 705 450" width="705" height="450">
+   <title>España y Portugal activos; Francia y el resto de Europa, próximamente</title>
+   <g class="land"><path class="m-off" d="M362 5h0M372 5h0M383 5h0M394 5h0M404 5h0M414 5h0M425 5h0M436 5h0M446 5h0M456 5h0M467 5h0M478 5h0M488 5h0M498 5h0M509 5h0M520 5h0M530 5h0M540 5h0M551 5h0M562 5h0M572 5h0M582 5h0M593 5h0M604 5h0M357 14h0M367 14h0M378 14h0M388 14h0M399 14h0M409 14h0M420 14h0M430 14h0M441 14h0M451 14h0M462 14h0M472 14h0M483 14h0M493 14h0M504 14h0M514 14h0M525 14h0M535 14h0M546 14h0M556 14h0M567 14h0M577 14h0M588 14h0M598 14h0M352 23h0M362 23h0M372 23h0M383 23h0M394 23h0M404 23h0M414 23h0M425 23h0M436 23h0M446 23h0M456 23h0M467 23h0M478 23h0M488 23h0M498 23h0M509 23h0M520 23h0M530 23h0M540 23h0M551 23h0M562 23h0M572 23h0M582 23h0M593 23h0M604 23h0M346 32h0M357 32h0M367 32h0M378 32h0M388 32h0M399 32h0M409 32h0M420 32h0M430 32h0M441 32h0M451 32h0M462 32h0M472 32h0M483 32h0M493 32h0M504 32h0M514 32h0M525 32h0M535 32h0M546 32h0M556 32h0M567 32h0M577 32h0M588 32h0M598 32h0M341 41h0M352 41h0M362 41h0M372 41h0M383 41h0M394 41h0M404 41h0M414 41h0M425 41h0M436 41h0M446 41h0M456 41h0M467 41h0M478 41h0M488 41h0M498 41h0M509 41h0M520 41h0M530 41h0M540 41h0M551 41h0M562 41h0M572 41h0M582 41h0M593 41h0M604 41h0M346 50h0M357 50h0M367 50h0M378 50h0M388 50h0M399 50h0M409 50h0M420 50h0M430 50h0M441 50h0M451 50h0M462 50h0M472 50h0M483 50h0M493 50h0M504 50h0M514 50h0M525 50h0M535 50h0M546 50h0M556 50h0M567 50h0M577 50h0M588 50h0M598 50h0M362 60h0M372 60h0M383 60h0M394 60h0M404 60h0M414 60h0M425 60h0M436 60h0M446 60h0M456 60h0M467 60h0M478 60h0M488 60h0M498 60h0M509 60h0M520 60h0M530 60h0M540 60h0M378 69h0M388 69h0M399 69h0M409 69h0M420 69h0M430 69h0M441 69h0M451 69h0M462 69h0M472 69h0M483 69h0M493 69h0M504 69h0M514 69h0M525 69h0M394 78h0M404 78h0M414 78h0M425 78h0M436 78h0M446 78h0M456 78h0M467 78h0M478 78h0M488 78h0M498 78h0M509 78h0M520 78h0M420 87h0M430 87h0M441 87h0M451 87h0M462 87h0M472 87h0M483 87h0M493 87h0M504 87h0M514 87h0M525 87h0M478 96h0M488 96h0M498 96h0M509 96h0M520 96h0M509 387h0M520 387h0M530 387h0M540 387h0M551 387h0M562 387h0M572 387h0M582 387h0M593 387h0M604 387h0M493 396h0M504 396h0M514 396h0M525 396h0M535 396h0M546 396h0M556 396h0M567 396h0M577 396h0M588 396h0M598 396h0M478 405h0M488 405h0M498 405h0M509 405h0M520 405h0M530 405h0M540 405h0M551 405h0M562 405h0M572 405h0M582 405h0M593 405h0M604 405h0M462 414h0M472 414h0M483 414h0M493 414h0M504 414h0M514 414h0M525 414h0M535 414h0M546 414h0M556 414h0M567 414h0M577 414h0M588 414h0M598 414h0M446 423h0M456 423h0M467 423h0M478 423h0M488 423h0M498 423h0M509 423h0M520 423h0M530 423h0M540 423h0M551 423h0M562 423h0M572 423h0M582 423h0M593 423h0M604 423h0M189 432h0M430 432h0M441 432h0M451 432h0M462 432h0M472 432h0M483 432h0M493 432h0M504 432h0M514 432h0M525 432h0M535 432h0M546 432h0M556 432h0M567 432h0M577 432h0M588 432h0M598 432h0M184 441h0M194 441h0M204 441h0M215 441h0M226 441h0M414 441h0M425 441h0M436 441h0M446 441h0M456 441h0M467 441h0M478 441h0M488 441h0M498 441h0M509 441h0M520 441h0M530 441h0M540 441h0M551 441h0M562 441h0M572 441h0M582 441h0M593 441h0M604 441h0"/><g class="es"><circle cx="100" cy="41" style="--d:7"/><circle cx="110" cy="41" style="--d:7"/><circle cx="120" cy="41" style="--d:6"/><circle cx="131" cy="41" style="--d:6"/><circle cx="142" cy="41" style="--d:6"/><circle cx="152" cy="41" style="--d:6"/><circle cx="162" cy="41" style="--d:6"/><circle cx="173" cy="41" style="--d:5"/><circle cx="184" cy="41" style="--d:5"/><circle cx="84" cy="50" style="--d:7"/><circle cx="94" cy="50" style="--d:7"/><circle cx="105" cy="50" style="--d:7"/><circle cx="115" cy="50" style="--d:6"/><circle cx="126" cy="50" style="--d:6"/><circle cx="136" cy="50" style="--d:6"/><circle cx="147" cy="50" style="--d:6"/><circle cx="157" cy="50" style="--d:5"/><circle cx="168" cy="50" style="--d:5"/><circle cx="178" cy="50" style="--d:5"/><circle cx="189" cy="50" style="--d:5"/><circle cx="199" cy="50" style="--d:5"/><circle cx="210" cy="50" style="--d:5"/><circle cx="220" cy="50" style="--d:5"/><circle cx="231" cy="50" style="--d:4"/><circle cx="241" cy="50" style="--d:4"/><circle cx="252" cy="50" style="--d:4"/><circle cx="262" cy="50" style="--d:4"/><circle cx="273" cy="50" style="--d:4"/><circle cx="283" cy="50" style="--d:4"/><circle cx="294" cy="50" style="--d:4"/><circle cx="304" cy="50" style="--d:5"/><circle cx="315" cy="50" style="--d:5"/><circle cx="325" cy="50" style="--d:5"/><circle cx="336" cy="50" style="--d:5"/><circle cx="68" cy="60" style="--d:7"/><circle cx="78" cy="60" style="--d:7"/><circle cx="89" cy="60" style="--d:7"/><circle cx="100" cy="60" style="--d:7"/><circle cx="110" cy="60" style="--d:6"/><circle cx="120" cy="60" style="--d:6"/><circle cx="131" cy="60" style="--d:6"/><circle cx="142" cy="60" style="--d:6"/><circle cx="152" cy="60" style="--d:5"/><circle cx="162" cy="60" style="--d:5"/><circle cx="173" cy="60" style="--d:5"/><circle cx="184" cy="60" style="--d:5"/><circle cx="194" cy="60" style="--d:5"/><circle cx="204" cy="60" style="--d:4"/><circle cx="215" cy="60" style="--d:4"/><circle cx="226" cy="60" style="--d:4"/><circle cx="236" cy="60" style="--d:4"/><circle cx="246" cy="60" style="--d:4"/><circle cx="257" cy="60" style="--d:4"/><circle cx="268" cy="60" style="--d:4"/><circle cx="278" cy="60" style="--d:4"/><circle cx="288" cy="60" style="--d:4"/><circle cx="299" cy="60" style="--d:4"/><circle cx="310" cy="60" style="--d:4"/><circle cx="320" cy="60" style="--d:4"/><circle cx="330" cy="60" style="--d:5"/><circle cx="341" cy="60" style="--d:5"/><circle cx="352" cy="60" style="--d:5"/><circle cx="52" cy="69" style="--d:8"/><circle cx="63" cy="69" style="--d:7"/><circle cx="73" cy="69" style="--d:7"/><circle cx="84" cy="69" style="--d:7"/><circle cx="94" cy="69" style="--d:6"/><circle cx="105" cy="69" style="--d:6"/><circle cx="115" cy="69" style="--d:6"/><circle cx="126" cy="69" style="--d:6"/><circle cx="136" cy="69" style="--d:5"/><circle cx="147" cy="69" style="--d:5"/><circle cx="157" cy="69" style="--d:5"/><circle cx="168" cy="69" style="--d:5"/><circle cx="178" cy="69" style="--d:5"/><circle cx="189" cy="69" style="--d:4"/><circle cx="199" cy="69" style="--d:4"/><circle cx="210" cy="69" style="--d:4"/><circle cx="220" cy="69" style="--d:4"/><circle cx="231" cy="69" style="--d:4"/><circle cx="241" cy="69" style="--d:4"/><circle cx="252" cy="69" style="--d:4"/><circle cx="262" cy="69" style="--d:4"/><circle cx="273" cy="69" style="--d:4"/><circle cx="283" cy="69" style="--d:4"/><circle cx="294" cy="69" style="--d:4"/><circle cx="304" cy="69" style="--d:4"/><circle cx="315" cy="69" style="--d:4"/><circle cx="325" cy="69" style="--d:4"/><circle cx="336" cy="69" style="--d:4"/><circle cx="346" cy="69" style="--d:5"/><circle cx="357" cy="69" style="--d:5"/><circle cx="367" cy="69" style="--d:5"/><circle cx="58" cy="78" style="--d:7"/><circle cx="68" cy="78" style="--d:7"/><circle cx="78" cy="78" style="--d:7"/><circle cx="89" cy="78" style="--d:6"/><circle cx="100" cy="78" style="--d:6"/><circle cx="110" cy="78" style="--d:6"/><circle cx="120" cy="78" style="--d:6"/><circle cx="131" cy="78" style="--d:5"/><circle cx="142" cy="78" style="--d:5"/><circle cx="152" cy="78" style="--d:5"/><circle cx="162" cy="78" style="--d:5"/><circle cx="173" cy="78" style="--d:4"/><circle cx="184" cy="78" style="--d:4"/><circle cx="194" cy="78" style="--d:4"/><circle cx="204" cy="78" style="--d:4"/><circle cx="215" cy="78" style="--d:4"/><circle cx="226" cy="78" style="--d:4"/><circle cx="236" cy="78" style="--d:4"/><circle cx="246" cy="78" style="--d:4"/><circle cx="257" cy="78" style="--d:3"/><circle cx="268" cy="78" style="--d:3"/><circle cx="278" cy="78" style="--d:3"/><circle cx="288" cy="78" style="--d:4"/><circle cx="299" cy="78" style="--d:4"/><circle cx="310" cy="78" style="--d:4"/><circle cx="320" cy="78" style="--d:4"/><circle cx="330" cy="78" style="--d:4"/><circle cx="341" cy="78" style="--d:4"/><circle cx="352" cy="78" style="--d:4"/><circle cx="362" cy="78" style="--d:5"/><circle cx="372" cy="78" style="--d:5"/><circle cx="383" cy="78" style="--d:5"/><circle cx="63" cy="87" style="--d:7"/><circle cx="73" cy="87" style="--d:7"/><circle cx="84" cy="87" style="--d:6"/><circle cx="94" cy="87" style="--d:6"/><circle cx="105" cy="87" style="--d:6"/><circle cx="115" cy="87" style="--d:6"/><circle cx="126" cy="87" style="--d:5"/><circle cx="136" cy="87" style="--d:5"/><circle cx="147" cy="87" style="--d:5"/><circle cx="157" cy="87" style="--d:5"/><circle cx="168" cy="87" style="--d:4"/><circle cx="178" cy="87" style="--d:4"/><circle cx="189" cy="87" style="--d:4"/><circle cx="199" cy="87" style="--d:4"/><circle cx="210" cy="87" style="--d:4"/><circle cx="220" cy="87" style="--d:3"/><circle cx="231" cy="87" style="--d:3"/><circle cx="241" cy="87" style="--d:3"/><circle cx="252" cy="87" style="--d:3"/><circle cx="262" cy="87" style="--d:3"/><circle cx="273" cy="87" style="--d:3"/><circle cx="283" cy="87" style="--d:3"/><circle cx="294" cy="87" style="--d:3"/><circle cx="304" cy="87" style="--d:3"/><circle cx="315" cy="87" style="--d:4"/><circle cx="325" cy="87" style="--d:4"/><circle cx="336" cy="87" style="--d:4"/><circle cx="346" cy="87" style="--d:4"/><circle cx="357" cy="87" style="--d:4"/><circle cx="367" cy="87" style="--d:4"/><circle cx="378" cy="87" style="--d:5"/><circle cx="388" cy="87" style="--d:5"/><circle cx="399" cy="87" style="--d:5"/><circle cx="409" cy="87" style="--d:5"/><circle cx="58" cy="96" style="--d:7"/><circle cx="68" cy="96" style="--d:7"/><circle cx="78" cy="96" style="--d:6"/><circle cx="89" cy="96" style="--d:6"/><circle cx="100" cy="96" style="--d:6"/><circle cx="110" cy="96" style="--d:6"/><circle cx="120" cy="96" style="--d:5"/><circle cx="131" cy="96" style="--d:5"/><circle cx="142" cy="96" style="--d:5"/><circle cx="152" cy="96" style="--d:4"/><circle cx="162" cy="96" style="--d:4"/><circle cx="173" cy="96" style="--d:4"/><circle cx="184" cy="96" style="--d:4"/><circle cx="194" cy="96" style="--d:4"/><circle cx="204" cy="96" style="--d:3"/><circle cx="215" cy="96" style="--d:3"/><circle cx="226" cy="96" style="--d:3"/><circle cx="236" cy="96" style="--d:3"/><circle cx="246" cy="96" style="--d:3"/><circle cx="257" cy="96" style="--d:3"/><circle cx="268" cy="96" style="--d:3"/><circle cx="278" cy="96" style="--d:3"/><circle cx="288" cy="96" style="--d:3"/><circle cx="299" cy="96" style="--d:3"/><circle cx="310" cy="96" style="--d:3"/><circle cx="320" cy="96" style="--d:3"/><circle cx="330" cy="96" style="--d:4"/><circle cx="341" cy="96" style="--d:4"/><circle cx="352" cy="96" style="--d:4"/><circle cx="362" cy="96" style="--d:4"/><circle cx="372" cy="96" style="--d:4"/><circle cx="383" cy="96" style="--d:5"/><circle cx="394" cy="96" style="--d:5"/><circle cx="404" cy="96" style="--d:5"/><circle cx="414" cy="96" style="--d:5"/><circle cx="425" cy="96" style="--d:6"/><circle cx="436" cy="96" style="--d:6"/><circle cx="446" cy="96" style="--d:6"/><circle cx="456" cy="96" style="--d:7"/><circle cx="467" cy="96" style="--d:7"/><circle cx="63" cy="105" style="--d:7"/><circle cx="73" cy="105" style="--d:6"/><circle cx="84" cy="105" style="--d:6"/><circle cx="94" cy="105" style="--d:6"/><circle cx="105" cy="105" style="--d:6"/><circle cx="115" cy="105" style="--d:5"/><circle cx="126" cy="105" style="--d:5"/><circle cx="136" cy="105" style="--d:5"/><circle cx="147" cy="105" style="--d:4"/><circle cx="157" cy="105" style="--d:4"/><circle cx="168" cy="105" style="--d:4"/><circle cx="178" cy="105" style="--d:4"/><circle cx="189" cy="105" style="--d:3"/><circle cx="199" cy="105" style="--d:3"/><circle cx="210" cy="105" style="--d:3"/><circle cx="220" cy="105" style="--d:3"/><circle cx="231" cy="105" style="--d:3"/><circle cx="241" cy="105" style="--d:3"/><circle cx="252" cy="105" style="--d:3"/><circle cx="262" cy="105" style="--d:3"/><circle cx="273" cy="105" style="--d:3"/><circle cx="283" cy="105" style="--d:3"/><circle cx="294" cy="105" style="--d:3"/><circle cx="304" cy="105" style="--d:3"/><circle cx="315" cy="105" style="--d:3"/><circle cx="325" cy="105" style="--d:3"/><circle cx="336" cy="105" style="--d:3"/><circle cx="346" cy="105" style="--d:4"/><circle cx="357" cy="105" style="--d:4"/><circle cx="367" cy="105" style="--d:4"/><circle cx="378" cy="105" style="--d:4"/><circle cx="388" cy="105" style="--d:5"/><circle cx="399" cy="105" style="--d:5"/><circle cx="409" cy="105" style="--d:5"/><circle cx="420" cy="105" style="--d:5"/><circle cx="430" cy="105" style="--d:6"/><circle cx="441" cy="105" style="--d:6"/><circle cx="451" cy="105" style="--d:6"/><circle cx="462" cy="105" style="--d:7"/><circle cx="472" cy="105" style="--d:7"/><circle cx="483" cy="105" style="--d:7"/><circle cx="493" cy="105" style="--d:8"/><circle cx="504" cy="105" style="--d:8"/><circle cx="514" cy="105" style="--d:8"/><circle cx="525" cy="105" style="--d:9"/><circle cx="68" cy="114" style="--d:6"/><circle cx="78" cy="114" style="--d:6"/><circle cx="89" cy="114" style="--d:6"/><circle cx="100" cy="114" style="--d:6"/><circle cx="110" cy="114" style="--d:5"/><circle cx="120" cy="114" style="--d:5"/><circle cx="131" cy="114" style="--d:5"/><circle cx="142" cy="114" style="--d:4"/><circle cx="152" cy="114" style="--d:4"/><circle cx="162" cy="114" style="--d:4"/><circle cx="173" cy="114" style="--d:4"/><circle cx="184" cy="114" style="--d:3"/><circle cx="194" cy="114" style="--d:3"/><circle cx="204" cy="114" style="--d:3"/><circle cx="215" cy="114" style="--d:3"/><circle cx="226" cy="114" style="--d:3"/><circle cx="236" cy="114" style="--d:2"/><circle cx="246" cy="114" style="--d:2"/><circle cx="257" cy="114" style="--d:2"/><circle cx="268" cy="114" style="--d:2"/><circle cx="278" cy="114" style="--d:2"/><circle cx="288" cy="114" style="--d:2"/><circle cx="299" cy="114" style="--d:3"/><circle cx="310" cy="114" style="--d:3"/><circle cx="320" cy="114" style="--d:3"/><circle cx="330" cy="114" style="--d:3"/><circle cx="341" cy="114" style="--d:3"/><circle cx="352" cy="114" style="--d:3"/><circle cx="362" cy="114" style="--d:4"/><circle cx="372" cy="114" style="--d:4"/><circle cx="383" cy="114" style="--d:4"/><circle cx="394" cy="114" style="--d:5"/><circle cx="404" cy="114" style="--d:5"/><circle cx="414" cy="114" style="--d:5"/><circle cx="425" cy="114" style="--d:5"/><circle cx="436" cy="114" style="--d:6"/><circle cx="446" cy="114" style="--d:6"/><circle cx="456" cy="114" style="--d:6"/><circle cx="467" cy="114" style="--d:7"/><circle cx="478" cy="114" style="--d:7"/><circle cx="488" cy="114" style="--d:7"/><circle cx="498" cy="114" style="--d:8"/><circle cx="509" cy="114" style="--d:8"/><circle cx="520" cy="114" style="--d:8"/><circle cx="157" cy="123" style="--d:4"/><circle cx="168" cy="123" style="--d:4"/><circle cx="178" cy="123" style="--d:3"/><circle cx="189" cy="123" style="--d:3"/><circle cx="199" cy="123" style="--d:3"/><circle cx="210" cy="123" style="--d:3"/><circle cx="220" cy="123" style="--d:2"/><circle cx="231" cy="123" style="--d:2"/><circle cx="241" cy="123" style="--d:2"/><circle cx="252" cy="123" style="--d:2"/><circle cx="262" cy="123" style="--d:2"/><circle cx="273" cy="123" style="--d:2"/><circle cx="283" cy="123" style="--d:2"/><circle cx="294" cy="123" style="--d:2"/><circle cx="304" cy="123" style="--d:2"/><circle cx="315" cy="123" style="--d:2"/><circle cx="325" cy="123" style="--d:3"/><circle cx="336" cy="123" style="--d:3"/><circle cx="346" cy="123" style="--d:3"/><circle cx="357" cy="123" style="--d:3"/><circle cx="367" cy="123" style="--d:4"/><circle cx="378" cy="123" style="--d:4"/><circle cx="388" cy="123" style="--d:4"/><circle cx="399" cy="123" style="--d:5"/><circle cx="409" cy="123" style="--d:5"/><circle cx="420" cy="123" style="--d:5"/><circle cx="430" cy="123" style="--d:5"/><circle cx="441" cy="123" style="--d:6"/><circle cx="451" cy="123" style="--d:6"/><circle cx="462" cy="123" style="--d:6"/><circle cx="472" cy="123" style="--d:7"/><circle cx="483" cy="123" style="--d:7"/><circle cx="493" cy="123" style="--d:7"/><circle cx="504" cy="123" style="--d:8"/><circle cx="514" cy="123" style="--d:8"/><circle cx="525" cy="123" style="--d:8"/><circle cx="162" cy="132" style="--d:3"/><circle cx="173" cy="132" style="--d:3"/><circle cx="184" cy="132" style="--d:3"/><circle cx="194" cy="132" style="--d:3"/><circle cx="204" cy="132" style="--d:2"/><circle cx="215" cy="132" style="--d:2"/><circle cx="226" cy="132" style="--d:2"/><circle cx="236" cy="132" style="--d:2"/><circle cx="246" cy="132" style="--d:2"/><circle cx="257" cy="132" style="--d:2"/><circle cx="268" cy="132" style="--d:2"/><circle cx="278" cy="132" style="--d:2"/><circle cx="288" cy="132" style="--d:2"/><circle cx="299" cy="132" style="--d:2"/><circle cx="310" cy="132" style="--d:2"/><circle cx="320" cy="132" style="--d:2"/><circle cx="330" cy="132" style="--d:3"/><circle cx="341" cy="132" style="--d:3"/><circle cx="352" cy="132" style="--d:3"/><circle cx="362" cy="132" style="--d:3"/><circle cx="372" cy="132" style="--d:4"/><circle cx="383" cy="132" style="--d:4"/><circle cx="394" cy="132" style="--d:4"/><circle cx="404" cy="132" style="--d:5"/><circle cx="414" cy="132" style="--d:5"/><circle cx="425" cy="132" style="--d:5"/><circle cx="436" cy="132" style="--d:5"/><circle cx="446" cy="132" style="--d:6"/><circle cx="456" cy="132" style="--d:6"/><circle cx="467" cy="132" style="--d:6"/><circle cx="478" cy="132" style="--d:7"/><circle cx="488" cy="132" style="--d:7"/><circle cx="498" cy="132" style="--d:7"/><circle cx="509" cy="132" style="--d:8"/><circle cx="168" cy="141" style="--d:3"/><circle cx="178" cy="141" style="--d:3"/><circle cx="189" cy="141" style="--d:3"/><circle cx="199" cy="141" style="--d:2"/><circle cx="210" cy="141" style="--d:2"/><circle cx="220" cy="141" style="--d:2"/><circle cx="231" cy="141" style="--d:2"/><circle cx="241" cy="141" style="--d:2"/><circle cx="252" cy="141" style="--d:1"/><circle cx="262" cy="141" style="--d:1"/><circle cx="273" cy="141" style="--d:1"/><circle cx="283" cy="141" style="--d:1"/><circle cx="294" cy="141" style="--d:2"/><circle cx="304" cy="141" style="--d:2"/><circle cx="315" cy="141" style="--d:2"/><circle cx="325" cy="141" style="--d:2"/><circle cx="336" cy="141" style="--d:3"/><circle cx="346" cy="141" style="--d:3"/><circle cx="357" cy="141" style="--d:3"/><circle cx="367" cy="141" style="--d:3"/><circle cx="378" cy="141" style="--d:4"/><circle cx="388" cy="141" style="--d:4"/><circle cx="399" cy="141" style="--d:4"/><circle cx="409" cy="141" style="--d:5"/><circle cx="420" cy="141" style="--d:5"/><circle cx="430" cy="141" style="--d:5"/><circle cx="441" cy="141" style="--d:6"/><circle cx="451" cy="141" style="--d:6"/><circle cx="462" cy="141" style="--d:6"/><circle cx="472" cy="141" style="--d:7"/><circle cx="483" cy="141" style="--d:7"/><circle cx="493" cy="141" style="--d:7"/><circle cx="504" cy="141" style="--d:8"/><circle cx="162" cy="150" style="--d:3"/><circle cx="173" cy="150" style="--d:3"/><circle cx="184" cy="150" style="--d:3"/><circle cx="194" cy="150" style="--d:2"/><circle cx="204" cy="150" style="--d:2"/><circle cx="215" cy="150" style="--d:2"/><circle cx="226" cy="150" style="--d:2"/><circle cx="236" cy="150" style="--d:1"/><circle cx="246" cy="150" style="--d:1"/><circle cx="257" cy="150" style="--d:1"/><circle cx="268" cy="150" style="--d:1"/><circle cx="278" cy="150" style="--d:1"/><circle cx="288" cy="150" style="--d:1"/><circle cx="299" cy="150" style="--d:1"/><circle cx="310" cy="150" style="--d:2"/><circle cx="320" cy="150" style="--d:2"/><circle cx="330" cy="150" style="--d:2"/><circle cx="341" cy="150" style="--d:2"/><circle cx="352" cy="150" style="--d:3"/><circle cx="362" cy="150" style="--d:3"/><circle cx="372" cy="150" style="--d:3"/><circle cx="383" cy="150" style="--d:4"/><circle cx="394" cy="150" style="--d:4"/><circle cx="404" cy="150" style="--d:4"/><circle cx="414" cy="150" style="--d:5"/><circle cx="425" cy="150" style="--d:5"/><circle cx="436" cy="150" style="--d:5"/><circle cx="446" cy="150" style="--d:6"/><circle cx="456" cy="150" style="--d:6"/><circle cx="467" cy="150" style="--d:6"/><circle cx="478" cy="150" style="--d:7"/><circle cx="488" cy="150" style="--d:7"/><circle cx="157" cy="160" style="--d:3"/><circle cx="168" cy="160" style="--d:3"/><circle cx="178" cy="160" style="--d:3"/><circle cx="189" cy="160" style="--d:2"/><circle cx="199" cy="160" style="--d:2"/><circle cx="210" cy="160" style="--d:2"/><circle cx="220" cy="160" style="--d:1"/><circle cx="231" cy="160" style="--d:1"/><circle cx="241" cy="160" style="--d:1"/><circle cx="252" cy="160" style="--d:1"/><circle cx="262" cy="160" style="--d:1"/><circle cx="273" cy="160" style="--d:1"/><circle cx="283" cy="160" style="--d:1"/><circle cx="294" cy="160" style="--d:1"/><circle cx="304" cy="160" style="--d:1"/><circle cx="315" cy="160" style="--d:2"/><circle cx="325" cy="160" style="--d:2"/><circle cx="336" cy="160" style="--d:2"/><circle cx="346" cy="160" style="--d:2"/><circle cx="357" cy="160" style="--d:3"/><circle cx="367" cy="160" style="--d:3"/><circle cx="378" cy="160" style="--d:3"/><circle cx="388" cy="160" style="--d:4"/><circle cx="399" cy="160" style="--d:4"/><circle cx="409" cy="160" style="--d:4"/><circle cx="420" cy="160" style="--d:5"/><circle cx="430" cy="160" style="--d:5"/><circle cx="441" cy="160" style="--d:5"/><circle cx="451" cy="160" style="--d:6"/><circle cx="462" cy="160" style="--d:6"/><circle cx="472" cy="160" style="--d:6"/><circle cx="483" cy="160" style="--d:7"/><circle cx="152" cy="169" style="--d:3"/><circle cx="162" cy="169" style="--d:3"/><circle cx="173" cy="169" style="--d:3"/><circle cx="184" cy="169" style="--d:2"/><circle cx="194" cy="169" style="--d:2"/><circle cx="204" cy="169" style="--d:2"/><circle cx="215" cy="169" style="--d:1"/><circle cx="226" cy="169" style="--d:1"/><circle cx="236" cy="169" style="--d:1"/><circle cx="246" cy="169" style="--d:1"/><circle cx="257" cy="169" style="--d:1"/><circle cx="268" cy="169" style="--d:1"/><circle cx="278" cy="169" style="--d:1"/><circle cx="288" cy="169" style="--d:1"/><circle cx="299" cy="169" style="--d:1"/><circle cx="310" cy="169" style="--d:1"/><circle cx="320" cy="169" style="--d:2"/><circle cx="330" cy="169" style="--d:2"/><circle cx="341" cy="169" style="--d:2"/><circle cx="352" cy="169" style="--d:3"/><circle cx="362" cy="169" style="--d:3"/><circle cx="372" cy="169" style="--d:3"/><circle cx="383" cy="169" style="--d:3"/><circle cx="394" cy="169" style="--d:4"/><circle cx="404" cy="169" style="--d:4"/><circle cx="414" cy="169" style="--d:4"/><circle cx="425" cy="169" style="--d:5"/><circle cx="436" cy="169" style="--d:5"/><circle cx="446" cy="169" style="--d:5"/><circle cx="456" cy="169" style="--d:6"/><circle cx="147" cy="178" style="--d:3"/><circle cx="157" cy="178" style="--d:3"/><circle cx="168" cy="178" style="--d:3"/><circle cx="178" cy="178" style="--d:2"/><circle cx="189" cy="178" style="--d:2"/><circle cx="199" cy="178" style="--d:2"/><circle cx="210" cy="178" style="--d:1"/><circle cx="220" cy="178" style="--d:1"/><circle cx="231" cy="178" style="--d:1"/><circle cx="241" cy="178" style="--d:1"/><circle cx="252" cy="178" style="--d:0"/><circle cx="262" cy="178" style="--d:0"/><circle cx="273" cy="178" style="--d:0"/><circle cx="283" cy="178" style="--d:0"/><circle cx="294" cy="178" style="--d:1"/><circle cx="304" cy="178" style="--d:1"/><circle cx="315" cy="178" style="--d:1"/><circle cx="325" cy="178" style="--d:2"/><circle cx="336" cy="178" style="--d:2"/><circle cx="346" cy="178" style="--d:2"/><circle cx="357" cy="178" style="--d:3"/><circle cx="367" cy="178" style="--d:3"/><circle cx="378" cy="178" style="--d:3"/><circle cx="388" cy="178" style="--d:4"/><circle cx="399" cy="178" style="--d:4"/><circle cx="409" cy="178" style="--d:4"/><circle cx="420" cy="178" style="--d:5"/><circle cx="430" cy="178" style="--d:5"/><circle cx="441" cy="178" style="--d:5"/><circle cx="152" cy="187" style="--d:3"/><circle cx="162" cy="187" style="--d:3"/><circle cx="173" cy="187" style="--d:2"/><circle cx="184" cy="187" style="--d:2"/><circle cx="194" cy="187" style="--d:2"/><circle cx="204" cy="187" style="--d:1"/><circle cx="215" cy="187" style="--d:1"/><circle cx="226" cy="187" style="--d:1"/><circle cx="236" cy="187" style="--d:1"/><circle cx="246" cy="187" style="--d:0"/><circle cx="257" cy="187" style="--d:0"/><circle cx="268" cy="187" style="--d:0"/><circle cx="278" cy="187" style="--d:0"/><circle cx="288" cy="187" style="--d:0"/><circle cx="299" cy="187" style="--d:1"/><circle cx="310" cy="187" style="--d:1"/><circle cx="320" cy="187" style="--d:1"/><circle cx="330" cy="187" style="--d:2"/><circle cx="341" cy="187" style="--d:2"/><circle cx="352" cy="187" style="--d:2"/><circle cx="362" cy="187" style="--d:3"/><circle cx="372" cy="187" style="--d:3"/><circle cx="383" cy="187" style="--d:3"/><circle cx="394" cy="187" style="--d:4"/><circle cx="404" cy="187" style="--d:4"/><circle cx="414" cy="187" style="--d:4"/><circle cx="425" cy="187" style="--d:5"/><circle cx="147" cy="196" style="--d:3"/><circle cx="157" cy="196" style="--d:3"/><circle cx="168" cy="196" style="--d:3"/><circle cx="178" cy="196" style="--d:2"/><circle cx="189" cy="196" style="--d:2"/><circle cx="199" cy="196" style="--d:2"/><circle cx="210" cy="196" style="--d:1"/><circle cx="220" cy="196" style="--d:1"/><circle cx="231" cy="196" style="--d:1"/><circle cx="241" cy="196" style="--d:0"/><circle cx="252" cy="196" style="--d:0"/><circle cx="262" cy="196" style="--d:0"/><circle cx="273" cy="196" style="--d:0"/><circle cx="283" cy="196" style="--d:0"/><circle cx="294" cy="196" style="--d:0"/><circle cx="304" cy="196" style="--d:1"/><circle cx="315" cy="196" style="--d:1"/><circle cx="325" cy="196" style="--d:1"/><circle cx="336" cy="196" style="--d:2"/><circle cx="346" cy="196" style="--d:2"/><circle cx="357" cy="196" style="--d:3"/><circle cx="367" cy="196" style="--d:3"/><circle cx="378" cy="196" style="--d:3"/><circle cx="388" cy="196" style="--d:4"/><circle cx="399" cy="196" style="--d:4"/><circle cx="409" cy="196" style="--d:4"/><circle cx="420" cy="196" style="--d:5"/><circle cx="152" cy="205" style="--d:3"/><circle cx="162" cy="205" style="--d:3"/><circle cx="173" cy="205" style="--d:2"/><circle cx="184" cy="205" style="--d:2"/><circle cx="194" cy="205" style="--d:2"/><circle cx="204" cy="205" style="--d:1"/><circle cx="215" cy="205" style="--d:1"/><circle cx="226" cy="205" style="--d:1"/><circle cx="236" cy="205" style="--d:0"/><circle cx="246" cy="205" style="--d:0"/><circle cx="257" cy="205" style="--d:0"/><circle cx="268" cy="205" style="--d:0"/><circle cx="278" cy="205" style="--d:0"/><circle cx="288" cy="205" style="--d:0"/><circle cx="299" cy="205" style="--d:1"/><circle cx="310" cy="205" style="--d:1"/><circle cx="320" cy="205" style="--d:1"/><circle cx="330" cy="205" style="--d:2"/><circle cx="341" cy="205" style="--d:2"/><circle cx="352" cy="205" style="--d:2"/><circle cx="362" cy="205" style="--d:3"/><circle cx="372" cy="205" style="--d:3"/><circle cx="383" cy="205" style="--d:3"/><circle cx="394" cy="205" style="--d:4"/><circle cx="404" cy="205" style="--d:4"/><circle cx="414" cy="205" style="--d:4"/><circle cx="147" cy="214" style="--d:3"/><circle cx="157" cy="214" style="--d:3"/><circle cx="168" cy="214" style="--d:3"/><circle cx="178" cy="214" style="--d:2"/><circle cx="189" cy="214" style="--d:2"/><circle cx="199" cy="214" style="--d:2"/><circle cx="210" cy="214" style="--d:1"/><circle cx="220" cy="214" style="--d:1"/><circle cx="231" cy="214" style="--d:1"/><circle cx="241" cy="214" style="--d:0"/><circle cx="252" cy="214" style="--d:0"/><circle cx="262" cy="214" style="--d:0"/><circle cx="273" cy="214" style="--d:0"/><circle cx="283" cy="214" style="--d:0"/><circle cx="294" cy="214" style="--d:1"/><circle cx="304" cy="214" style="--d:1"/><circle cx="315" cy="214" style="--d:1"/><circle cx="325" cy="214" style="--d:2"/><circle cx="336" cy="214" style="--d:2"/><circle cx="346" cy="214" style="--d:2"/><circle cx="357" cy="214" style="--d:3"/><circle cx="367" cy="214" style="--d:3"/><circle cx="378" cy="214" style="--d:3"/><circle cx="388" cy="214" style="--d:4"/><circle cx="399" cy="214" style="--d:4"/><circle cx="409" cy="214" style="--d:4"/><circle cx="142" cy="223" style="--d:4"/><circle cx="152" cy="223" style="--d:3"/><circle cx="162" cy="223" style="--d:3"/><circle cx="173" cy="223" style="--d:3"/><circle cx="184" cy="223" style="--d:2"/><circle cx="194" cy="223" style="--d:2"/><circle cx="204" cy="223" style="--d:2"/><circle cx="215" cy="223" style="--d:1"/><circle cx="226" cy="223" style="--d:1"/><circle cx="236" cy="223" style="--d:1"/><circle cx="246" cy="223" style="--d:0"/><circle cx="257" cy="223" style="--d:0"/><circle cx="268" cy="223" style="--d:0"/><circle cx="278" cy="223" style="--d:0"/><circle cx="288" cy="223" style="--d:1"/><circle cx="299" cy="223" style="--d:1"/><circle cx="310" cy="223" style="--d:1"/><circle cx="320" cy="223" style="--d:1"/><circle cx="330" cy="223" style="--d:2"/><circle cx="341" cy="223" style="--d:2"/><circle cx="352" cy="223" style="--d:2"/><circle cx="362" cy="223" style="--d:3"/><circle cx="372" cy="223" style="--d:3"/><circle cx="383" cy="223" style="--d:3"/><circle cx="394" cy="223" style="--d:4"/><circle cx="404" cy="223" style="--d:4"/><circle cx="147" cy="232" style="--d:3"/><circle cx="157" cy="232" style="--d:3"/><circle cx="168" cy="232" style="--d:3"/><circle cx="178" cy="232" style="--d:2"/><circle cx="189" cy="232" style="--d:2"/><circle cx="199" cy="232" style="--d:2"/><circle cx="210" cy="232" style="--d:2"/><circle cx="220" cy="232" style="--d:1"/><circle cx="231" cy="232" style="--d:1"/><circle cx="241" cy="232" style="--d:1"/><circle cx="252" cy="232" style="--d:1"/><circle cx="262" cy="232" style="--d:1"/><circle cx="273" cy="232" style="--d:1"/><circle cx="283" cy="232" style="--d:1"/><circle cx="294" cy="232" style="--d:1"/><circle cx="304" cy="232" style="--d:1"/><circle cx="315" cy="232" style="--d:1"/><circle cx="325" cy="232" style="--d:2"/><circle cx="336" cy="232" style="--d:2"/><circle cx="346" cy="232" style="--d:2"/><circle cx="357" cy="232" style="--d:3"/><circle cx="367" cy="232" style="--d:3"/><circle cx="378" cy="232" style="--d:3"/><circle cx="388" cy="232" style="--d:4"/><circle cx="399" cy="232" style="--d:4"/><circle cx="514" cy="232" style="--d:8"/><circle cx="525" cy="232" style="--d:8"/><circle cx="535" cy="232" style="--d:8"/><circle cx="120" cy="241" style="--d:4"/><circle cx="131" cy="241" style="--d:4"/><circle cx="142" cy="241" style="--d:4"/><circle cx="152" cy="241" style="--d:3"/><circle cx="162" cy="241" style="--d:3"/><circle cx="173" cy="241" style="--d:3"/><circle cx="184" cy="241" style="--d:2"/><circle cx="194" cy="241" style="--d:2"/><circle cx="204" cy="241" style="--d:2"/><circle cx="215" cy="241" style="--d:2"/><circle cx="226" cy="241" style="--d:1"/><circle cx="236" cy="241" style="--d:1"/><circle cx="246" cy="241" style="--d:1"/><circle cx="257" cy="241" style="--d:1"/><circle cx="268" cy="241" style="--d:1"/><circle cx="278" cy="241" style="--d:1"/><circle cx="288" cy="241" style="--d:1"/><circle cx="299" cy="241" style="--d:1"/><circle cx="310" cy="241" style="--d:1"/><circle cx="320" cy="241" style="--d:2"/><circle cx="330" cy="241" style="--d:2"/><circle cx="341" cy="241" style="--d:2"/><circle cx="352" cy="241" style="--d:3"/><circle cx="362" cy="241" style="--d:3"/><circle cx="372" cy="241" style="--d:3"/><circle cx="383" cy="241" style="--d:4"/><circle cx="394" cy="241" style="--d:4"/><circle cx="498" cy="241" style="--d:7"/><circle cx="509" cy="241" style="--d:8"/><circle cx="520" cy="241" style="--d:8"/><circle cx="530" cy="241" style="--d:8"/><circle cx="126" cy="251" style="--d:4"/><circle cx="136" cy="251" style="--d:4"/><circle cx="147" cy="251" style="--d:4"/><circle cx="157" cy="251" style="--d:3"/><circle cx="168" cy="251" style="--d:3"/><circle cx="178" cy="251" style="--d:3"/><circle cx="189" cy="251" style="--d:2"/><circle cx="199" cy="251" style="--d:2"/><circle cx="210" cy="251" style="--d:2"/><circle cx="220" cy="251" style="--d:2"/><circle cx="231" cy="251" style="--d:1"/><circle cx="241" cy="251" style="--d:1"/><circle cx="252" cy="251" style="--d:1"/><circle cx="262" cy="251" style="--d:1"/><circle cx="273" cy="251" style="--d:1"/><circle cx="283" cy="251" style="--d:1"/><circle cx="294" cy="251" style="--d:1"/><circle cx="304" cy="251" style="--d:2"/><circle cx="315" cy="251" style="--d:2"/><circle cx="325" cy="251" style="--d:2"/><circle cx="336" cy="251" style="--d:2"/><circle cx="346" cy="251" style="--d:3"/><circle cx="357" cy="251" style="--d:3"/><circle cx="367" cy="251" style="--d:3"/><circle cx="378" cy="251" style="--d:4"/><circle cx="388" cy="251" style="--d:4"/><circle cx="514" cy="251" style="--d:8"/><circle cx="525" cy="251" style="--d:8"/><circle cx="142" cy="260" style="--d:4"/><circle cx="152" cy="260" style="--d:4"/><circle cx="162" cy="260" style="--d:3"/><circle cx="173" cy="260" style="--d:3"/><circle cx="184" cy="260" style="--d:3"/><circle cx="194" cy="260" style="--d:2"/><circle cx="204" cy="260" style="--d:2"/><circle cx="215" cy="260" style="--d:2"/><circle cx="226" cy="260" style="--d:2"/><circle cx="236" cy="260" style="--d:2"/><circle cx="246" cy="260" style="--d:2"/><circle cx="257" cy="260" style="--d:1"/><circle cx="268" cy="260" style="--d:1"/><circle cx="278" cy="260" style="--d:1"/><circle cx="288" cy="260" style="--d:2"/><circle cx="299" cy="260" style="--d:2"/><circle cx="310" cy="260" style="--d:2"/><circle cx="320" cy="260" style="--d:2"/><circle cx="330" cy="260" style="--d:2"/><circle cx="341" cy="260" style="--d:3"/><circle cx="352" cy="260" style="--d:3"/><circle cx="362" cy="260" style="--d:3"/><circle cx="372" cy="260" style="--d:4"/><circle cx="383" cy="260" style="--d:4"/><circle cx="394" cy="260" style="--d:4"/><circle cx="147" cy="269" style="--d:4"/><circle cx="157" cy="269" style="--d:4"/><circle cx="168" cy="269" style="--d:3"/><circle cx="178" cy="269" style="--d:3"/><circle cx="189" cy="269" style="--d:3"/><circle cx="199" cy="269" style="--d:3"/><circle cx="210" cy="269" style="--d:2"/><circle cx="220" cy="269" style="--d:2"/><circle cx="231" cy="269" style="--d:2"/><circle cx="241" cy="269" style="--d:2"/><circle cx="252" cy="269" style="--d:2"/><circle cx="262" cy="269" style="--d:2"/><circle cx="273" cy="269" style="--d:2"/><circle cx="283" cy="269" style="--d:2"/><circle cx="294" cy="269" style="--d:2"/><circle cx="304" cy="269" style="--d:2"/><circle cx="315" cy="269" style="--d:2"/><circle cx="325" cy="269" style="--d:2"/><circle cx="336" cy="269" style="--d:3"/><circle cx="346" cy="269" style="--d:3"/><circle cx="357" cy="269" style="--d:3"/><circle cx="367" cy="269" style="--d:4"/><circle cx="378" cy="269" style="--d:4"/><circle cx="388" cy="269" style="--d:4"/><circle cx="399" cy="269" style="--d:4"/><circle cx="142" cy="278" style="--d:4"/><circle cx="152" cy="278" style="--d:4"/><circle cx="162" cy="278" style="--d:4"/><circle cx="173" cy="278" style="--d:3"/><circle cx="184" cy="278" style="--d:3"/><circle cx="194" cy="278" style="--d:3"/><circle cx="204" cy="278" style="--d:3"/><circle cx="215" cy="278" style="--d:2"/><circle cx="226" cy="278" style="--d:2"/><circle cx="236" cy="278" style="--d:2"/><circle cx="246" cy="278" style="--d:2"/><circle cx="257" cy="278" style="--d:2"/><circle cx="268" cy="278" style="--d:2"/><circle cx="278" cy="278" style="--d:2"/><circle cx="288" cy="278" style="--d:2"/><circle cx="299" cy="278" style="--d:2"/><circle cx="310" cy="278" style="--d:2"/><circle cx="320" cy="278" style="--d:3"/><circle cx="330" cy="278" style="--d:3"/><circle cx="341" cy="278" style="--d:3"/><circle cx="352" cy="278" style="--d:3"/><circle cx="362" cy="278" style="--d:4"/><circle cx="372" cy="278" style="--d:4"/><circle cx="383" cy="278" style="--d:4"/><circle cx="394" cy="278" style="--d:4"/><circle cx="404" cy="278" style="--d:5"/><circle cx="136" cy="287" style="--d:5"/><circle cx="147" cy="287" style="--d:4"/><circle cx="157" cy="287" style="--d:4"/><circle cx="168" cy="287" style="--d:4"/><circle cx="178" cy="287" style="--d:3"/><circle cx="189" cy="287" style="--d:3"/><circle cx="199" cy="287" style="--d:3"/><circle cx="210" cy="287" style="--d:3"/><circle cx="220" cy="287" style="--d:3"/><circle cx="231" cy="287" style="--d:3"/><circle cx="241" cy="287" style="--d:2"/><circle cx="252" cy="287" style="--d:2"/><circle cx="262" cy="287" style="--d:2"/><circle cx="273" cy="287" style="--d:2"/><circle cx="283" cy="287" style="--d:2"/><circle cx="294" cy="287" style="--d:2"/><circle cx="304" cy="287" style="--d:3"/><circle cx="315" cy="287" style="--d:3"/><circle cx="325" cy="287" style="--d:3"/><circle cx="336" cy="287" style="--d:3"/><circle cx="346" cy="287" style="--d:3"/><circle cx="357" cy="287" style="--d:4"/><circle cx="367" cy="287" style="--d:4"/><circle cx="378" cy="287" style="--d:4"/><circle cx="388" cy="287" style="--d:4"/><circle cx="399" cy="287" style="--d:5"/><circle cx="131" cy="296" style="--d:5"/><circle cx="142" cy="296" style="--d:5"/><circle cx="152" cy="296" style="--d:4"/><circle cx="162" cy="296" style="--d:4"/><circle cx="173" cy="296" style="--d:4"/><circle cx="184" cy="296" style="--d:4"/><circle cx="194" cy="296" style="--d:3"/><circle cx="204" cy="296" style="--d:3"/><circle cx="215" cy="296" style="--d:3"/><circle cx="226" cy="296" style="--d:3"/><circle cx="236" cy="296" style="--d:3"/><circle cx="246" cy="296" style="--d:3"/><circle cx="257" cy="296" style="--d:3"/><circle cx="268" cy="296" style="--d:3"/><circle cx="278" cy="296" style="--d:3"/><circle cx="288" cy="296" style="--d:3"/><circle cx="299" cy="296" style="--d:3"/><circle cx="310" cy="296" style="--d:3"/><circle cx="320" cy="296" style="--d:3"/><circle cx="330" cy="296" style="--d:3"/><circle cx="341" cy="296" style="--d:3"/><circle cx="352" cy="296" style="--d:4"/><circle cx="362" cy="296" style="--d:4"/><circle cx="372" cy="296" style="--d:4"/><circle cx="383" cy="296" style="--d:4"/><circle cx="394" cy="296" style="--d:5"/><circle cx="136" cy="305" style="--d:5"/><circle cx="147" cy="305" style="--d:5"/><circle cx="157" cy="305" style="--d:4"/><circle cx="168" cy="305" style="--d:4"/><circle cx="178" cy="305" style="--d:4"/><circle cx="189" cy="305" style="--d:4"/><circle cx="199" cy="305" style="--d:4"/><circle cx="210" cy="305" style="--d:3"/><circle cx="220" cy="305" style="--d:3"/><circle cx="231" cy="305" style="--d:3"/><circle cx="241" cy="305" style="--d:3"/><circle cx="252" cy="305" style="--d:3"/><circle cx="262" cy="305" style="--d:3"/><circle cx="273" cy="305" style="--d:3"/><circle cx="283" cy="305" style="--d:3"/><circle cx="294" cy="305" style="--d:3"/><circle cx="304" cy="305" style="--d:3"/><circle cx="315" cy="305" style="--d:3"/><circle cx="325" cy="305" style="--d:3"/><circle cx="336" cy="305" style="--d:4"/><circle cx="346" cy="305" style="--d:4"/><circle cx="357" cy="305" style="--d:4"/><circle cx="367" cy="305" style="--d:4"/><circle cx="378" cy="305" style="--d:5"/><circle cx="142" cy="314" style="--d:5"/><circle cx="152" cy="314" style="--d:5"/><circle cx="162" cy="314" style="--d:4"/><circle cx="173" cy="314" style="--d:4"/><circle cx="184" cy="314" style="--d:4"/><circle cx="194" cy="314" style="--d:4"/><circle cx="204" cy="314" style="--d:4"/><circle cx="215" cy="314" style="--d:4"/><circle cx="226" cy="314" style="--d:3"/><circle cx="236" cy="314" style="--d:3"/><circle cx="246" cy="314" style="--d:3"/><circle cx="257" cy="314" style="--d:3"/><circle cx="268" cy="314" style="--d:3"/><circle cx="278" cy="314" style="--d:3"/><circle cx="288" cy="314" style="--d:3"/><circle cx="299" cy="314" style="--d:3"/><circle cx="310" cy="314" style="--d:3"/><circle cx="320" cy="314" style="--d:4"/><circle cx="330" cy="314" style="--d:4"/><circle cx="341" cy="314" style="--d:4"/><circle cx="352" cy="314" style="--d:4"/><circle cx="362" cy="314" style="--d:4"/><circle cx="372" cy="314" style="--d:5"/><circle cx="383" cy="314" style="--d:5"/><circle cx="136" cy="323" style="--d:5"/><circle cx="147" cy="323" style="--d:5"/><circle cx="157" cy="323" style="--d:5"/><circle cx="168" cy="323" style="--d:5"/><circle cx="178" cy="323" style="--d:4"/><circle cx="189" cy="323" style="--d:4"/><circle cx="199" cy="323" style="--d:4"/><circle cx="210" cy="323" style="--d:4"/><circle cx="220" cy="323" style="--d:4"/><circle cx="231" cy="323" style="--d:4"/><circle cx="241" cy="323" style="--d:4"/><circle cx="252" cy="323" style="--d:4"/><circle cx="262" cy="323" style="--d:4"/><circle cx="273" cy="323" style="--d:4"/><circle cx="283" cy="323" style="--d:4"/><circle cx="294" cy="323" style="--d:4"/><circle cx="304" cy="323" style="--d:4"/><circle cx="315" cy="323" style="--d:4"/><circle cx="325" cy="323" style="--d:4"/><circle cx="336" cy="323" style="--d:4"/><circle cx="346" cy="323" style="--d:4"/><circle cx="357" cy="323" style="--d:5"/><circle cx="367" cy="323" style="--d:5"/><circle cx="378" cy="323" style="--d:5"/><circle cx="131" cy="332" style="--d:6"/><circle cx="142" cy="332" style="--d:5"/><circle cx="152" cy="332" style="--d:5"/><circle cx="162" cy="332" style="--d:5"/><circle cx="173" cy="332" style="--d:5"/><circle cx="184" cy="332" style="--d:5"/><circle cx="194" cy="332" style="--d:4"/><circle cx="204" cy="332" style="--d:4"/><circle cx="215" cy="332" style="--d:4"/><circle cx="226" cy="332" style="--d:4"/><circle cx="236" cy="332" style="--d:4"/><circle cx="246" cy="332" style="--d:4"/><circle cx="257" cy="332" style="--d:4"/><circle cx="268" cy="332" style="--d:4"/><circle cx="278" cy="332" style="--d:4"/><circle cx="288" cy="332" style="--d:4"/><circle cx="299" cy="332" style="--d:4"/><circle cx="310" cy="332" style="--d:4"/><circle cx="320" cy="332" style="--d:4"/><circle cx="330" cy="332" style="--d:4"/><circle cx="341" cy="332" style="--d:4"/><circle cx="352" cy="332" style="--d:5"/><circle cx="362" cy="332" style="--d:5"/><circle cx="372" cy="332" style="--d:5"/><circle cx="126" cy="341" style="--d:6"/><circle cx="136" cy="341" style="--d:6"/><circle cx="147" cy="341" style="--d:5"/><circle cx="157" cy="341" style="--d:5"/><circle cx="168" cy="341" style="--d:5"/><circle cx="178" cy="341" style="--d:5"/><circle cx="189" cy="341" style="--d:5"/><circle cx="199" cy="341" style="--d:5"/><circle cx="210" cy="341" style="--d:4"/><circle cx="220" cy="341" style="--d:4"/><circle cx="231" cy="341" style="--d:4"/><circle cx="241" cy="341" style="--d:4"/><circle cx="252" cy="341" style="--d:4"/><circle cx="262" cy="341" style="--d:4"/><circle cx="273" cy="341" style="--d:4"/><circle cx="283" cy="341" style="--d:4"/><circle cx="294" cy="341" style="--d:4"/><circle cx="304" cy="341" style="--d:4"/><circle cx="315" cy="341" style="--d:4"/><circle cx="325" cy="341" style="--d:4"/><circle cx="336" cy="341" style="--d:5"/><circle cx="346" cy="341" style="--d:5"/><circle cx="357" cy="341" style="--d:5"/><circle cx="367" cy="341" style="--d:5"/><circle cx="120" cy="351" style="--d:6"/><circle cx="131" cy="351" style="--d:6"/><circle cx="142" cy="351" style="--d:6"/><circle cx="152" cy="351" style="--d:6"/><circle cx="162" cy="351" style="--d:5"/><circle cx="173" cy="351" style="--d:5"/><circle cx="184" cy="351" style="--d:5"/><circle cx="194" cy="351" style="--d:5"/><circle cx="204" cy="351" style="--d:5"/><circle cx="215" cy="351" style="--d:5"/><circle cx="226" cy="351" style="--d:5"/><circle cx="236" cy="351" style="--d:4"/><circle cx="246" cy="351" style="--d:4"/><circle cx="257" cy="351" style="--d:4"/><circle cx="268" cy="351" style="--d:4"/><circle cx="278" cy="351" style="--d:4"/><circle cx="288" cy="351" style="--d:4"/><circle cx="299" cy="351" style="--d:5"/><circle cx="310" cy="351" style="--d:5"/><circle cx="320" cy="351" style="--d:5"/><circle cx="330" cy="351" style="--d:5"/><circle cx="341" cy="351" style="--d:5"/><circle cx="352" cy="351" style="--d:5"/><circle cx="126" cy="360" style="--d:6"/><circle cx="136" cy="360" style="--d:6"/><circle cx="147" cy="360" style="--d:6"/><circle cx="157" cy="360" style="--d:6"/><circle cx="168" cy="360" style="--d:6"/><circle cx="178" cy="360" style="--d:5"/><circle cx="189" cy="360" style="--d:5"/><circle cx="199" cy="360" style="--d:5"/><circle cx="210" cy="360" style="--d:5"/><circle cx="220" cy="360" style="--d:5"/><circle cx="231" cy="360" style="--d:5"/><circle cx="241" cy="360" style="--d:5"/><circle cx="252" cy="360" style="--d:5"/><circle cx="262" cy="360" style="--d:5"/><circle cx="273" cy="360" style="--d:5"/><circle cx="283" cy="360" style="--d:5"/><circle cx="294" cy="360" style="--d:5"/><circle cx="304" cy="360" style="--d:5"/><circle cx="315" cy="360" style="--d:5"/><circle cx="325" cy="360" style="--d:5"/><circle cx="336" cy="360" style="--d:5"/><circle cx="152" cy="369" style="--d:6"/><circle cx="162" cy="369" style="--d:6"/><circle cx="173" cy="369" style="--d:6"/><circle cx="184" cy="369" style="--d:6"/><circle cx="194" cy="369" style="--d:5"/><circle cx="204" cy="369" style="--d:5"/><circle cx="215" cy="369" style="--d:5"/><circle cx="226" cy="369" style="--d:5"/><circle cx="236" cy="369" style="--d:5"/><circle cx="246" cy="369" style="--d:5"/><circle cx="257" cy="369" style="--d:5"/><circle cx="268" cy="369" style="--d:5"/><circle cx="278" cy="369" style="--d:5"/><circle cx="288" cy="369" style="--d:5"/><circle cx="299" cy="369" style="--d:5"/><circle cx="310" cy="369" style="--d:5"/><circle cx="320" cy="369" style="--d:5"/><circle cx="330" cy="369" style="--d:5"/><circle cx="168" cy="378" style="--d:6"/><circle cx="178" cy="378" style="--d:6"/><circle cx="189" cy="378" style="--d:6"/><circle cx="199" cy="378" style="--d:6"/><circle cx="210" cy="378" style="--d:6"/><circle cx="220" cy="378" style="--d:5"/><circle cx="231" cy="378" style="--d:5"/><circle cx="241" cy="378" style="--d:5"/><circle cx="252" cy="378" style="--d:5"/><circle cx="262" cy="378" style="--d:5"/><circle cx="273" cy="378" style="--d:5"/><circle cx="283" cy="378" style="--d:5"/><circle cx="294" cy="378" style="--d:5"/><circle cx="304" cy="378" style="--d:5"/><circle cx="315" cy="378" style="--d:6"/><circle cx="325" cy="378" style="--d:6"/><circle cx="173" cy="387" style="--d:6"/><circle cx="184" cy="387" style="--d:6"/><circle cx="194" cy="387" style="--d:6"/><circle cx="204" cy="387" style="--d:6"/><circle cx="215" cy="387" style="--d:6"/><circle cx="226" cy="387" style="--d:6"/><circle cx="178" cy="396" style="--d:6"/><circle cx="189" cy="396" style="--d:6"/><circle cx="199" cy="396" style="--d:6"/><circle cx="210" cy="396" style="--d:6"/><circle cx="220" cy="396" style="--d:6"/><circle cx="184" cy="405" style="--d:7"/><circle cx="194" cy="405" style="--d:7"/><circle cx="204" cy="405" style="--d:6"/><circle cx="189" cy="414" style="--d:7"/></g><g class="pt"><circle cx="73" cy="123" style="--d:6"/><circle cx="84" cy="123" style="--d:6"/><circle cx="94" cy="123" style="--d:6"/><circle cx="105" cy="123" style="--d:5"/><circle cx="115" cy="123" style="--d:5"/><circle cx="126" cy="123" style="--d:5"/><circle cx="136" cy="123" style="--d:4"/><circle cx="147" cy="123" style="--d:4"/><circle cx="68" cy="132" style="--d:6"/><circle cx="78" cy="132" style="--d:6"/><circle cx="89" cy="132" style="--d:6"/><circle cx="100" cy="132" style="--d:5"/><circle cx="110" cy="132" style="--d:5"/><circle cx="120" cy="132" style="--d:5"/><circle cx="131" cy="132" style="--d:4"/><circle cx="142" cy="132" style="--d:4"/><circle cx="152" cy="132" style="--d:4"/><circle cx="73" cy="141" style="--d:6"/><circle cx="84" cy="141" style="--d:6"/><circle cx="94" cy="141" style="--d:5"/><circle cx="105" cy="141" style="--d:5"/><circle cx="115" cy="141" style="--d:5"/><circle cx="126" cy="141" style="--d:4"/><circle cx="136" cy="141" style="--d:4"/><circle cx="147" cy="141" style="--d:4"/><circle cx="157" cy="141" style="--d:3"/><circle cx="78" cy="150" style="--d:6"/><circle cx="89" cy="150" style="--d:5"/><circle cx="100" cy="150" style="--d:5"/><circle cx="110" cy="150" style="--d:5"/><circle cx="120" cy="150" style="--d:4"/><circle cx="131" cy="150" style="--d:4"/><circle cx="142" cy="150" style="--d:4"/><circle cx="152" cy="150" style="--d:3"/><circle cx="73" cy="160" style="--d:6"/><circle cx="84" cy="160" style="--d:6"/><circle cx="94" cy="160" style="--d:5"/><circle cx="105" cy="160" style="--d:5"/><circle cx="115" cy="160" style="--d:5"/><circle cx="126" cy="160" style="--d:4"/><circle cx="136" cy="160" style="--d:4"/><circle cx="147" cy="160" style="--d:4"/><circle cx="78" cy="169" style="--d:6"/><circle cx="89" cy="169" style="--d:5"/><circle cx="100" cy="169" style="--d:5"/><circle cx="110" cy="169" style="--d:5"/><circle cx="120" cy="169" style="--d:4"/><circle cx="131" cy="169" style="--d:4"/><circle cx="142" cy="169" style="--d:4"/><circle cx="73" cy="178" style="--d:6"/><circle cx="84" cy="178" style="--d:5"/><circle cx="94" cy="178" style="--d:5"/><circle cx="105" cy="178" style="--d:5"/><circle cx="115" cy="178" style="--d:4"/><circle cx="126" cy="178" style="--d:4"/><circle cx="136" cy="178" style="--d:4"/><circle cx="78" cy="187" style="--d:6"/><circle cx="89" cy="187" style="--d:5"/><circle cx="100" cy="187" style="--d:5"/><circle cx="110" cy="187" style="--d:5"/><circle cx="120" cy="187" style="--d:4"/><circle cx="131" cy="187" style="--d:4"/><circle cx="142" cy="187" style="--d:4"/><circle cx="73" cy="196" style="--d:6"/><circle cx="84" cy="196" style="--d:5"/><circle cx="94" cy="196" style="--d:5"/><circle cx="105" cy="196" style="--d:5"/><circle cx="115" cy="196" style="--d:4"/><circle cx="126" cy="196" style="--d:4"/><circle cx="136" cy="196" style="--d:4"/><circle cx="68" cy="205" style="--d:6"/><circle cx="78" cy="205" style="--d:6"/><circle cx="89" cy="205" style="--d:5"/><circle cx="100" cy="205" style="--d:5"/><circle cx="110" cy="205" style="--d:5"/><circle cx="120" cy="205" style="--d:4"/><circle cx="131" cy="205" style="--d:4"/><circle cx="142" cy="205" style="--d:3"/><circle cx="73" cy="214" style="--d:6"/><circle cx="84" cy="214" style="--d:5"/><circle cx="94" cy="214" style="--d:5"/><circle cx="105" cy="214" style="--d:5"/><circle cx="115" cy="214" style="--d:4"/><circle cx="126" cy="214" style="--d:4"/><circle cx="136" cy="214" style="--d:4"/><circle cx="68" cy="223" style="--d:6"/><circle cx="78" cy="223" style="--d:6"/><circle cx="89" cy="223" style="--d:5"/><circle cx="100" cy="223" style="--d:5"/><circle cx="110" cy="223" style="--d:5"/><circle cx="120" cy="223" style="--d:4"/><circle cx="131" cy="223" style="--d:4"/><circle cx="63" cy="232" style="--d:6"/><circle cx="73" cy="232" style="--d:6"/><circle cx="84" cy="232" style="--d:5"/><circle cx="94" cy="232" style="--d:5"/><circle cx="105" cy="232" style="--d:5"/><circle cx="115" cy="232" style="--d:4"/><circle cx="126" cy="232" style="--d:4"/><circle cx="136" cy="232" style="--d:4"/><circle cx="58" cy="241" style="--d:6"/><circle cx="68" cy="241" style="--d:6"/><circle cx="78" cy="241" style="--d:6"/><circle cx="89" cy="241" style="--d:5"/><circle cx="100" cy="241" style="--d:5"/><circle cx="110" cy="241" style="--d:5"/><circle cx="52" cy="251" style="--d:7"/><circle cx="63" cy="251" style="--d:6"/><circle cx="73" cy="251" style="--d:6"/><circle cx="84" cy="251" style="--d:6"/><circle cx="94" cy="251" style="--d:5"/><circle cx="105" cy="251" style="--d:5"/><circle cx="115" cy="251" style="--d:5"/><circle cx="47" cy="260" style="--d:7"/><circle cx="58" cy="260" style="--d:6"/><circle cx="68" cy="260" style="--d:6"/><circle cx="78" cy="260" style="--d:6"/><circle cx="89" cy="260" style="--d:6"/><circle cx="100" cy="260" style="--d:5"/><circle cx="110" cy="260" style="--d:5"/><circle cx="120" cy="260" style="--d:5"/><circle cx="131" cy="260" style="--d:4"/><circle cx="52" cy="269" style="--d:7"/><circle cx="63" cy="269" style="--d:6"/><circle cx="73" cy="269" style="--d:6"/><circle cx="84" cy="269" style="--d:6"/><circle cx="94" cy="269" style="--d:5"/><circle cx="105" cy="269" style="--d:5"/><circle cx="115" cy="269" style="--d:5"/><circle cx="126" cy="269" style="--d:5"/><circle cx="136" cy="269" style="--d:4"/><circle cx="47" cy="278" style="--d:7"/><circle cx="58" cy="278" style="--d:7"/><circle cx="68" cy="278" style="--d:6"/><circle cx="78" cy="278" style="--d:6"/><circle cx="89" cy="278" style="--d:6"/><circle cx="100" cy="278" style="--d:5"/><circle cx="110" cy="278" style="--d:5"/><circle cx="120" cy="278" style="--d:5"/><circle cx="131" cy="278" style="--d:5"/><circle cx="52" cy="287" style="--d:7"/><circle cx="63" cy="287" style="--d:7"/><circle cx="73" cy="287" style="--d:6"/><circle cx="84" cy="287" style="--d:6"/><circle cx="94" cy="287" style="--d:6"/><circle cx="105" cy="287" style="--d:5"/><circle cx="115" cy="287" style="--d:5"/><circle cx="126" cy="287" style="--d:5"/><circle cx="58" cy="296" style="--d:7"/><circle cx="68" cy="296" style="--d:7"/><circle cx="78" cy="296" style="--d:6"/><circle cx="89" cy="296" style="--d:6"/><circle cx="100" cy="296" style="--d:6"/><circle cx="110" cy="296" style="--d:5"/><circle cx="120" cy="296" style="--d:5"/><circle cx="63" cy="305" style="--d:7"/><circle cx="73" cy="305" style="--d:7"/><circle cx="84" cy="305" style="--d:6"/><circle cx="94" cy="305" style="--d:6"/><circle cx="105" cy="305" style="--d:6"/><circle cx="115" cy="305" style="--d:5"/><circle cx="126" cy="305" style="--d:5"/><circle cx="68" cy="314" style="--d:7"/><circle cx="78" cy="314" style="--d:7"/><circle cx="89" cy="314" style="--d:6"/><circle cx="100" cy="314" style="--d:6"/><circle cx="110" cy="314" style="--d:6"/><circle cx="120" cy="314" style="--d:5"/><circle cx="131" cy="314" style="--d:5"/><circle cx="73" cy="323" style="--d:7"/><circle cx="84" cy="323" style="--d:7"/><circle cx="94" cy="323" style="--d:6"/><circle cx="105" cy="323" style="--d:6"/><circle cx="115" cy="323" style="--d:6"/><circle cx="126" cy="323" style="--d:6"/><circle cx="68" cy="332" style="--d:7"/><circle cx="78" cy="332" style="--d:7"/><circle cx="89" cy="332" style="--d:7"/><circle cx="100" cy="332" style="--d:6"/><circle cx="110" cy="332" style="--d:6"/><circle cx="120" cy="332" style="--d:6"/><circle cx="73" cy="341" style="--d:7"/><circle cx="84" cy="341" style="--d:7"/><circle cx="94" cy="341" style="--d:7"/><circle cx="105" cy="341" style="--d:6"/><circle cx="115" cy="341" style="--d:6"/><circle cx="68" cy="351" style="--d:8"/><circle cx="78" cy="351" style="--d:7"/><circle cx="89" cy="351" style="--d:7"/><circle cx="100" cy="351" style="--d:7"/><circle cx="110" cy="351" style="--d:6"/><circle cx="73" cy="360" style="--d:8"/><circle cx="84" cy="360" style="--d:7"/><circle cx="94" cy="360" style="--d:7"/><circle cx="105" cy="360" style="--d:7"/><circle cx="115" cy="360" style="--d:7"/><circle cx="68" cy="369" style="--d:8"/><circle cx="78" cy="369" style="--d:8"/><circle cx="89" cy="369" style="--d:7"/><circle cx="100" cy="369" style="--d:7"/></g></g>
+   <g class="pulse"><circle cx="264" cy="199" r="6"/><circle cx="56" cy="284" r="6" style="--p:.6s"/><circle cx="489" cy="150" r="6" style="--p:1.2s"/><circle cx="76" cy="162" r="6" style="--p:1.8s"/></g>
+   <g class="m-lab">
+    <text x="250" y="262" class="on">España</text>
+    <path class="lead-l" d="M-16 300H40"/><text x="-56" y="306" class="on pt-l">Portugal</text>
+    <text x="470" y="36" class="soon" text-anchor="middle">Francia · próximamente</text>
+   </g>
+  </svg>
+  <figcaption class="m-leg"><span><i class="es"></i>España</span><span><i class="pt"></i>Portugal</span><span><i></i>Próximamente</span></figcaption>
+ </figure>
+ <div class="map-copy">
+  <h2 data-r>Más de 2M de empresas con el correo del propietario</h2>
+  <p class="sub" data-r style="--i:1">Filtramos la base con tus criterios. Hoy trabajamos en España y Portugal; el resto de Europa llegará después.</p>
+  <dl class="figs">
+   <div data-r style="--i:2"><dt>empresas en la base, con el contacto de quien decide</dt><dd><span data-count="2000000" data-pre="+">+2.000.000</span></dd></div>
+   <div data-r style="--i:3"><dt>países activos</dt><dd><span>2</span></dd></div>
+  </dl>
+  <ul class="chips light" data-r style="--i:4" aria-label="Filtros disponibles"><li>Sector</li><li>Provincia</li><li>Resultado del ejercicio</li><li>Facturación</li><li>Empleados</li></ul>
+ </div>
+</div></section>
 
-    function closeModal() {
-      document.getElementById('overlay').classList.remove('active');
-      document.body.style.overflow = '';
-    }
+<!-- 3. EL PROCESO -->
+<section class="flow-sec" id="flujo"><div class="wrap">
+ <div class="sec-head">
+  <h2 data-r>De tu cliente ideal a una reunión en tu calendario</h2>
+  <p class="sub" data-r style="--i:1">Reunvo encuentra y escribe. El propietario te responde a ti.</p>
+ </div>
+ <div class="fl2" data-r style="--i:2">
+  <svg class="fl2-svg" aria-hidden="true"><path class="fl2-base"/><path class="fl2-dash"/></svg>
+  <span class="fl2-dot" aria-hidden="true"></span><span class="fl2-dot" aria-hidden="true" style="--o:-1.75s"></span><span class="fl2-dot" aria-hidden="true" style="--o:-3.5s"></span><span class="fl2-dot" aria-hidden="true" style="--o:-5.25s"></span>
+  <span class="fl2-dot s" aria-hidden="true" data-strand="0"></span><span class="fl2-dot s" aria-hidden="true" data-strand="1" style="--o:-.8s"></span><span class="fl2-dot s" aria-hidden="true" data-strand="2" style="--o:-1.6s"></span>
+  <ol class="fl2-nodes">
+   <li class="fn n-cloud"><div class="fn-v cloud" aria-hidden="true"><i style="left:8%;top:12%" class="hot"></i><i style="left:40%;top:6%"></i><i style="left:70%;top:22%"></i><i style="left:22%;top:34%"></i><i style="left:55%;top:42%" class="hot"></i><i style="left:84%;top:46%"></i><i style="left:12%;top:60%"></i><i style="left:36%;top:68%"></i><i style="left:66%;top:74%"></i><i style="left:90%;top:80%" class="hot"></i><i style="left:4%;top:88%"></i><i style="left:48%;top:92%"></i><i style="left:28%;top:18%"></i><i style="left:76%;top:58%"></i></div><p class="fn-l">Tu cliente ideal</p></li>
+   <li class="fn n-filter"><div class="fn-v"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M8 12h8M11 17h2"/></svg></span></div><p class="fn-l">Filtramos</p></li>
+   <li class="fn n-owner"><div class="fn-v"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v11H4zM4 8l8 6 8-6"/><circle cx="18" cy="17" r="3.2" fill="var(--ink)"/><path d="M20.4 19.4L22 21"/></svg></span></div><p class="fn-l">Encontramos el email del propietario</p></li>
+   <li class="fn n-mail up"><div class="fn-v"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v11H4zM4 8l8 6 8-6"/></svg></span></div><p class="fn-l">Escribimos desde tu correo</p></li>
+   <li class="fn n-reply"><div class="fn-v"><span class="ring"><b>Re:</b></span><span class="bubble">«Me interesa. ¿Hablamos el jueves?»</span></div><p class="fn-l">Responden</p></li>
+   <li class="fn n-agenda up"><div class="fn-v"><span class="ring"><b>Sí</b></span></div><p class="fn-l">Tu firma responde y agenda</p></li>
+   <li class="fn n-cal"><div class="fn-v"><div class="calcard"><p>Tu calendario</p><div class="cc-g"><span><b>10:00</b>Comité</span><span><b>11:30</b>Cliente</span><span><b>13:00</b>Equipo</span><span class="ok-s"><b>Jue 10:00</b>Agendada</span></div></div></div><p class="fn-l">Reunión en tu calendario</p></li>
+  </ol>
+ </div>
+</div></section>
 
-    function handleOverlayClick(e) {
-      if (e.target === document.getElementById('overlay')) closeModal();
-    }
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
+<!-- 5. ANTES / DESPUÉS -->
+<section class="ba-sec" id="antes"><div class="wrap">
+ <div class="ba-head">
+  <h2 data-r>Reuniones al mes: antes y con Reunvo</h2>
+  <p class="sub" data-r style="--i:1">Sin Reunvo, la reunión llega cuando alguien te recomienda. Con Reunvo, llega cada semana. Arrastra la línea.</p>
+  <p class="ex" data-r style="--i:2">Ejemplo ilustrativo</p>
+ </div>
+ <figure class="cmp" id="comparador" data-r style="--i:2">
+  <div class="cmp-screen">
+   <div class="cmp-layer cmp-antes" aria-hidden="true"><p class="cmp-t">Noviembre, antes<b>1 reunión</b></p><div class="cal-h"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span></div><div class="cal-g"><div class="cd"><span>2</span></div><div class="cd"><span>3</span></div><div class="cd"><span>4</span></div><div class="cd"><span>5</span></div><div class="cd"><span>6</span></div><div class="cd"><span>9</span></div><div class="cd"><span>10</span></div><div class="cd"><span>11</span></div><div class="cd"><span>12</span></div><div class="cd"><span>13</span></div><div class="cd"><span>16</span></div><div class="cd"><span>17</span></div><div class="cd"><span>18</span><em>Reunión · recomendación</em></div><div class="cd"><span>19</span></div><div class="cd"><span>20</span></div><div class="cd"><span>23</span></div><div class="cd"><span>24</span></div><div class="cd"><span>25</span></div><div class="cd"><span>26</span></div><div class="cd"><span>27</span></div></div></div>
+   <div class="cmp-layer cmp-despues" aria-hidden="true"><p class="cmp-t">Noviembre, con Reunvo<b>8 reuniones</b></p><div class="cal-h"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span></div><div class="cal-g"><div class="cd"><span>2</span></div><div class="cd"><span>3</span><em>M. Iglesias</em></div><div class="cd"><span>4</span></div><div class="cd"><span>5</span><em>L. Otero</em></div><div class="cd"><span>6</span></div><div class="cd"><span>9</span><em>A. Lorenzo</em></div><div class="cd"><span>10</span></div><div class="cd"><span>11</span></div><div class="cd"><span>12</span><em>R. Vázquez</em></div><div class="cd"><span>13</span></div><div class="cd"><span>16</span></div><div class="cd"><span>17</span><em>X. Pereira</em></div><div class="cd"><span>18</span><em>Reunión · recomendación</em></div><div class="cd"><span>19</span></div><div class="cd"><span>20</span><em>E. Varela</em></div><div class="cd"><span>23</span></div><div class="cd"><span>24</span></div><div class="cd"><span>25</span><em>P. Rial</em></div><div class="cd"><span>26</span></div><div class="cd"><span>27</span></div></div></div>
+   <div class="cmp-line" aria-hidden="true"><span class="cmp-handle"><svg viewBox="0 0 24 24"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></span></div>
+   <input class="cmp-range" type="range" min="0" max="100" value="50" step="1" aria-label="Comparar un mes antes y con Reunvo" aria-valuetext="Antes al 50 %" hidden>
+  </div>
+  <span class="cmp-pill a" aria-hidden="true">Antes</span><span class="cmp-pill d" aria-hidden="true">Con Reunvo</span>
+  <figcaption class="sr">Antes: 1 reunión en el mes, por recomendación. Con Reunvo: 8 reuniones en el mes. Ejemplo ilustrativo.</figcaption>
+ </figure>
+</div></section>
 
-    async function handleSubmit(e) {
-      e.preventDefault();
+<!-- 7. PLANES -->
+<section class="plans-sec" id="planes"><div class="wrap">
+ <div class="sec-head split">
+  <h2 data-r>Planes para firmas de M&amp;A</h2>
+  <p class="sub" data-r style="--i:1">Tres planes mensuales, con todo lo que incluye cada uno.</p>
+ </div>
+ <div class="plans">
+  <article class="plan" data-r style="--i:2" aria-labelledby="pl-basic">
+   <div class="p-top"><h3 class="p-n" id="pl-basic">Basic</h3></div>
+   <p class="p-d">Para empezar a abrir conversaciones.</p>
+   <p class="p-m"><span class="p-big">1.500 €</span><span class="p-u">/mes</span></p>
+   <a class="btn ghost" href="#contacto">Elegir plan</a>
+   <p class="p-fine">Facturación mensual</p>
+   <ul class="p-list"><li>20 correos al día = 400 al mes</li><li class="p-hi">8 interesados al mes<br>4 reuniones al mes</li><li>10 dossiers al mes</li><li>Envíos de lunes a viernes</li></ul>
+  </article>
+  <article class="plan plan-rec" data-r style="--i:3" aria-labelledby="pl-advanced">
+   <div class="p-top"><h3 class="p-n" id="pl-advanced">Advanced</h3><span class="p-tag">Recomendado</span></div>
+   <p class="p-d">El ritmo que mejor equilibra volumen y reuniones.</p>
+   <p class="p-m"><span class="p-big">2.500 €</span><span class="p-u">/mes</span></p>
+   <a class="btn gold" href="#contacto">Elegir plan</a>
+   <p class="p-fine">Facturación mensual</p>
+   <ul class="p-list"><li>40 correos al día = 800 al mes</li><li class="p-hi">16 interesados al mes<br>9 reuniones al mes</li><li>20 dossiers al mes</li><li>Envíos de lunes a viernes</li></ul>
+  </article>
+  <article class="plan plan-anc" data-r style="--i:4" aria-labelledby="pl-ultra">
+   <div class="p-top"><h3 class="p-n" id="pl-ultra">Ultra</h3></div>
+   <p class="p-d">Máximo volumen para firmas con mucho mandato.</p>
+   <p class="p-m"><span class="p-big">4.000 €</span><span class="p-u">/mes</span></p>
+   <a class="btn ghost" href="#contacto">Elegir plan</a>
+   <p class="p-fine">Facturación mensual</p>
+   <ul class="p-list"><li>80 correos al día = 1.600 al mes</li><li class="p-hi">32 interesados al mes<br>18 reuniones al mes</li><li>40 dossiers al mes</li><li>Envíos de lunes a viernes</li></ul>
+  </article>
+ </div>
+ <p class="plans-note" data-r style="--i:5">Según las tasas de respuesta actuales. No es una garantía.</p>
+ <div class="incl" data-r style="--i:6">
+  <p><b>Todos los planes incluyen</b> el correo y el PDF personalizados y el dossier antes de cada llamada.</p>
+  <a class="btn" href="#contacto">Pedir una llamada</a>
+ </div>
+</div></section>
 
-      const btn = document.getElementById('btn-submit');
-      const errorEl = document.getElementById('form-error');
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
-      errorEl.style.display = 'none';
+<!-- 8. FAQ -->
+<section class="faq-sec" id="preguntas"><div class="wrap faq-grid">
+ <div class="faq-head">
+  <h2 data-r>Preguntas frecuentes sobre originación de mandatos</h2>
+ </div>
+ <div class="faq">
+  <details data-r style="--i:1"><summary>¿Qué es la originación de mandatos M&amp;A y cómo ayuda Reunvo?</summary><div class="a"><p>Es encontrar empresas cuyos dueños quieren vender antes de que lo haga otra firma. Reunvo hace la prospección completa y los propietarios interesados te responden directamente a ti.</p></div></details>
+  <details data-r style="--i:2"><summary>¿Cómo encontráis las empresas y el correo del propietario?</summary><div class="a"><p>Aplicamos tus filtros (sector, provincia, resultado del ejercicio y más) a nuestra base, revisamos la lista y verificamos cada correo antes de enviar. Tu firma aprueba la lista antes del primer envío.</p></div></details>
+  <details data-r style="--i:3"><summary>¿Desde qué correo se envía?</summary><div class="a"><p>Desde el Gmail de tu firma, con un permiso solo de envío. Las respuestas llegan a tu bandeja: responde tu firma, no Reunvo.</p></div></details>
+  <details data-r style="--i:4"><summary>¿Qué lleva el PDF personalizado?</summary><div class="a"><p>La empresa del propietario en cifras, quién compra empresas de su sector y qué ha hecho tu firma en operaciones parecidas.</p></div></details>
+   </div>
+</div></section>
 
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/reunvo_solicitar_acceso`, {
-          method: 'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            p_name:    document.getElementById('nombre').value.trim(),
-            p_company: document.getElementById('empresa').value.trim(),
-            p_email:   document.getElementById('email').value.trim(),
-            p_phone:   document.getElementById('telefono').value.trim()
-          })
-        });
-        const out = await res.json();
-        if (!res.ok || !out || out.ok !== true) throw new Error((out && out.mensaje) || 'Supabase error');
+<!-- CIERRE -->
+<section class="cta-sec" id="contacto"><div class="wrap cta-grid">
+ <div>
+  <h2 data-r>Pide una llamada</h2>
+  <p class="sub" data-r style="--i:1">Te llamamos, fijamos tus filtros y te explicamos cómo trabajamos.</p>
+ </div>
+ <form class="cta-form" id="form-contacto" data-r style="--i:2" action="#contacto" method="post" data-endpoint="" data-mailto="gp@reunvo.com" novalidate>
+  <!-- VARIABLES DEL FORMULARIO (ver PENDIENTES-V28.md):
+       data-endpoint: URL del servicio de formularios (POST JSON). Vacío = se abre el correo del usuario con el mensaje preparado hacia data-mailto (no hay envío desde la web).
+       data-mailto: dirección de contacto (gp@reunvo.com). -->
+  <div class="fld"><label for="f-nombre">Nombre</label><input id="f-nombre" name="nombre" type="text" autocomplete="name" required><p class="f-err" id="err-nombre" hidden>Escribe tu nombre.</p></div>
+  <div class="fld"><label for="f-email">Correo electrónico</label><input id="f-email" name="email" type="email" autocomplete="email" required><p class="f-err" id="err-email" hidden>Escribe un correo válido, por ejemplo nombre@firma.com.</p></div>
+  <div class="fld"><label for="f-firma">Tu firma <span class="opc">(opcional)</span></label><input id="f-firma" name="firma" type="text" autocomplete="organization"></div>
+  <button class="btn gold" type="submit">Pedir una llamada</button>
+  <div class="f-msg" role="status" aria-live="polite" hidden></div>
+  <p class="f-fine">Usaremos estos datos solo para responder a tu solicitud. Más información en la <a href="privacidad/index.html">política de privacidad</a>.</p>
+ </form>
+</div></section>
+</main>
 
-        document.getElementById('form-container').style.display = 'none';
-        document.getElementById('form-success').style.display = 'block';
-
-        setTimeout(function() {
-          document.getElementById('access-form').reset();
-          document.getElementById('form-container').style.display = '';
-          document.getElementById('form-success').style.display = '';
-          btn.disabled = false;
-          btn.textContent = 'Enviar solicitud';
-          closeModal();
-        }, 5000);
-
-      } catch (err) {
-        errorEl.textContent = err.message || 'Algo ha ido mal. Inténtalo de nuevo.';
-        errorEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Enviar solicitud';
-      }
-    }
-  </script>
-
+<footer class="foot"><div class="wrap">
+ <span class="logo" translate="no">Reunvo</span>
+ <span>Reuniones con propietarios para firmas de M&amp;A · España y Portugal</span>
+ <span><a href="aviso-legal/index.html">Aviso legal</a> · <a href="privacidad/index.html">Privacidad</a> · <a href="cookies/index.html">Cookies</a></span>
+</div></footer>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Página ampliada" hidden>
+ <button type="button" class="lb-x" aria-label="Cerrar">×</button>
+ <div class="lb-sc" tabindex="0"><img class="lb-img" alt="" width="1408" height="1991"></div>
+ <div class="lb-nav"><button type="button" class="lb-prev" aria-label="Página anterior">←</button><span class="lb-n" aria-live="polite">1/3</span><button type="button" class="lb-next" aria-label="Página siguiente">→</button></div>
+</div>
+<script src="main.js" defer></script>
 </body>
 </html>
-
