@@ -17,10 +17,9 @@ CREATE OR REPLACE FUNCTION public.reunvo_choca_reserva(p_client uuid, p_ccaa tex
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select 'En '||a.nombre||' las empresas con resultado entre '
-         ||to_char(z.min_eur/1e6,'FM990.0')||' y '||to_char(z.max_eur/1e6,'FM990')
-         ||' M€ están reservadas. Pida un tramo por debajo o por encima, u otra comunidad.'
-    from zonas_reservadas z join ccaa a on a.codigo = z.ccaa
+  -- Mensaje neutro a propósito: el cliente no debe saber que hay una reserva ni de quién.
+  select 'Este tramo no está disponible en esta zona; elija otro tramo u otra comunidad.'::text
+    from zonas_reservadas z
    where z.activa and z.ccaa = p_ccaa and z.metric = p_metric
      and z.titular is distinct from p_client
      and coalesce(p_min_eur, 0) <= z.max_eur
@@ -211,6 +210,23 @@ begin
 end $function$;
 
 -- ---- Target: solicitud del cliente (nuevo) y aplicación por Reunvo ---------------------
+-- La función antigua se mantiene (el panel la usa si falta la nueva) pero sin mencionar
+-- el texto antiguo del mensaje, que no se dice al cliente.
+CREATE OR REPLACE FUNCTION public.client_request_target(p_token text, p_region text, p_sector text, p_rev_min numeric, p_rev_max numeric)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v uuid;
+begin
+  select id into v from clients where panel_token=p_token;
+  if v is null then return jsonb_build_object('error','token'); end if;
+  insert into target_requests(client_id,region,sector,rev_min,rev_max,requested_at,status)
+    values(v,nullif(trim(p_region),''),nullif(trim(p_sector),''),p_rev_min,p_rev_max,now(),'pendiente');
+  return jsonb_build_object('ok',true,'mensaje','Solicitud enviada. La revisaremos y se la confirmaremos.');
+end;$function$;
+
 -- p_target: {"metric":"revenue|result","min_meur":n,"max_meur":n,"ccaa":"09",
 --            "provincias":["08"],"cnae":["C","46"],"edad_min":55}
 CREATE OR REPLACE FUNCTION public.client_request_target_v2(p_token text, p_target jsonb)
@@ -275,7 +291,7 @@ begin
           jsonb_build_object('origen','panel_v2'));
 
   return jsonb_build_object('ok',true,
-    'mensaje','Solicitud enviada. Reunvo la revisará y se la confirmará (las zonas y sectores se asignan en exclusiva).');
+    'mensaje','Solicitud enviada. La revisaremos y se la confirmaremos.');
 end $function$;
 
 CREATE OR REPLACE FUNCTION public.reunvo_aplicar_target(p_token text, p_request_id uuid)
@@ -335,6 +351,44 @@ begin
 end $function$;
 
 -- ---- Cola, Quitar, plazos y aprobación (antes en 2026-11-27_panel_cola_cupo.sql) -------
+
+-- Primer día de envío libre para el lote p_lote: el día de envío siguiente a aquel en que,
+-- al ritmo del plan (emails_per_day en sus dias_envio), se acaba lo pendiente de las listas
+-- ANTERIORES del mismo cliente que ya se envían o están aprobadas. Sin pendiente: null.
+-- Es una estimación (supone que se envía todos los días de envío); dos listas nunca se solapan.
+CREATE OR REPLACE FUNCTION public.reunvo_fin_envios(p_lote uuid)
+ RETURNS date
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare l record; c record; v_pend int; v_n int; v_ult date; v_dias int[];
+begin
+  select * into l from lotes where id = p_lote;
+  if not found then return null; end if;
+  select * into c from clients where id = l.client_id;
+  v_dias := coalesce(c.dias_envio, '{1,2,3,4,5}');
+
+  select count(*) into v_pend
+    from companies co join lotes lo on lo.id = co.lote_id
+   where lo.client_id = l.client_id and lo.id <> l.id and lo.periodo < l.periodo
+     and lo.estado in ('enviando','listo','guille')
+     and co.status = 'pilot_pending' and not coalesce(co.excluded_by_client,false)
+     and not exists (select 1 from campaigns ca where ca.company_id = co.id
+                      and ca.client_id = l.client_id::text);
+  if v_pend = 0 then return null; end if;
+
+  v_n := ceil(v_pend::numeric / greatest(coalesce(c.emails_per_day,10),1))::int;
+  -- último día de envío necesario, contando desde mañana (lo de hoy puede haber salido ya)
+  select d::date into v_ult
+    from generate_series(current_date + 1, current_date + 730, interval '1 day') d
+   where extract(isodow from d)::int = any(v_dias)
+   order by d offset v_n - 1 limit 1;
+  -- y el siguiente día de envío es el primero libre
+  return (select d::date from generate_series(v_ult + 1, v_ult + 14, interval '1 day') d
+           where extract(isodow from d)::int = any(v_dias) order by d limit 1);
+end $function$;
+
 CREATE OR REPLACE FUNCTION public.client_panel(p_token text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -428,7 +482,15 @@ begin
         'delivered_at', d.delivered_at) order by d.requested_at desc),'[]'::jsonb)
       from dossier_requests d where d.client_id=c.id),
     'lote', (select to_jsonb(x) from (
-       select l.periodo, l.estado, l.inicio_envio, l.limite_cliente, l.objetivo,
+       select l.periodo, l.estado, l.limite_cliente, l.objetivo,
+              -- Pendiente de aprobar: se enseña el inicio real previsto (nunca antes de que
+              -- acabe la lista en curso). Ya aprobada: el que quedó fijado.
+              case when l.estado = 'cliente'
+                   then greatest(l.inicio_envio, coalesce(reunvo_fin_envios(l.id), l.inicio_envio))
+                   else l.inicio_envio end as inicio_envio,
+              case when l.estado = 'cliente'
+                   then case when reunvo_fin_envios(l.id) > l.inicio_envio then 'fin_en_curso' else 'fecha_fijada' end
+                   else l.inicio_motivo end as inicio_motivo,
               (l.cerrado_cliente_at at time zone 'Europe/Madrid')::date as aprobada_el,
               coalesce(l.adelantado,false) as adelantado,
               coalesce(l.aprobado_auto,false) as aprobado_auto,
@@ -447,7 +509,7 @@ begin
               -- Lista ya aprobada que aún no ha empezado (tras aprobar se crea la siguiente y
               -- pasa a ser la principal; ésta se resume en una línea).
               (select jsonb_build_object('periodo', l3.periodo, 'inicio_envio', l3.inicio_envio,
-                      'adelantado', coalesce(l3.adelantado,false),
+                      'adelantado', coalesce(l3.adelantado,false), 'inicio_motivo', l3.inicio_motivo,
                       'aprobado_auto', coalesce(l3.aprobado_auto,false),
                       'aprobada_el', (l3.cerrado_cliente_at at time zone 'Europe/Madrid')::date)
                  from lotes l3 where l3.client_id=c.id and l3.id <> l.id
@@ -599,7 +661,7 @@ CREATE OR REPLACE FUNCTION public.client_lote_verificado(p_token text)
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-declare v_cli uuid; v_rev int; v_lote record; v_n int; v_ini date; v_hoy date;
+declare v_cli uuid; v_rev int; v_lote record; v_n int; v_ini date; v_hoy date; v_fin date; v_mot text;
 begin
   select id, coalesce(dias_revision,7) into v_cli, v_rev
     from clients where panel_token = p_token and status='active';
@@ -612,21 +674,26 @@ begin
       'mensaje','Ahora mismo no tiene ninguna lista pendiente de aprobar.'); end if;
 
   v_hoy := (now() at time zone 'Europe/Madrid')::date;
+  -- Inicio = la fecha más tardía entre «aprobación + 7» (sin pasar de la fecha fijada) y el
+  -- final de la lista que se está enviando. Nunca se solapan dos listas.
+  v_fin := reunvo_fin_envios(v_lote.id);
   v_ini := least(v_lote.inicio_envio, v_hoy + v_rev);
+  v_mot := case when v_ini < v_lote.inicio_envio then 'aprobacion' else 'fecha_fijada' end;
+  if v_fin is not null and v_fin > v_ini then v_ini := v_fin; v_mot := 'fin_en_curso'; end if;
 
   update lotes set estado='guille', cerrado_cliente_at=now(),
-         inicio_envio = v_ini, adelantado = (v_ini < v_lote.inicio_envio)
+         inicio_envio = v_ini, adelantado = (v_ini < v_lote.inicio_envio), inicio_motivo = v_mot
    where id=v_lote.id;
   select count(*) into v_n from companies where lote_id=v_lote.id
     and status='pilot_pending' and not coalesce(excluded_by_client,false);
 
   perform reunvo_ciclo_lotes();   -- encadena el siguiente lote de inmediato
 
-  return jsonb_build_object('ok',true,'inicio_envio',v_ini,
+  return jsonb_build_object('ok',true,'inicio_envio',v_ini,'inicio_motivo',v_mot,
     'adelantado', v_ini < v_lote.inicio_envio,
-    'mensaje','Lista de '||v_lote.periodo||' aprobada ('||v_n||' empresas). Envíos a partir del '||
-              to_char(v_ini,'DD/MM')||
-              case when v_ini < v_lote.inicio_envio then ' (7 días tras su aprobación).' else '.' end);
+    'mensaje','Lista aprobada ('||v_n||' empresas). Envíos a partir del '||to_char(v_ini,'DD/MM')||
+              case v_mot when 'aprobacion' then ' (7 días tras su aprobación).'
+                         when 'fin_en_curso' then ' (cuando termine la lista en curso).' else '.' end);
 end $function$;
 
 CREATE OR REPLACE FUNCTION public.reunvo_ciclo_lotes()
@@ -639,7 +706,10 @@ declare l record; v_log jsonb := '[]'::jsonb; v_pend int; v_nuevo jsonb;
 begin
   for l in select * from lotes where estado='cliente' and limite_cliente <= current_date loop
     update lotes set estado='guille', aprobado_auto=true,
-           cerrado_cliente_at=coalesce(cerrado_cliente_at, now()) where id=l.id;
+           cerrado_cliente_at=coalesce(cerrado_cliente_at, now()),
+           inicio_envio = greatest(l.inicio_envio, coalesce(reunvo_fin_envios(l.id), l.inicio_envio)),
+           inicio_motivo = case when reunvo_fin_envios(l.id) > l.inicio_envio then 'fin_en_curso' else 'fecha_fijada' end
+     where id=l.id;
     v_log := v_log || jsonb_build_object('lote',l.periodo,'de','cliente','a','guille','motivo','aprobada automáticamente en la fecha límite');
   end loop;
 

@@ -103,7 +103,7 @@
     </section>
 
     <section id="s-target"><h1>Mi target</h1>
-      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
+      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos.</p>
       <div id="target-pend"></div>
       <div class="panelbox"><div class="frm" id="t-form">
         <div class="full"><label>Criterio económico</label>
@@ -118,13 +118,12 @@
         <div class="full"><label for="t-sector">Sector (CNAE 2009)</label><select id="t-sector" onchange="tgtAddSector(this)"></select>
           <div class="chips" id="t-sectores"></div></div>
         <div><label for="t-edad">Edad mínima del director general o administrador (años)</label><input id="t-edad" type="number" min="18" max="100" step="1" placeholder="Sin mínimo"></div>
-        <div class="full"><div class="fnote" id="t-aviso"></div></div>
         <div class="full"><div class="ferr" id="t-err"></div></div>
         <div class="full"><button class="act b-gold" id="t-enviar" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
     <section id="s-empresas"><h1>Su cola de empresas</h1>
-      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su reserva y la lista sigue completa.</p>
+      <p class="hint">Estas son las empresas de su lista. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su reserva y la lista sigue completa.</p>
       <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
@@ -180,7 +179,7 @@ async function rpc(fn,a){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"PO
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
 function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
 function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
-const CAT=window.REUNVO_CATALOGOS||{cnae:[],ccaa:[],reservadas:{ccaa:[]}};
+const CAT=window.REUNVO_CATALOGOS||{cnae:[],ccaa:[]};
 const CNAE_T={},CCAA_T={},PROV_T={};
 CAT.cnae.forEach(x=>{CNAE_T[x.s]=x.t;x.d.forEach(d=>CNAE_T[d.c]=d.t);});
 CAT.ccaa.forEach(x=>{CCAA_T[x.c]=x.t;x.p.forEach(p=>PROV_T[p.c]=p.t);});
@@ -206,7 +205,9 @@ function render(d){
   document.getElementById("loading").style.display="none";
   const c=d.cliente||{},k=d.kpis||{},t=d.target||{},st=d.stats||{};
   document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
-  document.getElementById("s-resumen").classList.add("on");
+  // Al recargar (tras quitar o aprobar) se queda en la sección en la que estaba: antes se
+  // encendía Resumen además de la actual y se veían las dos a la vez.
+  if(!document.querySelector("section.on")) nav("resumen");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
   const cupo=((d.lote&&d.lote.objetivo)||(k.cupo_mes==null?k.en_cola:k.cupo_mes))||0;
   document.getElementById("lead").textContent="Cada mes contactamos "+cupo+" empresas en su nombre"+(d.lote&&d.lote.periodo?" (lista de "+mesTxt(d.lote.periodo)+")":"")+". Revise su lista, ajuste su target y pida el dossier de quien le responda.";
@@ -267,10 +268,10 @@ function render(d){
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function loteOk(btn){
-  if(!await confirmar("¿Aprobar la lista completa?","Los envíos empezarán 7 días después de su aprobación (o en la fecha prevista, si es anterior). Después ya no podrá quitar empresas de esta lista.","Sí, aprobar")) return;
+  if(!await confirmar("¿Aprobar la lista completa?","Los envíos empezarán 7 días después de su aprobación y nunca antes de que termine la lista en curso. Después ya no podrá quitar empresas de esta lista.","Sí, aprobar")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
-  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
+  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();nav("empresas");}
   else{btn.disabled=false;btn.textContent="Aprobar la lista completa";
        flash((r&&r.mensaje)||"No se pudo confirmar.");}
 }
@@ -278,6 +279,10 @@ let CUPO=0, LISTA_N=0;
 const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function mesTxt(per){const m=/^(\d{4})-(\d{2})/.exec(per||"");return m?MESES[+m[2]-1]+" "+m[1]:String(per||"");}
 function dmy(d){if(!d)return"—";const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));return m?m[3]+"/"+m[2]+"/"+m[1]:fecha(d);}
+// Por qué empiezan los envíos ese día. El servidor fija el inicio como la fecha más tardía entre
+// «aprobación + 7 días» y «fin de la lista que se está enviando» (nunca se solapan dos listas).
+function motivoTxt(l){return l.inicio_motivo==='fin_en_curso'?' (cuando termine la lista en curso)'
+  :((l.inicio_motivo==='aprobacion'||(!l.inicio_motivo&&l.adelantado))?' (7 días tras su aprobación)':'');}
 function loteCabecera(lo,n,cupo){
   // Plazos (decisión 27-nov): el cliente tiene dias_aprobacion (14) para aprobar; la fecha límite
   // es inicio − 7 (semana de revisión de correos). Si aprueba antes, los envíos empiezan 7 días
@@ -292,12 +297,12 @@ function loteCabecera(lo,n,cupo){
     tile(pendiente?"Apruebe antes del":(lo.aprobado_auto?"Aprobada automáticamente":"Aprobada"),pendiente?dmy(lo.limite_cliente):(lo.aprobada_el?dmy(lo.aprobada_el):"Sí")),
     tile("Envíos a partir del",dmy(lo.inicio_envio))].join("");
   const plazo = pendiente
-    ? `<b>Apruebe antes del ${dmy(lo.limite_cliente)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}`
+    ? `<b>Apruebe antes del ${dmy(lo.limite_cliente)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}${lo.inicio_motivo==='fin_en_curso'?' (cuando termine la lista en curso)':''}`
     : (lo.aprobado_auto
         ? `<b>Lista aprobada automáticamente el ${dmy(lo.aprobada_el)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}`
-        : `<b>Envíos a partir del ${dmy(lo.inicio_envio)}</b>${lo.adelantado?' (7 días tras su aprobación)':''}`);
+        : `<b>Envíos a partir del ${dmy(lo.inicio_envio)}</b>${motivoTxt(lo)}`);
   const A=lo.aprobada;
-  const ap = A ? `<p class="hint" style="margin:10px 0 0">Lista de ${esc(mesTxt(A.periodo))} ${A.aprobado_auto?('aprobada automáticamente el '+dmy(A.aprobada_el)):'aprobada'}: <b>envíos a partir del ${dmy(A.inicio_envio)}</b>${A.adelantado?' (7 días tras su aprobación)':''}.</p>` : '';
+  const ap = A ? `<p class="hint" style="margin:10px 0 0">Lista de ${esc(mesTxt(A.periodo))} ${A.aprobado_auto?('aprobada automáticamente el '+dmy(A.aprobada_el)):'aprobada'}: <b>envíos a partir del ${dmy(A.inicio_envio)}</b>${motivoTxt(A)}.</p>` : '';
   const curso = lo.en_curso ? `<p class="hint" style="margin:10px 0 0">En curso: lista de ${esc(mesTxt(lo.en_curso.periodo))}, quedan ${lo.en_curso.por_enviar} por enviar.</p>` : '';
   const aviso = falta ? `<div class="pend" id="lote-falta" style="margin:10px 0 0">Faltan ${falta} para completar el cupo: no quedan más empresas en reserva con su target. Las añadimos en cuanto haya.</div>` : '';
   return `<div class="panelbox" style="${pendiente?'border-color:#e9c98a;background:#fffdf7;':''}margin-bottom:14px">
@@ -305,7 +310,7 @@ function loteCabecera(lo,n,cupo){
      <p id="lote-plazo" style="margin:0 0 12px;font-size:15px;color:#1a3c6e">${plazo}</p>
      <div class="cards" style="margin-bottom:6px">${tiles}</div>
      <p class="hint" style="margin:0">${pendiente
-       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva. Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación. Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
+       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva. Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación, y nunca antes de que termine la lista en curso. Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
        : (lo.puede_quitar===false ? `La lista está cerrada: ya no admite cambios.` : `Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`)}</p>
      ${aviso}${ap}${curso}
      ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
@@ -380,18 +385,11 @@ function tgtLeer(){
     provincias:[...document.querySelectorAll('#t-prov input:checked')].map(i=>i.value),
     cnae:T_SECT.slice(), edad_min:nM(document.getElementById('t-edad').value)};
 }
-// Zona reservada: misma regla que reunvo_choca_reserva (solape de tramos). Es un aviso;
-// quien decide es el servidor (el titular de la zona sí puede pedirla).
-function tgtReservada(q){const R=CAT.reservadas; if(!q.ccaa||!R||!R.ccaa.includes(q.ccaa)||q.metric!==R.metric) return null;
-  const mn=q.min_meur==null?0:q.min_meur*1e6, mx=q.max_meur==null?Infinity:q.max_meur*1e6;
-  return (mn<=R.max_eur&&mx>=R.min_eur) ? `En ${CCAA_T[q.ccaa]} las empresas con resultado entre ${fM(R.min_eur/1e6)} y ${fM(R.max_eur/1e6)} M€ están reservadas. Pida un tramo por debajo o por encima, u otra comunidad.` : null;}
 function tgtCambio(){
   const q=tgtLeer(), res=q.metric==='result';
   document.getElementById('t-min-l').textContent=(res?'Resultado mínimo':'Facturación mínima')+' (M€)';
   document.getElementById('t-max-l').textContent=(res?'Resultado máximo':'Facturación máxima')+' (M€)';
   document.getElementById('t-min').min=res?'':'0';document.getElementById('t-max').min=res?'':'0';
-  const av=document.getElementById('t-aviso'), r=tgtReservada(q);
-  av.textContent=r||''; av.style.display=r?'block':'none';
   document.getElementById('t-err').style.display='none';
 }
 function tgtError(m){const e=document.getElementById('t-err');e.textContent=m;e.style.display='block';}
@@ -404,14 +402,13 @@ async function pedirTarget(btn){
   let r=await rpc("client_request_target_v2",{p_target:q});
   if(r&&r.code==='PGRST202'){
     // Base sin actualizar todavía: se envía por la función antigua, que no valida la reserva.
-    const res=tgtReservada(q); if(res){btn.disabled=false;return tgtError(res);}
     const sec=q.cnae.length?q.cnae.map(c=>c+' '+(CNAE_T[c]||'')).join(' / '):'';
     r=await rpc("client_request_target",{p_region:q.ccaa?CCAA_T[q.ccaa]+(q.provincias.length?' ('+q.provincias.map(c=>PROV_T[c]).join(', ')+')':''):'',
       p_sector:[sec,q.metric==='result'?('Resultado '+rango(q.min_meur,q.max_meur)):'',q.edad_min?('DG desde '+q.edad_min+' años'):''].filter(Boolean).join(' · '),
       p_rev_min:q.metric==='revenue'?q.min_meur:null,p_rev_max:q.metric==='revenue'?q.max_meur:null});
   }
   btn.disabled=false;
-  if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}
+  if(r&&r.ok){flash("Solicitud enviada. La revisaremos y se la confirmaremos.");await load();nav('target');}
   else tgtError((r&&r.mensaje)||"No se pudo enviar. Inténtelo de nuevo.");
 }
 function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}

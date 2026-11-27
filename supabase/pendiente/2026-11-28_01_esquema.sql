@@ -84,5 +84,7 @@ alter table public.target_requests add column if not exists edad_min   integer;
 -- ---- Lotes: plazos ------------------------------------------------------------------
 alter table public.lotes add column if not exists adelantado    boolean not null default false;
 alter table public.lotes add column if not exists aprobado_auto boolean not null default false;
+-- Por qué empieza ese día: 'fecha_fijada' | 'aprobacion' (aprobación + 7) | 'fin_en_curso' (al acabar la lista anterior)
+alter table public.lotes add column if not exists inicio_motivo text;
 
 commit;

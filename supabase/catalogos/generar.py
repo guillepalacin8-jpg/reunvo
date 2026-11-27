@@ -49,14 +49,13 @@ CCAA = [
  ("18","Ceuta",[("51","Ceuta")]),
  ("19","Melilla",[("52","Melilla")]),
 ]
-# Zonas reservadas a la firma (dato inicial; en la base vive en zonas_reservadas).
+# Zonas reservadas a la firma (solo para la semilla SQL; NUNCA se publica en el panel).
 RESERVADAS = {"ccaa":["09","02","13","10"],"metric":"result","min_eur":400000,"max_eur":50000000}
 
 assert sum(len(d) for _,_,d in CNAE)==88 and sum(len(p) for _,_,p in CCAA)==52
 root=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 js={"cnae":[{"s":s,"t":t,"d":[{"c":c,"t":tt,"sec":sec} for c,tt,sec in d]} for s,t,d in CNAE],
-    "ccaa":[{"c":c,"t":t,"p":[{"c":pc,"t":pt} for pc,pt in p]} for c,t,p in CCAA],
-    "reservadas":RESERVADAS}
+    "ccaa":[{"c":c,"t":t,"p":[{"c":pc,"t":pt} for pc,pt in p]} for c,t,p in CCAA]}
 with open(os.path.join(root,"assets","catalogos.js"),"w") as f:
     f.write("/* Generado por supabase/catalogos/generar.py: no editar a mano. CNAE 2009 (INE) por división, CCAA y provincias INE. */\n")
     f.write("window.REUNVO_CATALOGOS="+json.dumps(js,ensure_ascii=False,separators=(",",":"))+";\n")
