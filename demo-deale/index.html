@@ -267,8 +267,13 @@ function render(d){
     [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
+
+/* Confirmación dentro de la página (los navegadores y algunos visores bloquean confirm()). */
+function ask(msg){return new Promise(res=>{const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:rgba(20,36,63,.45);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px";
+o.innerHTML='<div style="background:#fff;border-radius:12px;max-width:420px;width:100%;padding:20px 22px;box-shadow:0 10px 30px rgba(0,0,0,.2)"><p style="white-space:pre-line;margin:0 0 16px;color:#1a2233">'+esc(msg)+'</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="act b-info" data-r="0" style="background:#eef1f5;color:#1a2233">Cancelar</button><button class="act b-gold" data-r="1">Sí, confirmar</button></div></div>';
+o.addEventListener("click",e=>{const r=e.target.getAttribute&&e.target.getAttribute("data-r");if(r!==null||e.target===o){o.remove();res(r==="1");}});document.body.appendChild(o);});}
 async function loteOk(btn){
-  if(!confirm("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?")) return;
+  if(!(await ask("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?"))) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
   if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
@@ -279,7 +284,7 @@ async function toggle(id,ex,btn){
   // Quitar una empresa la descarta para siempre: se confirma antes.
   if(ex){
     const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
-    if(!confirm("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?")) return;
+    if(!(await ask("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?"))) return;
   }
   btn.disabled=true; const txt=btn.textContent; btn.textContent="…";
   const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});
