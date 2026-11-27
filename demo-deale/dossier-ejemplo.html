@@ -5,103 +5,132 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Reunvo · Dossier de ejemplo</title>
 <style>
-  :root{color-scheme:light}*{box-sizing:border-box}
-  body{margin:0;background:#eef1f5;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
-  .page{max-width:860px;margin:24px auto;background:#fff;border:1px solid #dfe4ec;border-radius:10px;overflow:hidden;position:relative}
-  .wm{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
-  .wm span{font-size:120px;font-weight:800;color:rgba(185,28,28,.07);transform:rotate(-28deg);letter-spacing:.08em}
-  .band{background:#b91c1c;color:#fff;text-align:center;font-weight:700;font-size:12.5px;letter-spacing:.06em;padding:7px 12px}
-  header{background:#14243f;color:#fff;padding:26px 34px}
-  .brand{font-size:18px;font-weight:700}.brand span{color:#e9c98a}
-  header h1{font-size:26px;margin:14px 0 4px}
-  header p{margin:0;color:#cdd6e6}
-  main{padding:26px 34px 34px}
-  h2{font-size:15px;color:#1a3c6e;margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid #e6eaf0}
-  h2:first-child{margin-top:0}
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  .card{border:1px solid #e6eaf0;border-radius:8px;padding:12px}
-  .card .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6b7689}
-  .card .v{font-size:20px;font-weight:700;color:#1a3c6e;margin-top:2px;font-variant-numeric:tabular-nums}
-  .card.gold .v{color:#b7791f}
-  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-  th,td{padding:8px 10px;border-bottom:1px solid #eef1f5;text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6b7689;font-weight:600}
-  ul{margin:6px 0 0;padding-left:18px}li{margin:3px 0}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .val{background:#fffdf7;border:1px solid #e9c98a;border-radius:8px;padding:14px 16px}
-  .val b{color:#b7791f}
-  .note{font-size:12px;color:#6b7689;margin-top:22px}
-  @media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}main,header{padding-left:18px;padding-right:18px}.wm span{font-size:64px}}
+  :root{color-scheme:light;--navy:#1d3a6e;--navy2:#1f3d72;--gold:#c27c12;--ink:#1a2233;--mut:#6b7689;--line:#e4e1da;--paper:#fbfaf7}
+  *{box-sizing:border-box}
+  body{margin:0;background:#eceef2;color:var(--ink);font-family:Georgia,"Times New Roman",serif;font-size:14.5px;line-height:1.55}
+  .sheet{max-width:820px;margin:24px auto;background:#fff;padding:44px 60px 40px;box-shadow:0 1px 4px rgba(0,0,0,.08);position:relative;overflow:hidden}
+  .wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .wm span{font:800 130px/1 Arial,sans-serif;color:rgba(194,124,18,.06);transform:rotate(-28deg);letter-spacing:.08em}
+  .top{display:flex;justify-content:space-between;align-items:baseline}
+  .eyebrow{font:500 11.5px Arial,sans-serif;letter-spacing:.12em;color:var(--gold)}
+  .logo{font:700 13px Arial,sans-serif;letter-spacing:.25em;color:var(--navy)}
+  h1{font-size:28px;color:var(--navy);margin:8px 0 6px}
+  .sub{color:var(--mut);margin:0 0 14px}
+  hr.rule{border:0;border-top:2px solid var(--navy);margin:0 0 14px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .box{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:#fff}
+  .box.dark{background:var(--navy2);border-color:var(--navy2);color:#fff}
+  .lbl{font:700 12px Arial,sans-serif;letter-spacing:.1em;color:var(--gold);margin:0 0 10px}
+  .lbl sup{font-weight:500;color:#9aa3b2;letter-spacing:.06em;font-size:9.5px;margin-left:3px}
+  .box.dark .lbl{color:#e9c98a}
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px dotted #e3e6ec}
+  .kv:last-child{border-bottom:0}
+  .kv .k{color:var(--mut);flex-shrink:0}
+  .kv .v{font-weight:700;text-align:right}
+  .box.dark .kv{border-bottom-color:rgba(255,255,255,.12)}
+  .box.dark .kv .k{color:#b9c4d8}
+  .box.dark .note{font:12px/1.5 Arial,sans-serif;color:#b9c4d8;margin-top:10px}
+  p{margin:0 0 10px}
+  table{width:100%;border-collapse:collapse;font:13.5px Arial,sans-serif;font-variant-numeric:tabular-nums}
+  th{font-size:11.5px;color:var(--mut);text-align:right;padding:6px 10px;border-bottom:1px solid #e3e6ec}
+  th:first-child{text-align:left}
+  td{padding:9px 10px;text-align:right;border-bottom:1px solid #eef0f3}
+  td:first-child{text-align:left}
+  td.last{color:#1a7f43;font-weight:700}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
+  .kpi .k{font:10.5px Arial,sans-serif;letter-spacing:.06em;color:var(--mut);text-transform:uppercase}
+  .kpi .v{font-size:21px;font-weight:700;color:var(--navy)}
+  .kpi .v.up{color:#1a7f43}
+  .src{font:12px/1.5 Arial,sans-serif;color:var(--mut)}
+  .comp{padding:10px 0;border-bottom:1px dotted #e3e6ec}
+  .comp b{display:block}
+  .comp .m{font:12.5px Arial,sans-serif;color:var(--mut)}
+  .foot{display:flex;justify-content:space-between;border-top:1px solid #e3e6ec;margin-top:18px;padding-top:10px;font:12px Arial,sans-serif;color:var(--mut)}
+  .ej{background:#fff6e6;border:1px solid #e9c98a;color:#8a5a0a;font:600 12px Arial,sans-serif;border-radius:6px;padding:7px 10px;margin-bottom:14px}
+  @media(max-width:700px){.sheet{padding:24px 18px}.row{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.wm span{font-size:70px}}
 </style>
 </head>
 <body>
-<div class="wm" aria-hidden="true"><span>EJEMPLO</span></div>
-<div class="page">
-  <div class="band">DOSSIER DE EJEMPLO · EMPRESA Y CIFRAS FICTICIAS</div>
-  <header>
-    <div class="brand">Reunvo<span>.</span></div>
-    <h1>EMPRESA EJEMPLO, S.L.</h1>
-    <p>Dossier para Deale · Distribución mayorista · Sevilla (Andalucía) · Preparado el 14/11/2026</p>
-  </header>
-  <main>
-    <h2>Resumen</h2>
-    <div class="grid">
-      <div class="card"><div class="k">Facturación 2025</div><div class="v">21,2 M€</div></div>
-      <div class="card"><div class="k">EBITDA 2025</div><div class="v">2,7 M€</div></div>
-      <div class="card"><div class="k">Margen EBITDA</div><div class="v">12,7 %</div></div>
-      <div class="card gold"><div class="k">Valor de empresa</div><div class="v">14,9–17,6 M€</div></div>
+<div class="sheet">
+  <div class="wm" aria-hidden="true"><span>EJEMPLO</span></div>
+  <div class="top"><div class="eyebrow">DOSSIER DE EMPRESA · EJEMPLO</div><div class="logo">REUNVO</div></div>
+  <h1>Empresa Ejemplo SL</h1>
+  <p class="sub">Distribución mayorista de material eléctrico e iluminación · Sevilla y Jerez de la Frontera (Cádiz)</p>
+  <hr class="rule">
+  <div class="ej">Dossier de ejemplo para enseñar el formato. La empresa, las personas, los contactos y las cifras son ficticios.</div>
+
+  <div class="row">
+    <div class="box">
+      <div class="lbl">IDENTIDAD<sup>SABI</sup></div>
+      <div class="kv"><span class="k">Razón social</span><span class="v">Empresa Ejemplo SL</span></div>
+      <div class="kv"><span class="k">Forma jurídica</span><span class="v">Sociedad limitada</span></div>
+      <div class="kv"><span class="k">Fundación</span><span class="v">1989 · 37 años</span></div>
+      <div class="kv"><span class="k">Capital social</span><span class="v">150.000 €</span></div>
+      <div class="kv"><span class="k">CNAE</span><span class="v">4669 · Comercio al por mayor de otra maquinaria y equipo</span></div>
+      <div class="kv"><span class="k">Estructura</span><span class="v">Socio fundador (70 %) y familia (30 %)</span></div>
+      <div class="kv"><span class="k">Web</span><span class="v">empresaejemplo.es</span></div>
     </div>
+    <div class="box dark">
+      <div class="lbl">A QUIÉN LLAMAR</div>
+      <div class="kv"><span class="k">Administrador</span><span class="v">Juan Ejemplo Pérez (66 años)</span></div>
+      <div class="kv"><span class="k">Dir. general</span><span class="v">El mismo administrador</span></div>
+      <div class="kv"><span class="k">Email</span><span class="v">direccion@empresaejemplo.es</span></div>
+      <div class="kv"><span class="k">Teléfono</span><span class="v">+34 955 000 000</span></div>
+      <div class="note">Sin segunda generación en la gestión. Respondió al correo el 11/11/2026: «Podemos hablar, aunque todavía no tenemos prisa».</div>
+    </div>
+  </div>
 
-    <h2>Qué hace</h2>
-    <p>Distribuidor mayorista de material eléctrico e iluminación para instaladores y obra en Andalucía occidental. Dos almacenes (Sevilla y Jerez), 64 empleados y unos 2.300 clientes activos. Fundada en 1989; el administrador único tiene 66 años y no hay segunda generación en la gestión.</p>
+  <div class="box" style="margin-bottom:14px">
+    <div class="lbl">QUÉ HACEN<sup>WEB + SABI</sup></div>
+    <p>Empresa Ejemplo es un <b>distribuidor mayorista de material eléctrico e iluminación</b> para instaladores, constructoras y mantenimiento industrial en Andalucía occidental. Dos almacenes (Sevilla y Jerez), reparto propio en 24 h y unos 2.300 clientes activos.</p>
+    <p>Trabaja con las principales marcas del sector y tiene una línea propia de iluminación LED. Señales: web renovada en 2025 y ampliación del almacén de Jerez en 2026.</p>
+  </div>
 
-    <h2>Cifras (miles de €)</h2>
+  <div class="box" style="margin-bottom:14px">
+    <div class="lbl">FINANCIEROS<sup>SABI</sup></div>
     <table>
-      <thead><tr><th></th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+      <thead><tr><th>€ (M)</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th></tr></thead>
       <tbody>
-        <tr><td>Facturación</td><td>18.400</td><td>19.700</td><td>21.200</td></tr>
-        <tr><td>EBITDA</td><td>2.100</td><td>2.400</td><td>2.700</td></tr>
-        <tr><td>Resultado neto</td><td>1.150</td><td>1.380</td><td>1.590</td></tr>
-        <tr><td>Deuda financiera neta</td><td>3.200</td><td>2.700</td><td>2.100</td></tr>
-        <tr><td>Empleados</td><td>58</td><td>61</td><td>64</td></tr>
+        <tr><td>Facturación</td><td>14,20</td><td>15,85</td><td>17,40</td><td class="last">18,90</td></tr>
+        <tr><td>EBITDA</td><td>1,42</td><td>1,71</td><td>2,05</td><td class="last">2,36</td></tr>
+        <tr><td>Tesorería</td><td>0,80</td><td>0,95</td><td>1,30</td><td class="last">1,55</td></tr>
       </tbody>
     </table>
-
-    <h2>Valoración orientativa</h2>
-    <div class="val">
-      Múltiplo de referencia del sector: <b>5,5x–6,5x EBITDA</b>.<br>
-      Valor de empresa: <b>14,9–17,6 M€</b> · menos deuda neta (2,1 M€) · <b>valor de las acciones: 12,8–15,5 M€</b>.<br>
-      <span style="color:#6b7689;font-size:12.5px">Rango orientativo para la primera conversación; no sustituye a una valoración formal.</span>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Crecimiento 2021→2024 (CAGR)</div><div class="v up">+10,0 %/año</div></div>
+      <div class="kpi"><div class="k">Margen EBITDA</div><div class="v">12,5 %</div></div>
+      <div class="kpi"><div class="k">Deuda neta / EBITDA</div><div class="v">1,08×</div></div>
+      <div class="kpi"><div class="k">Empleados</div><div class="v">64</div></div>
     </div>
+    <div class="src">Fuente: SABI (cifras de ejemplo). Facturación 14,2 → 18,9 M€ y EBITDA 1,42 → 2,36 M€ en 2021-2024. Deuda financiera de 4,10 M€ y tesorería de 1,55 M€ en 2024: deuda neta de 2,55 M€.</div>
+  </div>
 
-    <div class="two">
-      <div>
-        <h2>Puntos fuertes</h2>
-        <ul><li>Crecimiento del 7 % anual durante 3 años.</li><li>Cartera de clientes muy repartida: ninguno supera el 4 %.</li><li>Deuda en descenso: 0,8x EBITDA.</li></ul>
-      </div>
-      <div>
-        <h2>A vigilar</h2>
-        <ul><li>Dependencia del administrador en compras y grandes cuentas.</li><li>Sin relevo generacional en la gestión.</li><li>Margen sensible al precio del cobre.</li></ul>
-      </div>
+  <div class="row">
+    <div class="box">
+      <div class="lbl">PROPIEDAD<sup>SABI</sup></div>
+      <div class="kv"><span class="k">Estructura</span><span class="v">Socio fundador (70 %) y familia (30 %)</span></div>
+      <div class="kv"><span class="k">Administrador</span><span class="v">Juan Ejemplo Pérez</span></div>
+      <div class="kv"><span class="k">Edad</span><span class="v">66 años</span></div>
+      <div class="kv"><span class="k">Nº empleados</span><span class="v">64</span></div>
     </div>
-
-    <div class="two">
-      <div>
-        <h2>Competidores (ejemplo)</h2>
-        <ul><li>Distribuidora Eléctrica Sur, S.A.</li><li>Material Eléctrico Bética, S.L.</li><li>Grupo Luz Atlántica, S.L.</li></ul>
-      </div>
-      <div>
-        <h2>Posibles compradores (tipo)</h2>
-        <ul><li>Grupos nacionales de distribución eléctrica que quieran entrar en Andalucía.</li><li>Fondos de private equity con estrategia de compra y suma en distribución.</li><li>Competidores regionales que busquen escala.</li></ul>
-      </div>
+    <div class="box">
+      <div class="lbl">SECTOR<sup>CONTEXTO</sup></div>
+      <p>Distribución de material eléctrico: sector fragmentado en Andalucía, con muchos distribuidores familiares de 5 a 30 M€ y grupos nacionales que crecen comprando.</p>
+      <div class="kv"><span class="k">Múltiplo típico</span><span class="v">5–6× EBITDA (orientativo)</span></div>
+      <div class="kv"><span class="k">Comprador típico</span><span class="v">Grupo nacional de distribución eléctrica o fondo con plataforma del sector</span></div>
     </div>
+  </div>
 
-    <h2>Contacto</h2>
-    <p>Respondió al correo el 11/11/2026: «Podemos hablar, aunque todavía no tenemos prisa». Persona de contacto: administrador único.</p>
+  <div class="box">
+    <div class="lbl">CON QUIÉN COMPITE<sup>ANÁLISIS REUNVO</sup></div>
+    <div class="src" style="margin-bottom:4px">Empresas con actividad, tamaño y zona comparables (ejemplos ficticios).</div>
+    <div class="comp"><b>Distribuidora Eléctrica del Sur SL</b><span class="m">Sevilla · 24,3 M€</span><p style="margin:4px 0 0">Distribución de material eléctrico y climatización. Diferencia: más grande y con más peso en climatización.</p></div>
+    <div class="comp"><b>Material Eléctrico Bética SA</b><span class="m">Córdoba · 12,6 M€</span><p style="margin:4px 0 0">Distribución para instaladores. Diferencia: más centrada en vivienda y con menos industria.</p></div>
+    <p style="margin:10px 0 0"><b>Dónde queda la empresa:</b> 2.ª de 3 por facturación, entre Distribuidora Eléctrica del Sur (24,3 M€) y Material Eléctrico Bética (12,6 M€).</p>
+  </div>
 
-    <p class="note">Documento de ejemplo creado para enseñar el formato del dossier de Reunvo. La empresa, las personas y todas las cifras son inventadas.</p>
-  </main>
+  <div class="foot"><span>Preparado por Reunvo · ejemplo de formato</span><span>Fuentes: SABI · web de la empresa · sector</span></div>
 </div>
 </body>
 </html>
