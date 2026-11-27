@@ -177,7 +177,7 @@ function _data(){return {cliente:{name:"Deale",epd:15,plan:"Piloto"},
  target:{region:"Andalucía",prov:"",sector:"",eco:"fact",rev_min:1,rev_max:40,edad:60},
  stats:{facturacion_media:12.8,sectores:_cnt("sector"),ciudades:_cnt("localidad")},
  lote:{estado:_ok?"ok":"cliente",periodo:"diciembre",limite_cliente:"2026-12-04",inicio_envio:"2026-12-09"},
- aprobacion:_q.slice(),contactadas:_C,dossiers:_D,gmail:{conectado:true,cuenta:"envios@deale.es"}};}
+ aprobacion:_q.slice(),contactadas:_C,dossiers:_D,gmail:{conectado:true,cuenta:"su-cuenta@ejemplo.com"}};}
 async function rpc(fn,a){a=a||{};
  if(fn==="client_toggle_company"){const i=_q.findIndex(x=>x.company_id===a.p_company_id);if(i<0)return{ok:false};
    _q.splice(i,1);const n=_res.shift();if(n)_q.push(n);
