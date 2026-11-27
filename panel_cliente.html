@@ -216,7 +216,7 @@ function render(d){
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function loteOk(btn){
-  if(!confirm("¿Está seguro de aprobar la lista completa?\n\nPasamos a preparar los envíos con estas empresas.")) return;
+  if(!confirm("¿Está seguro de aprobar la lista completa?\n\nLos envíos empezarán 7 días después de su aprobación (o en la fecha prevista, si es anterior).")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
   if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
@@ -228,6 +228,9 @@ const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","
 function mesTxt(per){const m=/^(\d{4})-(\d{2})/.exec(per||"");return m?MESES[+m[2]-1]+" "+m[1]:String(per||"");}
 function dmy(d){if(!d)return"—";const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));return m?m[3]+"/"+m[2]+"/"+m[1]:fecha(d);}
 function loteCabecera(lo,n,cupo){
+  // Plazos (decisión 27-nov): el cliente tiene dias_aprobacion (14) para aprobar; la fecha límite
+  // es inicio − 7 (semana de revisión de correos). Si aprueba antes, los envíos empiezan 7 días
+  // después de su aprobación: el servidor adelanta inicio_envio y marca lote.adelantado.
   const pendiente = lo.estado==='cliente';
   const aprob = pendiente ? 0 : n;              // el cliente aprueba la lista entera con el botón
   const falta = Math.max(cupo-n,0);
@@ -235,17 +238,22 @@ function loteCabecera(lo,n,cupo){
   const tiles=[
     tile("En su lista",`<span id="lote-n">${n}</span> de ${cupo}`),
     tile("Aprobadas",`<span id="lote-ap">${aprob}</span> de ${cupo}`, pendiente?'gold':''),
-    tile(pendiente?"Aprobar antes del":"Aprobada",pendiente?dmy(lo.limite_cliente):"Sí"),
-    tile("Envíos desde",dmy(lo.inicio_envio))].join("");
+    tile(pendiente?"Apruebe antes del":"Aprobada",pendiente?dmy(lo.limite_cliente):(lo.aprobada_el?dmy(lo.aprobada_el):"Sí")),
+    tile("Envíos a partir del",dmy(lo.inicio_envio))].join("");
+  const plazo = pendiente
+    ? `<b>Apruebe antes del ${dmy(lo.limite_cliente)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}`
+    : `<b>Envíos a partir del ${dmy(lo.inicio_envio)}</b>${lo.adelantado?' (7 días tras su aprobación)':''}`;
+  const ap = lo.aprobada ? `<p class="hint" style="margin:10px 0 0">Lista de ${esc(mesTxt(lo.aprobada.periodo))} aprobada: <b>envíos a partir del ${dmy(lo.aprobada.inicio_envio)}</b>${lo.aprobada.adelantado?' (7 días tras su aprobación)':''}.</p>` : '';
   const curso = lo.en_curso ? `<p class="hint" style="margin:10px 0 0">En curso: lista de ${esc(mesTxt(lo.en_curso.periodo))}, quedan ${lo.en_curso.por_enviar} por enviar.</p>` : '';
   const aviso = falta ? `<div class="pend" id="lote-falta" style="margin:10px 0 0">Faltan ${falta} para completar el cupo: no quedan más empresas en reserva con su target. Las añadimos en cuanto haya.</div>` : '';
   return `<div class="panelbox" style="${pendiente?'border-color:#e9c98a;background:#fffdf7;':''}margin-bottom:14px">
      <h3 style="${pendiente?'color:#b7791f':''}">Lista de ${esc(mesTxt(lo.periodo))} · ${pendiente?'pendiente de su aprobación':'aprobada'}</h3>
+     <p id="lote-plazo" style="margin:0 0 12px;font-size:15px;color:#1a3c6e">${plazo}</p>
      <div class="cards" style="margin-bottom:6px">${tiles}</div>
      <p class="hint" style="margin:0">${pendiente
-       ? `Quite las que no encajen antes del <b>${dmy(lo.limite_cliente)}</b>; cada una que quite se sustituye por la siguiente de su reserva. Los envíos empiezan el <b>${dmy(lo.inicio_envio)}</b>.`
-       : `Los envíos empiezan el <b>${dmy(lo.inicio_envio)}</b>. Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`}</p>
-     ${aviso}${curso}
+       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva. Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación.`
+       : `Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`}</p>
+     ${aviso}${ap}${curso}
      ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
    </div>`;
 }

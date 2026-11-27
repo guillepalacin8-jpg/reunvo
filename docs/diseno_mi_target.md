@@ -55,9 +55,13 @@ Regla de Guillem: un cliente no puede pedir Cataluña, Aragón, Madrid ni Comuni
 - UI: en el desplegable de comunidad, las reservadas aparecen con nota «solo resultado < 400 k€ o > 50 M€», y el mensaje de error explica qué ajustar.
 - Estimación: ½ día.
 
-## 5. Cola y «Quitar» (rama fix/panel-cola-cupo, c602f4b)
+## 5. Cola, «Quitar» y plazos (rama fix/panel-cola-cupo)
 
-Hecho en la rama y sin desplegar: panel + `supabase/pendiente/2026-11-27_panel_cola_cupo.sql` (client_panel muestra el próximo lote y su objetivo; Quitar definitivo con sustituta del pool o del lote siguiente). Falta decidir `dias_aprobacion` y el cupo por cliente: el de la firma está en 35/día × 20 y el del piloto Deale serían 15/día → 315/mes (21 días laborables).
+Hecho en la rama y sin desplegar: panel + `supabase/pendiente/2026-11-27_panel_cola_cupo.sql`.
+- client_panel muestra el próximo lote con su objetivo; Quitar es definitivo y la sustituta sale del pool o del lote siguiente.
+- Plazos (decisión 27-nov): `dias_aprobacion = 14`; fecha límite = inicio − 7 (`clients.dias_revision`, semana de revisión de correos). Si el cliente aprueba antes, `client_lote_verificado` adelanta el inicio a aprobación + 7 (`lotes.adelantado`). `reunvo_crear_lote` garantiza inicio ≥ hoy + 14 + 7.
+- Cabecera: «Apruebe antes del DD/MM · Envíos a partir del DD/MM»; tras aprobar: «Envíos a partir del DD/MM (7 días tras su aprobación)».
+- Cupo por cliente: la firma va a 35/día × 20; el piloto Deale serían 15/día con cola_objetivo_dias = 21 → 315/mes.
 
 ## 6. Plan de entrega, semana del 30/11 al 4/12
 
