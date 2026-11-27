@@ -123,7 +123,7 @@
       </div></div></section>
 
     <section id="s-empresas"><h1>Su cola de empresas</h1>
-      <p class="hint">Estas son las empresas de su lista. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su reserva y la lista sigue completa.</p>
+      <p class="hint" id="emp-hint">Estas son las empresas de su lista. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su reserva y la lista sigue completa.</p>
       <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
@@ -234,6 +234,10 @@ function render(d){
   document.getElementById("b-emp").textContent=lista.length;
   document.getElementById("lote-estado").innerHTML = lo ? loteCabecera(lo,lista.length,cupoLote) : '';
   const puedeQuitar = lo ? (lo.puede_quitar!=null ? !!lo.puede_quitar : true) : true;
+  // Lista cerrada: no se invita a quitar.
+  const H=document.getElementById("emp-hint");
+  if(!H.dataset.abierta) H.dataset.abierta=H.innerHTML;
+  H.innerHTML = puedeQuitar ? H.dataset.abierta : "Estas son las empresas de su lista aprobada.";
   document.getElementById("lista-emp").innerHTML=lista.map(a=>gcard(a,puedeQuitar?`<button class="act b-out" onclick="quitar('${a.company_id}',this)">Quitar</button>`:'')).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
