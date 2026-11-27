@@ -104,6 +104,8 @@ AS $function$
     -- Edad mínima del DG o administrador
     and (c.target_edad_min is null or co.dg_fecha_nacimiento is null
          or co.dg_fecha_nacimiento <= current_date - make_interval(years => c.target_edad_min))
+    -- Nunca a quien ya se escribió en nombre de este cliente (aunque vuelva al pool)
+    and not exists (select 1 from campaigns ca where ca.company_id = co.id and ca.client_id = c.id::text)
     -- Perímetro reservado a otro cliente
     and not reunvo_empresa_reservada(co, c.id);
 $function$;
@@ -362,7 +364,7 @@ CREATE OR REPLACE FUNCTION public.reunvo_fin_envios(p_lote uuid)
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-declare l record; c record; v_pend int; v_n int; v_ult date; v_dias int[];
+declare l record; c record; v_pend int; v_n int; v_ult date; v_dias int[]; v_desde date;
 begin
   select * into l from lotes where id = p_lote;
   if not found then return null; end if;
@@ -379,9 +381,13 @@ begin
   if v_pend = 0 then return null; end if;
 
   v_n := ceil(v_pend::numeric / greatest(coalesce(c.emails_per_day,10),1))::int;
-  -- último día de envío necesario, contando desde mañana (lo de hoy puede haber salido ya)
+  -- Se empieza a contar mañana (lo de hoy puede haber salido ya) o, si la lista anterior aún
+  -- no ha empezado, el día en que empieza.
+  select greatest(current_date + 1, min(lo.inicio_envio)) into v_desde
+    from lotes lo where lo.client_id = l.client_id and lo.id <> l.id and lo.periodo < l.periodo
+     and lo.estado in ('enviando','listo','guille');
   select d::date into v_ult
-    from generate_series(current_date + 1, current_date + 730, interval '1 day') d
+    from generate_series(v_desde, v_desde + 730, interval '1 day') d
    where extract(isodow from d)::int = any(v_dias)
    order by d offset v_n - 1 limit 1;
   -- y el siguiente día de envío es el primero libre
@@ -533,6 +539,17 @@ begin
 
   if not coalesce(p_exclude, false) then
     return jsonb_build_object('ok',false,'mensaje','Las empresas quitadas no se pueden reponer.');
+  end if;
+
+  -- Una sola operación de quitar a la vez por cliente (doble clic, dos pestañas): sin esto,
+  -- dos llamadas simultáneas podían elegir la misma sustituta y la lista bajaba de su cupo.
+  perform pg_advisory_xact_lock(hashtext('reunvo_quitar:' || c.id::text));
+
+  -- Ya quitada (otra pestaña o doble clic): no es un error ni se busca otra sustituta.
+  if exists (select 1 from companies where id = p_company_id and assigned_client_id = c.id
+               and coalesce(excluded_by_client,false)) then
+    return jsonb_build_object('ok',true,'excluida',true,'ya_quitada',true,
+      'mensaje','Esa empresa ya estaba quitada.');
   end if;
 
   select co.lote_id into v_lote from companies co
@@ -767,3 +784,17 @@ begin
 
   return jsonb_build_object('ts', now(), 'cambios', v_log);
 end $function$;
+
+-- ---- Permisos ------------------------------------------------------------------------
+-- Las funciones internas no se pueden llamar desde el navegador (como el resto de las
+-- internas del proyecto); la del panel, sí.
+revoke execute on function public.reunvo_choca_reserva(uuid, text, text, numeric, numeric) from public, anon, authenticated;
+revoke execute on function public.reunvo_empresa_reservada(public.companies, uuid)       from public, anon, authenticated;
+revoke execute on function public.reunvo_elegible(public.companies, public.clients)      from public, anon, authenticated;
+revoke execute on function public.reunvo_fin_envios(uuid)                                from public, anon, authenticated;
+revoke execute on function public.buscar_reemplazo(uuid)                                 from public, anon, authenticated;
+revoke execute on function public.reunvo_crear_lote(uuid, date)                          from public, anon, authenticated;
+revoke execute on function public.reunvo_ciclo_lotes()                                   from public, anon, authenticated;
+revoke execute on function public.reunvo_mantener_colas()                                from public, anon, authenticated;
+grant  execute on function public.client_request_target_v2(text, jsonb)                  to anon, authenticated;
+

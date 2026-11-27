@@ -320,8 +320,13 @@ function loteCabecera(lo,n,cupo){
      ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
    </div>`;
 }
+let QUITANDO=false;   // una operación de quitar a la vez en esta pestaña
 async function quitar(id,btn){
   // Quitar es definitivo: no hay «Reponer». Se confirma antes.
+  if(QUITANDO) return; QUITANDO=true;
+  try{ await quitarUna(id,btn); } finally { QUITANDO=false; }
+}
+async function quitarUna(id,btn){
   const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
   if(!await confirmar("¿Está seguro?","Va a quitar «"+(nm||"esta empresa")+"». No se le escribirá y entrará en su lugar la siguiente empresa de su reserva.","Sí, quitar")) return;
   btn.disabled=true; btn.textContent="…";
@@ -330,6 +335,7 @@ async function quitar(id,btn){
   if(!(r&&r.ok)){btn.disabled=false;btn.textContent="Quitar";if(card)card.style.opacity="";flash((r&&r.mensaje)||"No se pudo, reintente.");return;}
   await load(); nav('empresas');
   flash(r.mensaje || "Quitada.");
+  if(r.ya_quitada) return;   // la quitó otra pestaña: solo se refresca
   if(r.nueva&&r.nueva.company_id){
     const grid=document.getElementById('lista-emp');
     const c=grid.querySelector('.gcard[data-id="'+r.nueva.company_id+'"]');
@@ -343,9 +349,11 @@ function confirmar(titulo,texto,si){
     const m=document.getElementById('modal'),bs=document.getElementById('modal-si'),bn=document.getElementById('modal-no');
     document.getElementById('modal-t').textContent=titulo;document.getElementById('modal-p').textContent=texto;
     bs.textContent=si||"Sí";m.classList.add('on');bs.focus();
-    const fin=v=>{m.classList.remove('on');bs.onclick=bn.onclick=m.onclick=document.onkeydown=null;res(v);};
+    // Una sola respuesta por diálogo: un doble clic en «Sí» no confirma dos veces.
+    // Un clic en el fondo no cierra (con doble clic en «Quitar» el segundo clic caía ahí).
+    let hecho=false;
+    const fin=v=>{if(hecho)return;hecho=true;m.classList.remove('on');bs.onclick=bn.onclick=document.onkeydown=null;res(v);};
     bs.onclick=()=>fin(true);bn.onclick=()=>fin(false);
-    m.onclick=e=>{if(e.target===m)fin(false);};
     document.onkeydown=e=>{if(e.key==='Escape')fin(false);};
   });
 }
