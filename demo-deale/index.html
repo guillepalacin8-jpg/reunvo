@@ -1,0 +1,295 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reunvo · Panel Deale (demo)</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reunvo"><meta name="theme-color" content="#1a3c6e">
+<style>
+  :root{color-scheme:light}*{box-sizing:border-box}
+  body{margin:0;background:#f7f8fa;color:#1a2233;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+  .app{display:flex;min-height:100vh}
+  .side{width:210px;background:#14243f;color:#cdd6e6;flex-shrink:0;padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+  .brand{font-size:18px;font-weight:700;color:#fff;padding:4px 10px 12px}.brand span{color:#e9c98a}
+  .who{font-size:12px;color:#8fa0bd;padding:0 10px 14px;border-bottom:1px solid #24365a;margin-bottom:8px}
+  .nav{background:none;border:0;color:#cdd6e6;text-align:left;padding:9px 11px;border-radius:8px;font-size:13.5px;cursor:pointer;width:100%;display:flex;justify-content:space-between;align-items:center}
+  .nav:hover{background:#1e3155}.nav.active{background:#2a4372;color:#fff;font-weight:600}
+  .nav .badge{background:#e9c98a;color:#14243f;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
+  .main{flex:1;padding:24px 34px 48px;width:100%}
+  h1{font-size:19px;margin:0 0 6px;color:#1a3c6e}
+  .lead{color:#3a4763;font-size:14px;margin:0 0 16px}
+  .hint{color:#6b7688;font-size:12.5px;margin:0 0 12px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+  .card{background:#fff;border:1px solid #e6e9ef;border-radius:11px;padding:12px 14px}
+  .card .k{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .card .v{font-size:22px;font-weight:650;color:#1a3c6e}.card.gold .v{color:#b7791f}
+  .panelbox{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .panelbox h3{margin:0 0 12px;font-size:13px;color:#1a3c6e}
+  .stats2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .stats2 .k{font-size:11px;color:#6b7688;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .bar{display:grid;grid-template-columns:135px 1fr 26px;align-items:center;gap:8px;margin-bottom:6px;font-size:12.5px}
+  .bl{color:#3a4763;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bt{background:#eef1f6;border-radius:5px;height:9px;overflow:hidden}.bf{display:block;height:100%;background:#2a4372;border-radius:5px}
+  .bn{color:#6b7688;text-align:right}
+  input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:12px;max-width:420px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .gcard{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:14px 16px}
+  .gcard.out{opacity:.45}
+  .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
+  @keyframes entra{0%{background:#fdf6e6}100%{background:#fff}}
+  .gcard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .gcard .nm{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gcard .gmeta{color:#6b7688;font-size:12px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  button.act{border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .b-out{background:#fef2f2;color:#b91c1c}.b-in{background:#eef1f6;color:#1a3c6e}.b-info{background:#1a3c6e;color:#fff}.b-done{background:#e9f7ef;color:#15803d}.b-gold{background:#b7791f;color:#fff}
+  .msg{background:#eef6ff;border:1px solid #cfe3fb;color:#1a3c6e;border-radius:10px;padding:11px 13px;font-size:13px;margin:0 0 12px;display:none}
+  .pend{background:#fff8ec;border:1px solid #f0dcae;color:#8a6d2f;border-radius:10px;padding:10px 13px;font-size:12.5px;margin-bottom:12px}
+  .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
+  section{display:none}section.on{display:block}
+  .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e6e9ef;font-size:13.5px}.kv .k{color:#6b7688}
+  .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}
+  .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
+  @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.stats2,.frm,.grid{grid-template-columns:1fr}.frm .full{grid-column:1}}
+</style>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+</head>
+<body>
+<div class="app">
+  <nav class="side">
+    <div class="brand">Reunvo<span>.</span></div>
+    <div class="who" id="who">…</div>
+    <button class="nav active" data-s="resumen" onclick="nav('resumen')">Resumen</button>
+    <button class="nav" data-s="target" onclick="nav('target')">Mi target</button>
+    <button class="nav" data-s="empresas" onclick="nav('empresas')">Su cola <span class="badge" id="b-emp"></span></button>
+    <button class="nav" data-s="contactadas" onclick="nav('contactadas')">Contactadas <span class="badge" id="b-con"></span></button>
+    <button class="nav" data-s="dossiers" onclick="nav('dossiers')">Dossiers</button>
+    <button class="nav" data-s="ajustes" onclick="nav('ajustes')">Ajustes</button>
+    <div class="foot">Nunca leemos su correo · no se contacta a nadie que no apruebe</div>
+  </nav>
+  <main class="main">
+    <div id="err" class="err"></div>
+    <div id="msg" class="msg"></div>
+    <div id="loading" class="hint">Cargando…</div>
+
+    <section id="s-resumen"><h1>Resumen</h1>
+      <p class="lead" id="lead"></p>
+      <div class="cards" id="kpis"></div>
+      <div class="panelbox"><h3>Panorama de sus contactadas</h3>
+        <div class="stats2">
+          <div><div class="k">Sectores</div><div id="secbars"></div></div>
+          <div><div class="k">Dónde</div><div id="citybars"></div></div>
+        </div></div>
+      <div class="panelbox"><h3>Su target</h3><div id="target-mini"></div></div>
+    </section>
+
+    <section id="s-target"><h1>Mi target</h1>
+      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
+      <div id="target-pend"></div>
+      <div class="panelbox"><div class="frm">
+        <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
+        <div class="full"><label>Sector (opcional — vacío = todos)</label><input id="t-sector" placeholder="p.ej. industrial, alimentación…"></div>
+        <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
+        <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
+        <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
+      </div></div></section>
+
+    <section id="s-empresas"><h1>Su cola de empresas</h1>
+      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
+      <div id="lote-estado"></div>
+      <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
+      <div class="grid" id="lista-emp"></div></section>
+
+    <section id="s-contactadas"><h1>Contactadas</h1>
+      <p class="hint">Todas a las que ya se ha escrito. Cuando una le responda con interés, <b>búsquela y pida el dossier</b> — le llega al email.</p>
+      <input class="search" id="q-con" placeholder="Buscar empresa…" oninput="filtrar('con')">
+      <div class="grid" id="lista-con"></div></section>
+
+    <section id="s-dossiers"><h1>Dossiers pedidos</h1><div id="lista-dos"></div></section>
+
+    <section id="s-ajustes"><h1>Ajustes</h1><div id="ajustes"></div>
+      <p class="hint" style="margin-top:12px">Para cambiar de plan, escríbanos a gp@reunvo.com.</p>
+      <div id="gmail-estado" style="margin-top:18px"></div>
+      <div class="panelbox" style="margin-top:18px">
+        <h3>Acceso</h3>
+        <p class="hint" style="margin-bottom:10px">Este navegador recuerda su acceso, así que puede
+        entrar desde <b>reunvo.com</b> sin buscar ningún enlace. Si usa un ordenador compartido,
+        cierre la sesión al terminar.</p>
+        <button class="act b-info" onclick="salir()">Cerrar sesión en este navegador</button>
+      </div></section>
+  </main>
+</div>
+<script>
+const SUPA="";
+const KEY="";
+const OAUTH_START_URL="#";
+/* Acceso recordado: la primera vez se entra con el enlace del correo (?t=…); a partir de ahí
+   el navegador lo recuerda y basta con abrir reunvo.com. El token se borra de la barra de
+   direcciones para que no salga en capturas ni al compartir pantalla. */
+const T = (function(){
+  const q = new URLSearchParams(location.search).get('t');
+  if (q) {
+    try { localStorage.setItem('reunvo_cliente_t', q); } catch(e) {}
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch(e) {}
+    return q;
+  }
+  try { return localStorage.getItem('reunvo_cliente_t') || ''; } catch(e) { return ''; }
+})();
+function salir(){
+  try { localStorage.removeItem('reunvo_cliente_t'); } catch(e) {}
+  location.href = '/entrar.html';
+}
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mEur=k=>k?("€"+(k/1000).toFixed(1)+"M"):"—";
+const fecha=d=>d?new Date(d).toLocaleDateString('es-ES'):"";
+
+/* DEMO: datos de ejemplo en el navegador; no se conecta a ningún servidor. */
+const _E=[["Agrícola Vega Norte, S.A.","Comercio mayorista de frutas y hortalizas","Almería"],["Conservas Marisma Dorada, S.A.","Conservas de pescado","Huelva"],["Distribuciones Costa del Sol Norte, S.L.","Distribución de bebidas","Málaga"],["Aceites Sierra Alta, S.L.","Aceite de oliva","Jaén"],["Envases del Genil, S.L.","Envases plásticos","Córdoba"],["Suministros Aljarafe del Sur, S.L.","Material eléctrico","Sevilla"],["Transportes Guadalmedina, S.L.","Transporte de mercancías","Málaga"],["Mármoles Sierra de Filabres, S.L.","Piedra natural","Almería"],["Logística Bahía Sur, S.L.","Almacenaje y logística","Cádiz"],["Ferretería Industrial Alcazaba, S.L.","Suministros industriales","Granada"],["Hortofrutícola Campo de Níjar, S.L.","Frutas y hortalizas","Almería"],["Talleres Mecánicos del Guadalquivir, S.L.","Mecanizado industrial","Sevilla"],["Bodegas Sierra Morena Alta, S.L.","Vinos y licores","Córdoba"],["Plásticos Técnicos Bética, S.L.","Componentes plásticos","Sevilla"],["Frigoríficos Costa Tropical, S.L.","Logística en frío","Granada"],["Instalaciones Eléctricas Axarquía, S.L.","Instalaciones eléctricas","Málaga"],["Cárnicas Valle del Guadiato, S.L.","Industria cárnica","Córdoba"],["Maderas y Palets Sierra Sur, S.L.","Palets y embalaje","Jaén"]].map((e,i)=>({company_id:"d"+i,empresa:e[0],sector:e[1],localidad:e[2],excluida:false}));
+(function(){const A=[["Distribuciones","Distribución mayorista"],["Transportes","Transporte de mercancías"],["Conservas","Industria alimentaria"],["Talleres","Mecanizado industrial"],["Suministros","Suministros industriales"],["Envases","Envases y embalaje"],["Instalaciones","Instalaciones eléctricas"],["Hortofrutícola","Frutas y hortalizas"],["Logística","Almacenaje y logística"],["Metalúrgica","Estructuras metálicas"],["Aceites","Aceite de oliva"],["Construcciones","Construcción"],["Frigoríficos","Logística en frío"],["Química","Productos químicos"],["Carpintería","Carpintería industrial"]];
+const B=["del Sur","Bética","Guadalquivir","Sierra Nevada","Costa Tropical","Campiña","Axarquía","Alpujarra","Bahía","Aljarafe","Vega Alta","Subbética","Marismas","Filabres","Genil","Almanzora","Condado","Los Vélez","Sierra Sur","Levante Andaluz","Mágina"];
+const C=[["Sevilla"],["Málaga"],["Almería"],["Granada"],["Córdoba"],["Jaén"],["Cádiz"],["Huelva"]];
+const T=["S.L.","S.A.","S.L.","S.L."];let k=0;const seen=new Set(_E.map(e=>e.empresa));
+for(let i=0;i<B.length&&_E.length<345;i++)for(let j=0;j<A.length&&_E.length<345;j++){const n=A[j][0]+" "+B[i]+", "+T[(i+j)%4];if(seen.has(n))continue;seen.add(n);_E.push({company_id:"g"+(k++),empresa:n,sector:A[j][1],localidad:C[(i*3+j)%8][0],excluida:false});}})();
+const _COLA=315; let _q=_E.slice(0,_COLA), _res=_E.slice(_COLA), _ok=false;
+/* Mes anterior (noviembre) ya hecho: 315 contactadas, 3 dossiers pedidos. */
+const _C=(function(){const A=["Comercial","Industrias","Grupo","Talleres","Servicios","Alimentación","Técnicas","Hermanos Ruiz","Transformados","Cerámicas","Mármoles","Agroindustrial","Maquinaria","Proyectos","Recambios"];
+const B=["del Estrecho","del Bajo Guadalquivir","de Cazorla","de Doñana","Tartessos","del Torcal","de Ronda","de Écija","de Antequera","de Baza","de Úbeda","de Osuna","del Albaicín","de los Caños","de Medina","del Sur","de la Vega","del Andévalo","de la Janda","de la Loma","del Poniente"];
+const SA=["Distribución mayorista","Fabricación","Distribución mayorista","Mecanizado industrial","Servicios industriales","Industria alimentaria","Servicios industriales","Fabricación","Fabricación","Cerámica y construcción","Piedra natural","Agroalimentario","Maquinaria","Construcción","Recambios"];
+const L=["Sevilla","Málaga","Granada","Córdoba","Jaén","Almería","Cádiz","Huelva"];const T=["S.L.","S.A.","S.L."];const r=[];
+for(let i=0;i<B.length&&r.length<315;i++)for(let j=0;j<A.length&&r.length<315;j++)r.push({company_id:"c"+r.length,empresa:A[j]+" "+B[i]+", "+T[(i+j)%3],sector:SA[j],localidad:L[(i*5+j)%8],dossier_pedido:false});
+r.splice(0,0,{company_id:"cE",empresa:"EMPRESA EJEMPLO, S.L.",sector:"Distribución mayorista",localidad:"Sevilla",dossier_pedido:true});
+r.length=315;r[5].dossier_pedido=true;r[11].dossier_pedido=true;return r;})();
+let _D=[{empresa:"EMPRESA EJEMPLO, S.L.",fecha:"2026-11-12",status:"entregado",delivered_at:"2026-11-14",url:"dossier-ejemplo.html"},
+ {empresa:_C[5].empresa,fecha:"2026-11-20",status:"entregado",delivered_at:"2026-11-22"},
+ {empresa:_C[11].empresa,fecha:"2026-11-26",status:"preparando"}];
+function _cnt(f){const m={};_C.forEach(c=>m[c[f]]=(m[c[f]]||0)+1);return Object.entries(m).map(([s,n])=>({s,n})).sort((a,b)=>b.n-a.n);}
+function _data(){return {cliente:{name:"Deale",epd:15,plan:"Piloto"},
+ kpis:{contactadas:_C.length,aperturas:198,en_cola:_q.length,cupo_mes:_q.length,dossiers_cap:10,dossiers_usados:_D.length},
+ target:{region:"Andalucía",sector:"",rev_min:1,rev_max:40},
+ stats:{facturacion_media:12.8,sectores:_cnt("sector"),ciudades:_cnt("localidad")},
+ lote:{estado:_ok?"ok":"cliente",periodo:"diciembre",limite_cliente:"2026-12-04",inicio_envio:"2026-12-09"},
+ aprobacion:_q.slice(),contactadas:_C,dossiers:_D,gmail:{conectado:true,cuenta:"envios@deale.es"}};}
+async function rpc(fn,a){a=a||{};
+ if(fn==="client_toggle_company"){const i=_q.findIndex(x=>x.company_id===a.p_company_id);if(i<0)return{ok:false};
+   _q.splice(i,1);const n=_res.shift();if(n)_q.push(n);
+   return{ok:true,mensaje:n?"Quitada. Ha entrado «"+n.empresa+"» en su lugar.":"Quitada.",nueva:n||null};}
+ if(fn==="client_lote_verificado"){_ok=true;return{ok:true,mensaje:"Lista confirmada. Empezamos los envíos el 9/12/2026."};}
+ if(fn==="client_request_target"){return{ok:true,mensaje:"Solicitud enviada. Se la confirmamos en breve."};}
+ if(fn==="client_request_dossier"){const c=_C.find(x=>x.company_id===a.p_company_id);if(c){c.dossier_pedido=true;_D.push({empresa:c.empresa,fecha:new Date().toISOString(),status:"preparando"});}return{ok:true,mensaje:"Pedido. Le enviaremos el dossier a su email."};}
+ return _data();}
+
+function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
+function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
+function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
+function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
+
+async function load(){
+  try{const d=await rpc("client_panel",{});if(!d||d.error){throw new Error("Enlace no válido");}render(d);}
+  catch(e){document.getElementById("loading").style.display="none";const el=document.getElementById("err");el.style.display="block";el.textContent="No se pudo cargar: "+(e.message||e);}
+}
+function render(d){
+  document.getElementById("loading").style.display="none";
+  const c=d.cliente||{},k=d.kpis||{},t=d.target||{},st=d.stats||{};
+  document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
+  document.getElementById("s-resumen").classList.add("on");
+  const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
+  const cupo=(k.cupo_mes==null?k.en_cola:k.cupo_mes)||0;
+  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en su nombre, de su cola de "+(k.en_cola||0)+". Revíselas, ajuste su target y pida el dossier de quien le responda.";
+  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
+    .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
+  document.getElementById("secbars").innerHTML=bars(st.sectores);
+  document.getElementById("citybars").innerHTML=bars(st.ciudades);
+  document.getElementById("target-mini").innerHTML=`<div class="kv"><span class="k">A quién contactamos</span><span>${esc(tgtTxt(t))}</span></div>`;
+  document.getElementById("t-region").value=t.region||"";document.getElementById("t-sector").value=t.sector||"";
+  document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
+  const tp=d.target_pendiente;
+  document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
+  document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
+  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+     <div class="top"><div class="nm">${esc(a.empresa)}</div>${accion}</div>
+     <div class="gmeta">${esc(a.localidad||'—')} · ${esc(a.sector||'—')}</div></div>`;
+  // Estado del lote: hasta cuándo puede depurar, y el botón para cerrarlo antes
+  const lo=d.lote||null;
+  document.getElementById("lote-estado").innerHTML = lo && lo.estado==='cliente'
+    ? `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7;margin-bottom:14px">
+         <h3 style="color:#b7791f">Lista de ${esc(lo.periodo)} · pendiente de su visto bueno</h3>
+         <p class="hint" style="margin-bottom:12px">Puede quitar empresas hasta el
+         <b>${fecha(lo.limite_cliente)}</b>. A partir de esa fecha preparamos los envíos, que
+         empiezan el <b>${fecha(lo.inicio_envio)}</b>.<br>
+         Si ya la ha revisado entera, díganoslo y pasamos a preparar la siguiente.</p>
+         <button class="act b-gold" onclick="loteOk(this)">Todas verificadas y correctas</button>
+       </div>`
+    : (lo ? `<div class="panelbox" style="margin-bottom:14px">
+         <h3>Lista de ${esc(lo.periodo)}</h3>
+         <p class="hint">Ya revisada. Los envíos empiezan el <b>${fecha(lo.inicio_envio)}</b>.
+         Le avisaremos cuando preparemos la siguiente.</p></div>` : '');
+
+  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
+  document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
+  // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
+  // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
+  const dosEstado=x=>x.status==='entregado'?`Enviado a su email el ${fecha(x.delivered_at)}`:(x.status==='listo'?'Enviándoselo ahora':'Lo estamos preparando');
+  document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">Pedido ${fecha(x.fecha)} · ${esc(dosEstado(x))}${x.url?` · <a href="${x.url}" target="_blank" rel="noopener">Ver dossier</a>`:""}</span></div>`).join("")||'<p class="hint">Todavía no ha pedido ningún dossier. Pídalos desde Contactadas.</p>';
+  const gm=d.gmail||{};
+  const gmailLink=OAUTH_START_URL+"?t="+encodeURIComponent(T);
+  const gmailNota='<p class="hint" style="margin-top:8px">Solo escribimos en su nombre. Nunca leemos su bandeja de entrada.</p>';
+  document.getElementById("gmail-estado").innerHTML = gm.caducado
+    ? `<div class="panelbox" style="border-color:#fecaca;background:#fef2f2">
+         <h3 style="color:#b91c1c">Conexión de Gmail caducada</h3>
+         <p class="hint" style="color:#b91c1c;margin-bottom:12px">Google ha revocado o caducado el permiso para enviar en su nombre. Hasta que la reconecte, no podemos enviar sus correos.</p>
+         <button class="act b-gold" onclick="location.href='${gmailLink}'">Volver a conectar Gmail</button>
+         ${gmailNota}
+       </div>`
+    : (gm.conectado
+      ? `<div class="panelbox">
+           <h3>Gmail conectado</h3>
+           <p class="hint" style="margin-bottom:12px">Conectado como <b>${esc(gm.cuenta||'')}</b>.</p>
+           <button class="act b-info" onclick="location.href='${gmailLink}'">Reconectar Gmail</button>
+           ${gmailNota}
+         </div>`
+      : `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7">
+           <h3 style="color:#b7791f">Gmail sin conectar</h3>
+           <p class="hint" style="margin-bottom:12px">Aún no hemos conectado su Gmail, así que no podemos enviar correos en su nombre.</p>
+           <button class="act b-gold" onclick="location.href='${gmailLink}'">Conectar mi Gmail</button>
+           ${gmailNota}
+         </div>`);
+  document.getElementById("ajustes").innerHTML=
+    [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
+  const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
+}
+async function loteOk(btn){
+  if(!confirm("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?")) return;
+  btn.disabled=true; btn.textContent="…";
+  const r=await rpc("client_lote_verificado",{});
+  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
+  else{btn.disabled=false;btn.textContent="Todas verificadas y correctas";
+       flash((r&&r.mensaje)||"No se pudo confirmar.");}
+}
+async function toggle(id,ex,btn){
+  // Quitar una empresa la descarta para siempre: se confirma antes.
+  if(ex){
+    const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
+    if(!confirm("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?")) return;
+  }
+  btn.disabled=true; const txt=btn.textContent; btn.textContent="…";
+  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});
+  if(r&&r.ok){
+    await load(); nav('empresas');
+    flash(r.mensaje || (ex?"Quitada.":"Repuesta."));
+    // Resaltar la que ha entrado en su lugar, para que se vea el cambio
+    if(r.nueva&&r.nueva.company_id){
+      const c=document.querySelector('#lista-emp .gcard[data-id="'+r.nueva.company_id+'"]');
+      if(c){c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
+    }
+  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintente.");}
+}
+async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
+async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
+function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}
+load();
+</script>
+</body>
+</html>
+
+</body></html>
