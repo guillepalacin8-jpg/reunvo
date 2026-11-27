@@ -34,8 +34,7 @@
   input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:12px;max-width:420px}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .gcard{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:14px 16px}
-  .gcard.out{opacity:.45}
-  .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
+    .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
   @keyframes entra{0%{background:#fdf6e6}100%{background:#fff}}
   .gcard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .gcard .nm{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -95,7 +94,7 @@
       </div></div></section>
 
     <section id="s-empresas"><h1>Su cola de empresas</h1>
-      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
+      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su reserva y la lista sigue completa.</p>
       <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
@@ -158,9 +157,9 @@ function render(d){
   document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
   document.getElementById("s-resumen").classList.add("on");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
-  const cupo=(k.cupo_mes==null?k.en_cola:k.cupo_mes)||0;
-  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en su nombre, de su cola de "+(k.en_cola||0)+". Revíselas, ajuste su target y pida el dossier de quien le responda.";
-  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
+  const cupo=((d.lote&&d.lote.objetivo)||(k.cupo_mes==null?k.en_cola:k.cupo_mes))||0;
+  document.getElementById("lead").textContent="Cada mes contactamos "+cupo+" empresas en su nombre"+(d.lote&&d.lote.periodo?" (lista de "+mesTxt(d.lote.periodo)+")":"")+". Revise su lista, ajuste su target y pida el dossier de quien le responda.";
+  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En su lista",(d.aprobacion?(d.aprobacion.filter(a=>!a.excluida).length):k.en_cola)],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
     .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
   document.getElementById("secbars").innerHTML=bars(st.sectores);
   document.getElementById("citybars").innerHTML=bars(st.ciudades);
@@ -169,27 +168,21 @@ function render(d){
   document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
-  document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
-  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+  document.getElementById("b-con").textContent=k.contactadas||0;
+  const gcard=(a,accion)=>`<div class="gcard" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
      <div class="top"><div class="nm">${esc(a.empresa)}</div>${accion}</div>
      <div class="gmeta">${esc(a.localidad||'—')} · ${esc(a.sector||'—')}</div></div>`;
-  // Estado del lote: hasta cuándo puede depurar, y el botón para cerrarlo antes
+  // Cabecera del lote. El cupo sale del lote (objetivo = plan del cliente), no del código.
+  // Las quitadas no se enseñan: una vez quitada, se va. Al quitar entra otra de la reserva,
+  // así que la lista se mantiene en el cupo mientras haya reserva.
   const lo=d.lote||null;
-  document.getElementById("lote-estado").innerHTML = lo && lo.estado==='cliente'
-    ? `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7;margin-bottom:14px">
-         <h3 style="color:#b7791f">Lista de ${esc(lo.periodo)} · pendiente de su visto bueno</h3>
-         <p class="hint" style="margin-bottom:12px">Puede quitar empresas hasta el
-         <b>${fecha(lo.limite_cliente)}</b>. A partir de esa fecha preparamos los envíos, que
-         empiezan el <b>${fecha(lo.inicio_envio)}</b>.<br>
-         Si ya la ha revisado entera, díganoslo y pasamos a preparar la siguiente.</p>
-         <button class="act b-gold" onclick="loteOk(this)">Todas verificadas y correctas</button>
-       </div>`
-    : (lo ? `<div class="panelbox" style="margin-bottom:14px">
-         <h3>Lista de ${esc(lo.periodo)}</h3>
-         <p class="hint">Ya revisada. Los envíos empiezan el <b>${fecha(lo.inicio_envio)}</b>.
-         Le avisaremos cuando preparemos la siguiente.</p></div>` : '');
-
-  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
+  const lista=(d.aprobacion||[]).filter(a=>!a.excluida);
+  LISTA_N=lista.length;
+  const cupoLote=lo?(lo.objetivo||k.cupo_mes||lista.length):0;
+  CUPO=cupoLote;
+  document.getElementById("b-emp").textContent=lista.length;
+  document.getElementById("lote-estado").innerHTML = lo ? loteCabecera(lo,lista.length,cupoLote) : '';
+  document.getElementById("lista-emp").innerHTML=lista.map(a=>gcard(a,`<button class="act b-out" onclick="quitar('${a.company_id}',this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
   // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
@@ -223,30 +216,54 @@ function render(d){
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function loteOk(btn){
-  if(!confirm("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?")) return;
+  if(!confirm("¿Está seguro de aprobar la lista completa?\n\nPasamos a preparar los envíos con estas empresas.")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
   if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
-  else{btn.disabled=false;btn.textContent="Todas verificadas y correctas";
+  else{btn.disabled=false;btn.textContent="Aprobar la lista completa";
        flash((r&&r.mensaje)||"No se pudo confirmar.");}
 }
-async function toggle(id,ex,btn){
-  // Quitar una empresa la descarta para siempre: se confirma antes.
-  if(ex){
-    const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
-    if(!confirm("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?")) return;
+let CUPO=0, LISTA_N=0;
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function mesTxt(per){const m=/^(\d{4})-(\d{2})/.exec(per||"");return m?MESES[+m[2]-1]+" "+m[1]:String(per||"");}
+function dmy(d){if(!d)return"—";const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));return m?m[3]+"/"+m[2]+"/"+m[1]:fecha(d);}
+function loteCabecera(lo,n,cupo){
+  const pendiente = lo.estado==='cliente';
+  const aprob = pendiente ? 0 : n;              // el cliente aprueba la lista entera con el botón
+  const falta = Math.max(cupo-n,0);
+  const tile=(k,v,cl)=>`<div class="card${cl?' '+cl:''}"><div class="k">${k}</div><div class="v" style="font-size:18px">${v}</div></div>`;
+  const tiles=[
+    tile("En su lista",`<span id="lote-n">${n}</span> de ${cupo}`),
+    tile("Aprobadas",`<span id="lote-ap">${aprob}</span> de ${cupo}`, pendiente?'gold':''),
+    tile(pendiente?"Aprobar antes del":"Aprobada",pendiente?dmy(lo.limite_cliente):"Sí"),
+    tile("Envíos desde",dmy(lo.inicio_envio))].join("");
+  const curso = lo.en_curso ? `<p class="hint" style="margin:10px 0 0">En curso: lista de ${esc(mesTxt(lo.en_curso.periodo))}, quedan ${lo.en_curso.por_enviar} por enviar.</p>` : '';
+  const aviso = falta ? `<div class="pend" id="lote-falta" style="margin:10px 0 0">Faltan ${falta} para completar el cupo: no quedan más empresas en reserva con su target. Las añadimos en cuanto haya.</div>` : '';
+  return `<div class="panelbox" style="${pendiente?'border-color:#e9c98a;background:#fffdf7;':''}margin-bottom:14px">
+     <h3 style="${pendiente?'color:#b7791f':''}">Lista de ${esc(mesTxt(lo.periodo))} · ${pendiente?'pendiente de su aprobación':'aprobada'}</h3>
+     <div class="cards" style="margin-bottom:6px">${tiles}</div>
+     <p class="hint" style="margin:0">${pendiente
+       ? `Quite las que no encajen antes del <b>${dmy(lo.limite_cliente)}</b>; cada una que quite se sustituye por la siguiente de su reserva. Los envíos empiezan el <b>${dmy(lo.inicio_envio)}</b>.`
+       : `Los envíos empiezan el <b>${dmy(lo.inicio_envio)}</b>. Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`}</p>
+     ${aviso}${curso}
+     ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
+   </div>`;
+}
+async function quitar(id,btn){
+  // Quitar es definitivo: no hay «Reponer». Se confirma antes.
+  const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
+  if(!confirm("¿Está seguro de quitar «"+(nm||"esta empresa")+"»?\n\nNo se le escribirá. Entrará en su lugar la siguiente empresa de su reserva.")) return;
+  btn.disabled=true; btn.textContent="…";
+  if(card){card.style.transition="opacity .2s";card.style.opacity=".3";}
+  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:true});
+  if(!(r&&r.ok)){btn.disabled=false;btn.textContent="Quitar";if(card)card.style.opacity="";flash((r&&r.mensaje)||"No se pudo, reintente.");return;}
+  await load(); nav('empresas');
+  flash(r.mensaje || "Quitada.");
+  if(r.nueva&&r.nueva.company_id){
+    const grid=document.getElementById('lista-emp');
+    const c=grid.querySelector('.gcard[data-id="'+r.nueva.company_id+'"]');
+    if(c){grid.prepend(c);c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
   }
-  btn.disabled=true; const txt=btn.textContent; btn.textContent="…";
-  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});
-  if(r&&r.ok){
-    await load(); nav('empresas');
-    flash(r.mensaje || (ex?"Quitada.":"Repuesta."));
-    // Resaltar la que ha entrado en su lugar, para que se vea el cambio
-    if(r.nueva&&r.nueva.company_id){
-      const c=document.querySelector('#lista-emp .gcard[data-id="'+r.nueva.company_id+'"]');
-      if(c){c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
-    }
-  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintente.");}
 }
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
 async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
