@@ -14,7 +14,7 @@ Proyecto Supabase: quywrltqzoyyorbsuiwc. Datos consultados el 27/11/2026, solo l
 | Provincia | No hay columna. `postal_code` solo en 718 empresas; la provincia sale de sus 2 primeros dígitos. `locality` es texto libre. |
 | Solicitudes | `target_requests(region, sector, rev_min, rev_max, meta jsonb)`: 1 fila. `client_request_target` guarda texto libre sin validar. |
 
-**Conflicto de fondo con el punto 4:** 14.735 de las ~19.800 empresas de la base (Cataluña + Aragón, «resultado 400k-50M») caen exactamente en el perímetro reservado a la firma. Si la regla se aplica a la base y no solo a lo que pide el cliente, hoy quedarían ~5.000 empresas utilizables. Esto lo tiene que decidir Guillem (ver § 6).
+**Contexto del punto 4:** 14.735 de las ~19.800 empresas de la base (Cataluña + Aragón, «resultado 400k-50M») son el universo de la firma M&A, que hoy es el único cliente, así que es lo esperado. La reserva sirve para que OTROS clientes no pisen a la firma: el titular (`zonas_reservadas.titular`) queda exento y el resto no puede pedir ni recibir esas empresas. Para clientes nuevos (p. ej. el piloto Deale, aún por crear) el inventario disponible fuera del perímetro reservado es hoy de unas 5.000 empresas.
 
 ## 1. Criterio económico (facturación O resultado, con mínimo y máximo)
 
@@ -49,7 +49,7 @@ Proyecto Supabase: quywrltqzoyyorbsuiwc. Datos consultados el 27/11/2026, solo l
 Regla de Guillem: un cliente no puede pedir Cataluña, Aragón, Madrid ni Comunidad Valenciana con resultado entre 400 k€ y 50 M€.
 
 - Tabla `zonas_reservadas(ccaa, metric, min_eur, max_eur, titular, activa)` con esas 4 filas (resultado 400.000–50.000.000). Así cambiar la regla es un dato y no hay que redesplegar.
-- Validación en el servidor (`client_request_target`) y, como segunda barrera, en `reunvo_elegible`: una empresa de una CCAA reservada con resultado dentro del rango nunca entra en la cola de un cliente externo.
+- Validación en el servidor (`client_request_target`) y, como segunda barrera, en `reunvo_elegible`: una empresa de una CCAA reservada con resultado dentro del rango nunca entra en la cola de un cliente que no sea el titular (`clients.id <> zonas_reservadas.titular`).
 - Solape: se rechaza si el tramo pedido **se solapa** con el reservado, no solo si está contenido. Ejemplo: Cataluña, resultado 30–80 M€ → se rechaza, o se ofrece «solo > 50 M€».
 - Con facturación como métrica no se puede comprobar el resultado en la solicitud. La exclusión se aplica igual por empresa en `reunvo_elegible` usando `result_eur`; si una empresa no tiene resultado, se excluye por precaución (a decidir).
 - UI: en el desplegable de comunidad, las reservadas aparecen con nota «solo resultado < 400 k€ o > 50 M€», y el mensaje de error explica qué ajustar.
@@ -57,16 +57,16 @@ Regla de Guillem: un cliente no puede pedir Cataluña, Aragón, Madrid ni Comuni
 
 ## 5. Cola y «Quitar» (rama fix/panel-cola-cupo, c602f4b)
 
-Hecho en la rama y sin desplegar: panel + `supabase/pendiente/2026-11-27_panel_cola_cupo.sql` (client_panel muestra el próximo lote y su objetivo; Quitar definitivo con sustituta del pool o del lote siguiente). Falta decidir `dias_aprobacion` y el cupo real (315 = 15/día × 21 días laborables, que no es lo que hay en la base: 35/día).
+Hecho en la rama y sin desplegar: panel + `supabase/pendiente/2026-11-27_panel_cola_cupo.sql` (client_panel muestra el próximo lote y su objetivo; Quitar definitivo con sustituta del pool o del lote siguiente). Falta decidir `dias_aprobacion` y el cupo por cliente: el de la firma está en 35/día × 20 y el del piloto Deale serían 15/día → 315/mes (21 días laborables).
 
 ## 6. Plan de entrega, semana del 30/11 al 4/12
 
 | Día | Trabajo | SQL | Decide Guillem antes |
 |---|---|---|---|
-| L 30/11 | Desplegar cola/Quitar (c602f4b) + SQL pendiente. Revisar por qué no hay envíos desde el 19/11. | `2026-11-27_panel_cola_cupo.sql`; `dias_aprobacion` y objetivo del cliente | Cupo (15/día → 315) y días de aprobación; qué cliente es Deale y si su panel está en este proyecto |
-| M 1/12 | Tablas de referencia (ccaa, provincias, cnae2009, sector_map, zonas_reservadas) + columnas nuevas | migración de esquema, sin tocar datos | Lista de zonas reservadas (¿alguna más?, ¿la regla aplica también a la base o solo a la solicitud?) |
+| L 30/11 | Desplegar cola/Quitar (c602f4b) + SQL pendiente. (Los envíos siguen en pausa por decisión de Guillem; esto no los reactiva.) | `2026-11-27_panel_cola_cupo.sql`; `dias_aprobacion` y objetivo del cliente | Cupo y días de aprobación por cliente (Deale, piloto por crear: 15/día → 315/mes) |
+| M 1/12 | Tablas de referencia (ccaa, provincias, cnae2009, sector_map, zonas_reservadas) + columnas nuevas | migración de esquema, sin tocar datos | Lista de zonas reservadas (¿alguna más?) |
 | X 2/12 | Reimportar de SABI: resultado, CNAE, CP/provincia; normalizar `revenue_eur` | carga de datos (staging → merge) | Export SABI con esas columnas |
 | J 3/12 | `reunvo_elegible` único + `client_request_target` con validación y regla de la firma; adaptar las 6 funciones | funciones | Qué hacer con empresas sin resultado en CCAA reservada |
 | V 4/12 | UI «Mi target» con desplegables y criterio económico; pruebas Playwright con mocks; despliegue | — | Visto bueno final |
 
-Total estimado: unos 4,5 días de trabajo, más la reimportación de SABI. Lo que más riesgo tiene para el calendario es esa reimportación y la decisión del § 0 sobre el perímetro reservado.
+Total estimado: unos 4,5 días de trabajo, más la reimportación de SABI. Lo que más riesgo tiene para el calendario es esa reimportación.
