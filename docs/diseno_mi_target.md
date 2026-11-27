@@ -1,5 +1,7 @@
 # «Mi target» y cola del panel de cliente: diseño y plan de entrega
 
+> **Estado 27/11 (noche):** implementado en la rama (panel + SQL en `supabase/pendiente/`, ver LEEME). Pendiente: aprobación de Guillem, ejecutar el SQL, reimportar de SABI `result_eur`, `cnae`, CP y `dg_fecha_nacimiento` (sin esos datos los filtros nuevos no descartan nada) y desplegar. Interruptor «aprobar bloquea Quitar»: activado por defecto (recomendado).
+
 Estado: especificación. No se implementa ni se ejecuta SQL hasta que lo apruebe Guillem.
 Proyecto Supabase: quywrltqzoyyorbsuiwc. Datos consultados el 27/11/2026, solo lectura.
 

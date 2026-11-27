@@ -49,6 +49,26 @@
   .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}
   .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
   @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.stats2,.frm,.grid{grid-template-columns:1fr}.frm .full{grid-column:1}}
+  /* Diálogo de confirmación en la propia página (sustituye a confirm()) */
+  .modal{position:fixed;inset:0;background:rgba(20,36,63,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal.on{display:flex}
+  .modal .box{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(20,36,63,.25)}
+  .modal h4{margin:0 0 8px;font-size:16px;color:#1a3c6e}
+  .modal p{margin:0 0 16px;color:#3a4763;font-size:13.5px;white-space:pre-line}
+  .modal .btns{display:flex;gap:8px;justify-content:flex-end}
+  .b-ghost{background:#eef1f6;color:#3a4763}
+  /* Formulario de target */
+  .frm select{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;background:#fff}
+  .seg{display:inline-flex;border:1px solid #d6dae2;border-radius:9px;overflow:hidden}
+  .frm .seg label{white-space:nowrap;margin:0;padding:7px 12px;font-size:13px;color:#3a4763;cursor:pointer;display:flex;gap:6px;align-items:center}
+  .seg input{margin:0}
+  .frm .seg label:has(input:checked){background:#1a3c6e;color:#fff}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#eef1f6;color:#1a3c6e;border-radius:999px;padding:4px 10px;font-size:12.5px}
+  .chip button{border:0;background:none;color:#6b7688;cursor:pointer;font-size:14px;line-height:1;padding:0}
+  .frm .chk{margin:0;display:inline-flex;align-items:center;gap:5px;background:#f7f8fa;border:1px solid #e6e9ef;border-radius:8px;padding:4px 9px;font-size:12.5px;color:#3a4763}
+  .ferr{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:9px;padding:9px 12px;font-size:12.5px;display:none}
+  .fnote{color:#8a6d2f;background:#fff8ec;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;font-size:12.5px;display:none}
 </style>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -85,12 +105,22 @@
     <section id="s-target"><h1>Mi target</h1>
       <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
       <div id="target-pend"></div>
-      <div class="panelbox"><div class="frm">
-        <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
-        <div class="full"><label>Sector (opcional — vacío = todos)</label><input id="t-sector" placeholder="p.ej. industrial, alimentación…"></div>
-        <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
-        <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
-        <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
+      <div class="panelbox"><div class="frm" id="t-form">
+        <div class="full"><label>Criterio económico</label>
+          <div class="seg" role="radiogroup" aria-label="Criterio económico">
+            <label><input type="radio" name="t-metric" id="t-metric-revenue" value="revenue" checked onchange="tgtCambio()"> Facturación</label>
+            <label><input type="radio" name="t-metric" id="t-metric-result" value="result" onchange="tgtCambio()"> Resultado del ejercicio</label>
+          </div></div>
+        <div><label for="t-min" id="t-min-l">Facturación mínima (M€)</label><input id="t-min" type="number" step="0.1" oninput="tgtCambio()"></div>
+        <div><label for="t-max" id="t-max-l">Facturación máxima (M€)</label><input id="t-max" type="number" step="0.1" oninput="tgtCambio()"></div>
+        <div class="full"><label for="t-ccaa">Comunidad autónoma</label><select id="t-ccaa" onchange="tgtProvincias();tgtCambio()"></select></div>
+        <div class="full" id="t-prov-box" style="display:none"><label>Provincias <span style="color:#8fa0bd">(ninguna marcada = toda la comunidad)</span></label><div class="chips" id="t-prov"></div></div>
+        <div class="full"><label for="t-sector">Sector (CNAE 2009)</label><select id="t-sector" onchange="tgtAddSector(this)"></select>
+          <div class="chips" id="t-sectores"></div></div>
+        <div><label for="t-edad">Edad mínima del director general o administrador (años)</label><input id="t-edad" type="number" min="18" max="100" step="1" placeholder="Sin mínimo"></div>
+        <div class="full"><div class="fnote" id="t-aviso"></div></div>
+        <div class="full"><div class="ferr" id="t-err"></div></div>
+        <div class="full"><button class="act b-gold" id="t-enviar" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
     <section id="s-empresas"><h1>Su cola de empresas</h1>
@@ -118,6 +148,11 @@
       </div></section>
   </main>
 </div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="box"><h4 id="modal-t"></h4><p id="modal-p"></p>
+    <div class="btns"><button class="act b-ghost" id="modal-no">Cancelar</button><button class="act b-out" id="modal-si">Sí</button></div></div>
+</div>
+<script src="assets/catalogos.js?v=1"></script>
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
@@ -145,7 +180,23 @@ async function rpc(fn,a){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"PO
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
 function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
 function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
-function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
+const CAT=window.REUNVO_CATALOGOS||{cnae:[],ccaa:[],reservadas:{ccaa:[]}};
+const CNAE_T={},CCAA_T={},PROV_T={};
+CAT.cnae.forEach(x=>{CNAE_T[x.s]=x.t;x.d.forEach(d=>CNAE_T[d.c]=d.t);});
+CAT.ccaa.forEach(x=>{CCAA_T[x.c]=x.t;x.p.forEach(p=>PROV_T[p.c]=p.t);});
+const nM=v=>(v==null||v==="")?null:Number(v);
+const fM=v=>String(Math.round(v*100)/100).replace('.',',');
+function rango(min,max){min=nM(min);max=nM(max);if(min==null&&max==null)return"";
+  if(min!=null&&max!=null)return fM(min)+"–"+fM(max)+" M€";return min!=null?"desde "+fM(min)+" M€":"hasta "+fM(max)+" M€";}
+function tgtTxt(t){if(!t)return"—";const p=[];
+  if(t.ccaa){p.push((CCAA_T[t.ccaa]||t.ccaa)+((t.provincias&&t.provincias.length)?" ("+t.provincias.map(c=>PROV_T[c]||c).join(", ")+")":""));}
+  else if(t.region)p.push(t.region);
+  if(t.cnae&&t.cnae.length)p.push(t.cnae.map(c=>(c.length===1?"Sección ":"")+c+" "+(CNAE_T[c]||"")).join(" / "));
+  else if(t.sector)p.push(t.sector);
+  if(t.metric){const r=rango(t.min_meur,t.max_meur);if(r)p.push((t.metric==='result'?"Resultado ":"Facturación ")+r);}
+  else if(t.rev_min||t.rev_max)p.push("Facturación "+rango(t.rev_min,t.rev_max));
+  if(t.edad_min)p.push("DG desde "+t.edad_min+" años");
+  return p.length?p.join(" · "):"sin definir";}
 
 async function load(){
   try{const d=await rpc("client_panel",{});if(!d||d.error){throw new Error("Enlace no válido");}render(d);}
@@ -164,8 +215,7 @@ function render(d){
   document.getElementById("secbars").innerHTML=bars(st.sectores);
   document.getElementById("citybars").innerHTML=bars(st.ciudades);
   document.getElementById("target-mini").innerHTML=`<div class="kv"><span class="k">A quién contactamos</span><span>${esc(tgtTxt(t))}</span></div>`;
-  document.getElementById("t-region").value=t.region||"";document.getElementById("t-sector").value=t.sector||"";
-  document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
+  tgtRellenar(t);
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
   document.getElementById("b-con").textContent=k.contactadas||0;
@@ -182,7 +232,8 @@ function render(d){
   CUPO=cupoLote;
   document.getElementById("b-emp").textContent=lista.length;
   document.getElementById("lote-estado").innerHTML = lo ? loteCabecera(lo,lista.length,cupoLote) : '';
-  document.getElementById("lista-emp").innerHTML=lista.map(a=>gcard(a,`<button class="act b-out" onclick="quitar('${a.company_id}',this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
+  const puedeQuitar = lo ? (lo.puede_quitar!=null ? !!lo.puede_quitar : true) : true;
+  document.getElementById("lista-emp").innerHTML=lista.map(a=>gcard(a,puedeQuitar?`<button class="act b-out" onclick="quitar('${a.company_id}',this)">Quitar</button>`:'')).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
   // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
@@ -216,7 +267,7 @@ function render(d){
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
 async function loteOk(btn){
-  if(!confirm("¿Está seguro de aprobar la lista completa?\n\nLos envíos empezarán 7 días después de su aprobación (o en la fecha prevista, si es anterior).")) return;
+  if(!await confirmar("¿Aprobar la lista completa?","Los envíos empezarán 7 días después de su aprobación (o en la fecha prevista, si es anterior). Después ya no podrá quitar empresas de esta lista.","Sí, aprobar")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
   if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
@@ -255,7 +306,7 @@ function loteCabecera(lo,n,cupo){
      <div class="cards" style="margin-bottom:6px">${tiles}</div>
      <p class="hint" style="margin:0">${pendiente
        ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva. Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación. Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
-       : `Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`}</p>
+       : (lo.puede_quitar===false ? `La lista está cerrada: ya no admite cambios.` : `Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`)}</p>
      ${aviso}${ap}${curso}
      ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
    </div>`;
@@ -263,7 +314,7 @@ function loteCabecera(lo,n,cupo){
 async function quitar(id,btn){
   // Quitar es definitivo: no hay «Reponer». Se confirma antes.
   const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
-  if(!confirm("¿Está seguro de quitar «"+(nm||"esta empresa")+"»?\n\nNo se le escribirá. Entrará en su lugar la siguiente empresa de su reserva.")) return;
+  if(!await confirmar("¿Está seguro?","Va a quitar «"+(nm||"esta empresa")+"». No se le escribirá y entrará en su lugar la siguiente empresa de su reserva.","Sí, quitar")) return;
   btn.disabled=true; btn.textContent="…";
   if(card){card.style.transition="opacity .2s";card.style.opacity=".3";}
   const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:true});
@@ -277,7 +328,92 @@ async function quitar(id,btn){
   }
 }
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
-async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
+// ---- Diálogo de confirmación en la página (los visores embebidos bloquean confirm()) ----
+function confirmar(titulo,texto,si){
+  return new Promise(res=>{
+    const m=document.getElementById('modal'),bs=document.getElementById('modal-si'),bn=document.getElementById('modal-no');
+    document.getElementById('modal-t').textContent=titulo;document.getElementById('modal-p').textContent=texto;
+    bs.textContent=si||"Sí";m.classList.add('on');bs.focus();
+    const fin=v=>{m.classList.remove('on');bs.onclick=bn.onclick=m.onclick=document.onkeydown=null;res(v);};
+    bs.onclick=()=>fin(true);bn.onclick=()=>fin(false);
+    m.onclick=e=>{if(e.target===m)fin(false);};
+    document.onkeydown=e=>{if(e.key==='Escape')fin(false);};
+  });
+}
+// ---- Formulario de target ----
+let T_SECT=[];
+function tgtOpciones(){
+  const cc=document.getElementById('t-ccaa'),se=document.getElementById('t-sector');
+  if(cc.options.length) return;
+  cc.innerHTML='<option value="">Toda España</option>'+CAT.ccaa.map(x=>`<option value="${x.c}">${esc(x.t)}</option>`).join('');
+  se.innerHTML='<option value="">Añadir un sector…</option>'+CAT.cnae.map(x=>`<optgroup label="${x.s} · ${esc(x.t)}"><option value="${x.s}">Toda la sección ${x.s} · ${esc(x.t)}</option>${x.d.map(d=>`<option value="${d.c}">${d.c} · ${esc(d.t)}</option>`).join('')}</optgroup>`).join('');
+}
+function tgtProvincias(sel){
+  const c=document.getElementById('t-ccaa').value, x=CAT.ccaa.find(a=>a.c===c), box=document.getElementById('t-prov-box');
+  if(!x||x.p.length<2){box.style.display='none';document.getElementById('t-prov').innerHTML='';return;}
+  box.style.display='block';
+  document.getElementById('t-prov').innerHTML=x.p.map(p=>`<label class="chk"><input type="checkbox" value="${p.c}" ${(sel||[]).includes(p.c)?'checked':''}> ${esc(p.t)}</label>`).join('');
+}
+function tgtChips(){document.getElementById('t-sectores').innerHTML=T_SECT.map(c=>`<span class="chip">${c.length===1?'Sección ':''}${c} · ${esc(CNAE_T[c]||'')}<button type="button" aria-label="Quitar sector" onclick="tgtDelSector('${c}')">×</button></span>`).join('')||'<span class="hint" style="margin:4px 0 0">Ningún sector elegido: todos los sectores.</span>';}
+function tgtAddSector(sel){const v=sel.value;sel.value='';if(!v||T_SECT.includes(v))return;
+  // Elegir una sección entera sustituye a sus divisiones sueltas
+  const sec=CAT.cnae.find(x=>x.s===v); if(sec) T_SECT=T_SECT.filter(c=>!sec.d.some(d=>d.c===c));
+  const padre=CAT.cnae.find(x=>x.d.some(d=>d.c===v)); if(padre&&T_SECT.includes(padre.s)) return;
+  T_SECT.push(v);tgtChips();}
+function tgtDelSector(c){T_SECT=T_SECT.filter(x=>x!==c);tgtChips();}
+function tgtRellenar(t){
+  tgtOpciones();
+  const metric=t.metric||'revenue';
+  document.getElementById('t-metric-'+metric).checked=true;
+  document.getElementById('t-min').value=t.metric?(t.min_meur??''):(t.rev_min??'');
+  document.getElementById('t-max').value=t.metric?(t.max_meur??''):(t.rev_max??'');
+  let cc=t.ccaa||''; if(!cc&&t.region){const x=CAT.ccaa.find(a=>a.t===t.region);cc=x?x.c:'';}
+  document.getElementById('t-ccaa').value=cc; tgtProvincias(t.provincias||[]);
+  T_SECT=(t.cnae||[]).slice(); tgtChips();
+  document.getElementById('t-edad').value=t.edad_min||'';
+  tgtCambio();
+}
+function tgtLeer(){
+  const metric=document.querySelector('input[name="t-metric"]:checked').value;
+  return {metric, min_meur:nM(document.getElementById('t-min').value), max_meur:nM(document.getElementById('t-max').value),
+    ccaa:document.getElementById('t-ccaa').value||null,
+    provincias:[...document.querySelectorAll('#t-prov input:checked')].map(i=>i.value),
+    cnae:T_SECT.slice(), edad_min:nM(document.getElementById('t-edad').value)};
+}
+// Zona reservada: misma regla que reunvo_choca_reserva (solape de tramos). Es un aviso;
+// quien decide es el servidor (el titular de la zona sí puede pedirla).
+function tgtReservada(q){const R=CAT.reservadas; if(!q.ccaa||!R||!R.ccaa.includes(q.ccaa)||q.metric!==R.metric) return null;
+  const mn=q.min_meur==null?0:q.min_meur*1e6, mx=q.max_meur==null?Infinity:q.max_meur*1e6;
+  return (mn<=R.max_eur&&mx>=R.min_eur) ? `En ${CCAA_T[q.ccaa]} las empresas con resultado entre ${fM(R.min_eur/1e6)} y ${fM(R.max_eur/1e6)} M€ están reservadas. Pida un tramo por debajo o por encima, u otra comunidad.` : null;}
+function tgtCambio(){
+  const q=tgtLeer(), res=q.metric==='result';
+  document.getElementById('t-min-l').textContent=(res?'Resultado mínimo':'Facturación mínima')+' (M€)';
+  document.getElementById('t-max-l').textContent=(res?'Resultado máximo':'Facturación máxima')+' (M€)';
+  document.getElementById('t-min').min=res?'':'0';document.getElementById('t-max').min=res?'':'0';
+  const av=document.getElementById('t-aviso'), r=tgtReservada(q);
+  av.textContent=r||''; av.style.display=r?'block':'none';
+  document.getElementById('t-err').style.display='none';
+}
+function tgtError(m){const e=document.getElementById('t-err');e.textContent=m;e.style.display='block';}
+async function pedirTarget(btn){
+  const q=tgtLeer();
+  if(q.metric==='revenue'&&((q.min_meur!=null&&q.min_meur<0)||(q.max_meur!=null&&q.max_meur<0))) return tgtError('La facturación no puede ser negativa.');
+  if(q.min_meur!=null&&q.max_meur!=null&&q.min_meur>q.max_meur) return tgtError('El mínimo es mayor que el máximo.');
+  if(q.edad_min!=null&&(q.edad_min<18||q.edad_min>100)) return tgtError('La edad mínima debe estar entre 18 y 100 años.');
+  btn.disabled=true;
+  let r=await rpc("client_request_target_v2",{p_target:q});
+  if(r&&r.code==='PGRST202'){
+    // Base sin actualizar todavía: se envía por la función antigua, que no valida la reserva.
+    const res=tgtReservada(q); if(res){btn.disabled=false;return tgtError(res);}
+    const sec=q.cnae.length?q.cnae.map(c=>c+' '+(CNAE_T[c]||'')).join(' / '):'';
+    r=await rpc("client_request_target",{p_region:q.ccaa?CCAA_T[q.ccaa]+(q.provincias.length?' ('+q.provincias.map(c=>PROV_T[c]).join(', ')+')':''):'',
+      p_sector:[sec,q.metric==='result'?('Resultado '+rango(q.min_meur,q.max_meur)):'',q.edad_min?('DG desde '+q.edad_min+' años'):''].filter(Boolean).join(' · '),
+      p_rev_min:q.metric==='revenue'?q.min_meur:null,p_rev_max:q.metric==='revenue'?q.max_meur:null});
+  }
+  btn.disabled=false;
+  if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}
+  else tgtError((r&&r.mensaje)||"No se pudo enviar. Inténtelo de nuevo.");
+}
 function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}
 load();
 </script>
