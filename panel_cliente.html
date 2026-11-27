@@ -234,6 +234,7 @@ function render(d){
   document.getElementById("b-emp").textContent=lista.length;
   document.getElementById("lote-estado").innerHTML = lo ? loteCabecera(lo,lista.length,cupoLote) : '';
   const puedeQuitar = lo ? (lo.puede_quitar!=null ? !!lo.puede_quitar : true) : true;
+  LOTE_V2 = !!(lo && lo.flujo_v2);
   // Lista cerrada: no se invita a quitar.
   const H=document.getElementById("emp-hint");
   if(!H.dataset.abierta) H.dataset.abierta=H.innerHTML;
@@ -271,8 +272,11 @@ function render(d){
     [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
+let LOTE_V2=false;
 async function loteOk(btn){
-  if(!await confirmar("¿Aprobar la lista completa?","Los envíos empezarán 7 días después de su aprobación y nunca antes de que termine la lista en curso. Después ya no podrá quitar empresas de esta lista.","Sí, aprobar")) return;
+  if(!await confirmar("¿Aprobar la lista completa?", LOTE_V2
+      ? "Los envíos empezarán 7 días después de su aprobación y nunca antes de que termine la lista en curso. Después ya no podrá quitar empresas de esta lista."
+      : "Pasamos a preparar los envíos con estas empresas.","Sí, aprobar")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
   if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();nav("empresas");}
@@ -314,7 +318,7 @@ function loteCabecera(lo,n,cupo){
      <p id="lote-plazo" style="margin:0 0 12px;font-size:15px;color:#1a3c6e">${plazo}</p>
      <div class="cards" style="margin-bottom:6px">${tiles}</div>
      <p class="hint" style="margin:0">${pendiente
-       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva. Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación, y nunca antes de que termine la lista en curso. Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
+       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su reserva.${lo.flujo_v2?' Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación, y nunca antes de que termine la lista en curso.':''} Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
        : (lo.puede_quitar===false ? `La lista está cerrada: ya no admite cambios.` : `Aún puede quitar alguna; se sustituye por la siguiente de su reserva.`)}</p>
      ${aviso}${ap}${curso}
      ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}

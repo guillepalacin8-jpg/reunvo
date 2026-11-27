@@ -6,11 +6,13 @@ Rama `fix/panel-cola-cupo`. Empieza solo cuando Guillem dé el sí al despliegue
 
 ## 0. Preparación (día 0, con el sí de Guillem)
 
-1. Ejecutar SQL 01→04 en quywrltqzoyyorbsuiwc y desplegar `panel_cliente.html` + `assets/catalogos.js`.
+1. Ejecutar el SQL 00→04 en quywrltqzoyyorbsuiwc y desplegar `panel_cliente.html` + `assets/catalogos.js`.
+   - 00 es la copia de seguridad; `99_vuelta_atras.sql` lo deshace en un paso.
+   - Los clientes actuales quedan sin `flujo_v2`, así que solo les llega la corrección de Quitar.
 2. Crear el cliente de prueba «Deale (prueba)» con estos valores:
    - `is_test = true`, `status = 'active'`;
    - `emails_per_day = 15`, `cola_objetivo_dias = 21` (315/mes);
-   - `dias_aprobacion = 14`, `dias_revision = 7`, `bloquear_quitar_tras_aprobar = true`;
+   - `flujo_v2 = true`, `dias_aprobacion = 14`, `dias_revision = 7`, `bloquear_quitar_tras_aprobar = true`;
    - `envio_pausado = true` y `modo_envio = 'borrador'`;
    - `target_region = 'DEMO'`.
    - Email de contacto y del consultor: los de Guillem. Así cualquier aviso «al cliente» le llega a él.

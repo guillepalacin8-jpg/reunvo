@@ -70,6 +70,10 @@ alter table public.clients add column if not exists target_provincias text[];   
 alter table public.clients add column if not exists target_edad_min   integer;  -- edad mínima del DG, años
 alter table public.clients add column if not exists dias_revision     integer not null default 7;
 alter table public.clients add column if not exists bloquear_quitar_tras_aprobar boolean not null default true;
+-- Bandera del flujo nuevo (plazos de 14+7, aprobación automática marcada, inicio sin solape,
+-- bloqueo de Quitar tras aprobar, sustituta desde la lista siguiente). Apagada por defecto:
+-- a los clientes actuales solo les llega la corrección de Quitar. Se enciende por cliente.
+alter table public.clients add column if not exists flujo_v2 boolean not null default false;
 alter table public.clients drop constraint if exists clients_target_metric_chk;
 alter table public.clients add constraint clients_target_metric_chk check (target_metric in ('revenue','result'));
 

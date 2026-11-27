@@ -27,15 +27,11 @@ update public.zonas_reservadas z
  where z.titular is null
    and (select count(*) from public.clients where status = 'active' and not coalesce(is_test,false)) = 1;
 
--- 3) Plazos: 14 días para aprobar; fecha límite = inicio − 7 (dias_revision, por defecto 7).
---    Con esto los lotes nuevos pasan por el cliente y reunvo_ciclo_lotes() crea en su
---    siguiente pasada un lote 'cliente' para quien no lo tenga.
-update public.clients set dias_aprobacion = 14
- where status = 'active' and coalesce(dias_aprobacion, -1) <> 14;
-
--- 4) Interruptor «aprobar bloquea Quitar». Recomendado: true (valor por defecto de la columna).
---    Para permitir quitar tras aprobar en un cliente concreto:
--- update public.clients set bloquear_quitar_tras_aprobar = false where id = '<id>';
+-- 3) Plazos (14 + 7), aprobación automática marcada, inicio sin solape, bloqueo de Quitar
+--    tras aprobar y sustituta desde la lista siguiente: SOLO para clientes con flujo_v2.
+--    A los clientes actuales no se les cambia nada de eso. Para el cliente de prueba:
+-- update public.clients set flujo_v2 = true, dias_aprobacion = 14, dias_revision = 7,
+--        bloquear_quitar_tras_aprobar = true where id = '<id del cliente de prueba>';
 
 commit;
 

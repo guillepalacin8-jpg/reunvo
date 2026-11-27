@@ -491,17 +491,19 @@ begin
        select l.periodo, l.estado, l.limite_cliente, l.objetivo,
               -- Pendiente de aprobar: se enseña el inicio real previsto (nunca antes de que
               -- acabe la lista en curso). Ya aprobada: el que quedó fijado.
-              case when l.estado = 'cliente'
+              case when l.estado = 'cliente' and coalesce(c.flujo_v2,false)
                    then greatest(l.inicio_envio, coalesce(reunvo_fin_envios(l.id), l.inicio_envio))
                    else l.inicio_envio end as inicio_envio,
-              case when l.estado = 'cliente'
+              case when l.estado = 'cliente' and coalesce(c.flujo_v2,false)
                    then case when reunvo_fin_envios(l.id) > l.inicio_envio then 'fin_en_curso' else 'fecha_fijada' end
                    else l.inicio_motivo end as inicio_motivo,
               (l.cerrado_cliente_at at time zone 'Europe/Madrid')::date as aprobada_el,
               coalesce(l.adelantado,false) as adelantado,
               coalesce(l.aprobado_auto,false) as aprobado_auto,
+              coalesce(c.flujo_v2,false) as flujo_v2,
               -- Interruptor: tras aprobar (cliente o automática) ¿se puede seguir quitando?
-              (l.estado = 'cliente' or not coalesce(c.bloquear_quitar_tras_aprobar,true)) as puede_quitar,
+              (l.estado = 'cliente' or not coalesce(c.flujo_v2,false)
+               or not coalesce(c.bloquear_quitar_tras_aprobar,true)) as puede_quitar,
               (select count(*) from companies co where co.lote_id=l.id
                  and co.status='pilot_pending' and not coalesce(co.excluded_by_client,false)
                  and not exists (select 1 from campaigns ca where ca.company_id=co.id
@@ -562,7 +564,7 @@ begin
   select inicio_envio, objetivo into v_ini, v_obj from lotes where id = v_lote;
 
   -- Interruptor (recomendado: activado). Aprobada la lista, ya no se quita nada.
-  if coalesce(c.bloquear_quitar_tras_aprobar,true)
+  if coalesce(c.flujo_v2,false) and coalesce(c.bloquear_quitar_tras_aprobar,true)
      and exists (select 1 from lotes where id = v_lote and estado <> 'cliente') then
     return jsonb_build_object('ok',false,
       'mensaje','Esta lista ya está aprobada y no admite cambios.');
@@ -572,7 +574,8 @@ begin
 
   v_id := buscar_reemplazo(c.id);
 
-  if v_id is null and v_lote is not null then
+  -- Tomar de la lista siguiente mueve una empresa entre listas ya creadas: solo con flujo_v2.
+  if v_id is null and v_lote is not null and coalesce(c.flujo_v2,false) then
     select co.id into v_id
       from companies co join lotes l on l.id = co.lote_id
      where l.client_id = c.id and co.lote_id <> v_lote and l.inicio_envio > v_ini
@@ -628,13 +631,14 @@ begin
   if not found then return jsonb_build_object('ok',false,'mensaje','cliente no existe'); end if;
 
   v_apr := coalesce(c.dias_aprobacion,7);
-  v_rev := coalesce(c.dias_revision,7);
+  -- Sin flujo_v2: límite = inicio − dias_aprobacion, como siempre.
+  v_rev := case when coalesce(c.flujo_v2,false) then coalesce(c.dias_revision,7) else v_apr end;
 
   v_ini := coalesce(p_inicio,
     (select max(inicio_envio) + coalesce(c.cola_objetivo_dias,20) from lotes where client_id = p_client_id),
     (current_date + 1));
   -- El cliente tiene que tener sus días de aprobación completos + la semana de revisión.
-  v_min := current_date + (case when v_apr > 0 then v_apr + v_rev else 1 end);
+  v_min := current_date + (case when v_apr > 0 and coalesce(c.flujo_v2,false) then v_apr + v_rev else 1 end);
   if v_ini < v_min then v_ini := v_min; end if;
 
   v_per := to_char(v_ini,'YYYY-MM');
@@ -678,9 +682,9 @@ CREATE OR REPLACE FUNCTION public.client_lote_verificado(p_token text)
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-declare v_cli uuid; v_rev int; v_lote record; v_n int; v_ini date; v_hoy date; v_fin date; v_mot text;
+declare v_cli uuid; v_rev int; v_lote record; v_n int; v_ini date; v_hoy date; v_fin date; v_mot text; v_v2 boolean;
 begin
-  select id, coalesce(dias_revision,7) into v_cli, v_rev
+  select id, coalesce(dias_revision,7), coalesce(flujo_v2,false) into v_cli, v_rev, v_v2
     from clients where panel_token = p_token and status='active';
   if v_cli is null then return jsonb_build_object('ok',false,'mensaje','token'); end if;
 
@@ -693,14 +697,19 @@ begin
   v_hoy := (now() at time zone 'Europe/Madrid')::date;
   -- Inicio = la fecha más tardía entre «aprobación + 7» (sin pasar de la fecha fijada) y el
   -- final de la lista que se está enviando. Nunca se solapan dos listas.
-  v_fin := reunvo_fin_envios(v_lote.id);
-  v_ini := least(v_lote.inicio_envio, v_hoy + v_rev);
-  v_mot := case when v_ini < v_lote.inicio_envio then 'aprobacion' else 'fecha_fijada' end;
-  if v_fin is not null and v_fin > v_ini then v_ini := v_fin; v_mot := 'fin_en_curso'; end if;
-
-  update lotes set estado='guille', cerrado_cliente_at=now(),
-         inicio_envio = v_ini, adelantado = (v_ini < v_lote.inicio_envio), inicio_motivo = v_mot
-   where id=v_lote.id;
+  if v_v2 then
+    v_fin := reunvo_fin_envios(v_lote.id);
+    v_ini := least(v_lote.inicio_envio, v_hoy + v_rev);
+    v_mot := case when v_ini < v_lote.inicio_envio then 'aprobacion' else 'fecha_fijada' end;
+    if v_fin is not null and v_fin > v_ini then v_ini := v_fin; v_mot := 'fin_en_curso'; end if;
+    update lotes set estado='guille', cerrado_cliente_at=now(),
+           inicio_envio = v_ini, adelantado = (v_ini < v_lote.inicio_envio), inicio_motivo = v_mot
+     where id=v_lote.id;
+  else
+    -- Sin flujo_v2: exactamente lo de producción (solo cambia el estado).
+    v_ini := v_lote.inicio_envio; v_mot := 'fecha_fijada';
+    update lotes set estado='guille', cerrado_cliente_at=now() where id=v_lote.id;
+  end if;
   select count(*) into v_n from companies where lote_id=v_lote.id
     and status='pilot_pending' and not coalesce(excluded_by_client,false);
 
@@ -721,12 +730,18 @@ CREATE OR REPLACE FUNCTION public.reunvo_ciclo_lotes()
 AS $function$
 declare l record; v_log jsonb := '[]'::jsonb; v_pend int; v_nuevo jsonb;
 begin
-  for l in select * from lotes where estado='cliente' and limite_cliente <= current_date loop
-    update lotes set estado='guille', aprobado_auto=true,
-           cerrado_cliente_at=coalesce(cerrado_cliente_at, now()),
-           inicio_envio = greatest(l.inicio_envio, coalesce(reunvo_fin_envios(l.id), l.inicio_envio)),
-           inicio_motivo = case when reunvo_fin_envios(l.id) > l.inicio_envio then 'fin_en_curso' else 'fecha_fijada' end
-     where id=l.id;
+  for l in select lo.*, coalesce(cl.flujo_v2,false) as v2 from lotes lo join clients cl on cl.id = lo.client_id
+            where lo.estado='cliente' and lo.limite_cliente <= current_date loop
+    if l.v2 then
+      update lotes set estado='guille', aprobado_auto=true,
+             cerrado_cliente_at=coalesce(cerrado_cliente_at, now()),
+             inicio_envio = greatest(l.inicio_envio, coalesce(reunvo_fin_envios(l.id), l.inicio_envio)),
+             inicio_motivo = case when reunvo_fin_envios(l.id) > l.inicio_envio then 'fin_en_curso' else 'fecha_fijada' end
+       where id=l.id;
+    else
+      -- Sin flujo_v2: exactamente lo de producción.
+      update lotes set estado='guille', cerrado_cliente_at=coalesce(cerrado_cliente_at, now()) where id=l.id;
+    end if;
     v_log := v_log || jsonb_build_object('lote',l.periodo,'de','cliente','a','guille','motivo','aprobada automáticamente en la fecha límite');
   end loop;
 
