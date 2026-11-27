@@ -48,7 +48,7 @@
   .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:14px;font-size:13px;display:none}
   section{display:none}section.on{display:block}
   .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e6e9ef;font-size:13.5px}.kv .k{color:#6b7688}
-  .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}
+  .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}.frm select{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;background:#fff;color:#1a2233}.frm .seg{display:flex;gap:6px}.frm .seg label{display:flex;align-items:center;gap:6px;border:1px solid #d6dae2;border-radius:8px;padding:7px 12px;font-size:13.5px;color:#1a2233;margin:0;cursor:pointer}.frm .seg input{width:auto}.frm h4{grid-column:1/3;margin:10px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#1a3c6e}
   .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
   @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.stats2,.frm,.grid{grid-template-columns:1fr}.frm .full{grid-column:1}}
 </style>
@@ -88,10 +88,18 @@
       <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
       <div id="target-pend"></div>
       <div class="panelbox"><div class="frm">
-        <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
-        <div class="full"><label>Sector (opcional — vacío = todos)</label><input id="t-sector" placeholder="p.ej. industrial, alimentación…"></div>
-        <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
-        <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
+        <h4>Zona</h4>
+        <div><label>Comunidad autónoma</label><select id="t-region"><option value="">Todas las disponibles</option><option>Andalucía</option><option>Asturias</option><option>Baleares</option><option>Canarias</option><option>Cantabria</option><option>Castilla y León</option><option>Castilla-La Mancha</option><option>Extremadura</option><option>Galicia</option><option>La Rioja</option><option>Murcia</option><option>Navarra</option><option>País Vasco</option></select></div>
+        <div><label>Provincia</label><select id="t-prov"><option value="">Todas</option><option>Almería</option><option>Cádiz</option><option>Córdoba</option><option>Granada</option><option>Huelva</option><option>Jaén</option><option>Málaga</option><option>Sevilla</option></select></div>
+        <h4>Sector</h4>
+        <div class="full"><label>Sector (CNAE)</label><select id="t-sector"><option value="">Todos los sectores</option><option>A · Agricultura, ganadería y pesca</option><option>B · Industrias extractivas</option><option>C · Industria manufacturera</option><option>C10-11 · Industria de la alimentación y bebidas</option><option>C25 · Productos metálicos</option><option>C28 · Maquinaria y equipo</option><option>D · Energía eléctrica y gas</option><option>E · Agua, saneamiento y residuos</option><option>F · Construcción</option><option>G · Comercio mayorista y minorista</option><option>G46 · Comercio al por mayor</option><option>H · Transporte y almacenamiento</option><option>I · Hostelería</option><option>J · Información y comunicaciones</option><option>L · Actividades inmobiliarias</option><option>M · Actividades profesionales y técnicas</option><option>N · Actividades administrativas y servicios auxiliares</option><option>Q · Actividades sanitarias</option></select></div>
+        <h4>Criterio económico</h4>
+        <div class="full seg"><label><input type="radio" name="t-eco" value="fact" checked onchange="ecoLbl()"> Facturación</label><label><input type="radio" name="t-eco" value="res" onchange="ecoLbl()"> Resultado del ejercicio</label></div>
+        <div><label id="l-min">Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="0.1"></div>
+        <div><label id="l-max">Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="0.1"></div>
+        <h4>Relevo generacional</h4>
+        <div><label>Edad mínima del Director General o Administrador</label><input id="t-edad" type="number" min="0" step="1" placeholder="p.ej. 60"></div>
+        <div></div>
         <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
@@ -166,7 +174,7 @@ let _D=[{empresa:"EMPRESA EJEMPLO, S.L.",fecha:"2026-11-12",status:"entregado",d
 function _cnt(f){const m={};_C.forEach(c=>m[c[f]]=(m[c[f]]||0)+1);return Object.entries(m).map(([s,n])=>({s,n})).sort((a,b)=>b.n-a.n);}
 function _data(){return {cliente:{name:"Deale",epd:15,plan:"Piloto"},
  kpis:{contactadas:_C.length,aperturas:198,en_cola:_q.length,cupo_mes:_q.length,dossiers_cap:10,dossiers_usados:_D.length},
- target:{region:"Andalucía",sector:"",rev_min:1,rev_max:40},
+ target:{region:"Andalucía",prov:"",sector:"",eco:"fact",rev_min:1,rev_max:40,edad:60},
  stats:{facturacion_media:12.8,sectores:_cnt("sector"),ciudades:_cnt("localidad")},
  lote:{estado:_ok?"ok":"cliente",periodo:"diciembre",limite_cliente:"2026-12-04",inicio_envio:"2026-12-09"},
  aprobacion:_q.slice(),contactadas:_C,dossiers:_D,gmail:{conectado:true,cuenta:"envios@deale.es"}};}
@@ -182,7 +190,8 @@ async function rpc(fn,a){a=a||{};
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
 function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
 function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
-function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
+function ecoLbl(){const r=(document.querySelector('input[name="t-eco"]:checked')||{}).value==="res";document.getElementById("l-min").textContent=(r?"Resultado mínimo":"Facturación mínima")+" (M€)";document.getElementById("l-max").textContent=(r?"Resultado máximo":"Facturación máxima")+" (M€)";}
+function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.prov)p.push(t.prov);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push((t.eco==="res"?"Resultado ":"Facturación ")+"€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");if(t.edad)p.push("DG/Administrador +"+t.edad+" años");return p.length?p.join(" · "):"sin definir";}
 
 async function load(){
   try{const d=await rpc("client_panel",{});if(!d||d.error){throw new Error("Enlace no válido");}render(d);}
@@ -202,7 +211,7 @@ function render(d){
   document.getElementById("citybars").innerHTML=bars(st.ciudades);
   document.getElementById("target-mini").innerHTML=`<div class="kv"><span class="k">A quién contactamos</span><span>${esc(tgtTxt(t))}</span></div>`;
   document.getElementById("t-region").value=t.region||"";document.getElementById("t-sector").value=t.sector||"";
-  document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
+  document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";document.getElementById("t-edad").value=t.edad||"";
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
   document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
