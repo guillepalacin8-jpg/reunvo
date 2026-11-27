@@ -60,7 +60,9 @@ Regla de Guillem: un cliente no puede pedir Cataluña, Aragón, Madrid ni Comuni
 Hecho en la rama y sin desplegar: panel + `supabase/pendiente/2026-11-27_panel_cola_cupo.sql`.
 - client_panel muestra el próximo lote con su objetivo; Quitar es definitivo y la sustituta sale del pool o del lote siguiente.
 - Plazos (decisión 27-nov): `dias_aprobacion = 14`; fecha límite = inicio − 7 (`clients.dias_revision`, semana de revisión de correos). Si el cliente aprueba antes, `client_lote_verificado` adelanta el inicio a aprobación + 7 (`lotes.adelantado`). `reunvo_crear_lote` garantiza inicio ≥ hoy + 14 + 7.
-- Cabecera: «Apruebe antes del DD/MM · Envíos a partir del DD/MM»; tras aprobar: «Envíos a partir del DD/MM (7 días tras su aprobación)».
+- Aprobación automática (opción A): si el cliente no aprueba como tarde en la fecha límite, `reunvo_ciclo_lotes` la da por aprobada ese día tal como esté (lo quitado, quitado queda), marca `lotes.aprobado_auto` y los envíos salen en la fecha fijada (tras la revisión de correos de esa semana).
+- Cabecera: «Apruebe antes del DD/MM · Envíos a partir del DD/MM»; tras aprobar: «Envíos a partir del DD/MM (7 días tras su aprobación)»; tras la fecha límite: «Lista aprobada automáticamente el DD/MM».
+- Pendiente de decidir: hoy el cliente puede seguir quitando empresas de una lista ya aprobada (hasta que se envían). Si la aprobación debe cerrarla, basta con limitar `client_toggle_company` a lotes en estado 'cliente' y ocultar «Quitar».
 - Cupo por cliente: la firma va a 35/día × 20; el piloto Deale serían 15/día con cola_objetivo_dias = 21 → 315/mes.
 
 ## 6. Plan de entrega, semana del 30/11 al 4/12

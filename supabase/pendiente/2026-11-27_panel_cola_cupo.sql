@@ -103,6 +103,7 @@ begin
        select l.periodo, l.estado, l.inicio_envio, l.limite_cliente, l.objetivo,
               (l.cerrado_cliente_at at time zone 'Europe/Madrid')::date as aprobada_el,
               coalesce(l.adelantado,false) as adelantado,
+              coalesce(l.aprobado_auto,false) as aprobado_auto,
               (select count(*) from companies co where co.lote_id=l.id
                  and co.status='pilot_pending' and not coalesce(co.excluded_by_client,false)
                  and not exists (select 1 from campaigns ca where ca.company_id=co.id
@@ -116,7 +117,9 @@ begin
               -- Lista ya aprobada que aún no ha empezado (tras aprobar se crea la siguiente y
               -- pasa a ser la principal; ésta se resume en una línea).
               (select jsonb_build_object('periodo', l3.periodo, 'inicio_envio', l3.inicio_envio,
-                      'adelantado', coalesce(l3.adelantado,false))
+                      'adelantado', coalesce(l3.adelantado,false),
+                      'aprobado_auto', coalesce(l3.aprobado_auto,false),
+                      'aprobada_el', (l3.cerrado_cliente_at at time zone 'Europe/Madrid')::date)
                  from lotes l3 where l3.client_id=c.id and l3.id <> l.id
                   and l3.estado in ('guille','listo') and l3.inicio_envio > current_date
                 order by l3.inicio_envio limit 1) as aprobada
@@ -217,6 +220,7 @@ end $function$;
 --      (nunca más tarde de lo previsto): lotes.adelantado = true.
 alter table public.clients add column if not exists dias_revision integer not null default 7;
 alter table public.lotes   add column if not exists adelantado boolean not null default false;
+alter table public.lotes   add column if not exists aprobado_auto boolean not null default false;
 
 CREATE OR REPLACE FUNCTION public.reunvo_crear_lote(p_client_id uuid, p_inicio date DEFAULT NULL::date)
  RETURNS jsonb
@@ -323,6 +327,82 @@ end $function$;
 -- Ojo, encadenado: el siguiente lote se calcula con max(inicio_envio) + cola_objetivo_dias.
 -- Si un lote se adelanta, el siguiente también se adelanta, pero reunvo_crear_lote lo empuja
 -- como mínimo a hoy + 14 + 7, así que el cliente siempre tiene sus 2 semanas.
+
+-- Aprobación automática (decisión de Guillem, opción A): si el cliente no aprueba como tarde
+-- en la fecha límite (inicio − 7), la lista se da por aprobada ese día tal como esté (lo
+-- quitado, quitado queda) y los envíos salen en la fecha fijada. Lo único que cambia respecto
+-- a la función actual es que se marca aprobado_auto; el resto es idéntico.
+CREATE OR REPLACE FUNCTION public.reunvo_ciclo_lotes()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare l record; v_log jsonb := '[]'::jsonb; v_pend int; v_nuevo jsonb;
+begin
+  for l in select * from lotes where estado='cliente' and limite_cliente <= current_date loop
+    update lotes set estado='guille', aprobado_auto=true,
+           cerrado_cliente_at=coalesce(cerrado_cliente_at, now()) where id=l.id;
+    v_log := v_log || jsonb_build_object('lote',l.periodo,'de','cliente','a','guille','motivo','aprobada automáticamente en la fecha límite');
+  end loop;
+
+  for l in select * from lotes where estado='guille' loop
+    select count(*) into v_pend from companies co
+      join clients cl on cl.id = l.client_id
+     where co.lote_id=l.id and co.assigned_client_id=l.client_id
+       and co.status='pilot_pending'
+       and co.contact_email is not null and co.email_verified
+       and en_tramo(co.revenue_eur, cl.target_revenue_min, cl.target_revenue_max)
+       and not co.envio_aprobado and not coalesce(co.excluded_by_client,false);
+    if v_pend = 0 then
+      update lotes set estado='listo', aprobado_at=now() where id=l.id;
+      v_log := v_log || jsonb_build_object('lote',l.periodo,'de','guille','a','listo');
+    end if;
+  end loop;
+
+  for l in select * from lotes where estado='listo' and inicio_envio <= current_date loop
+    update lotes set estado='enviando' where id=l.id;
+    v_log := v_log || jsonb_build_object('lote',l.periodo,'de','listo','a','enviando');
+  end loop;
+
+  for l in select * from lotes where estado='enviando' loop
+    select count(*) into v_pend from companies co
+     where co.lote_id=l.id and co.status='pilot_pending'
+       and not coalesce(co.excluded_by_client,false) and co.envio_aprobado
+       and not exists (select 1 from campaigns ca where ca.company_id=co.id and ca.client_id=l.client_id::text);
+    if v_pend = 0 then
+      update lotes set estado='agotado' where id=l.id;
+      v_log := v_log || jsonb_build_object('lote',l.periodo,'de','enviando','a','agotado');
+    end if;
+  end loop;
+
+  for l in
+    select c.* from clients c
+     where c.status='active' and not coalesce(c.envio_pausado,false) and c.html_template is not null
+       and coalesce(c.dias_aprobacion,7) > 0
+       and not exists (select 1 from lotes lo where lo.client_id=c.id and lo.estado='cliente')
+  loop
+    v_nuevo := reunvo_crear_lote(l.id);
+    v_log := v_log || jsonb_build_object('lote_nuevo', v_nuevo);
+  end loop;
+
+  for l in
+    select c.* from clients c
+     where c.status='active' and not coalesce(c.is_test,false)
+       and not coalesce(c.envio_pausado,false) and c.html_template is not null
+       and coalesce(c.dias_aprobacion,7) = 0
+       and not exists (select 1 from lotes lo where lo.client_id=c.id
+                        and lo.estado in ('guille','listo'))
+  loop
+    v_nuevo := reunvo_crear_lote(l.id);
+    v_log := v_log || jsonb_build_object('lote_nuevo', v_nuevo);
+  end loop;
+
+  return jsonb_build_object('ts', now(), 'cambios', v_log);
+end $function$;
+-- Nota: tras la aprobación automática el lote pasa por la revisión de correos de Reunvo
+-- ('guille' → 'listo') igual que si lo hubiera aprobado el cliente; para salir en la fecha
+-- fijada esa revisión tiene que terminar en la semana de margen.
 
 -- 4) CONFIGURACIÓN
 --    Aplicar el plazo de 14 días. Con esto los lotes nuevos pasan por el cliente y
