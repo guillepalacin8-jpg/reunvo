@@ -86,6 +86,11 @@ alter table public.target_requests add column if not exists ccaa       text;
 alter table public.target_requests add column if not exists provincias text[];
 alter table public.target_requests add column if not exists edad_min   integer;
 
+-- ---- Conexión de correo: estado que escribe n8n (invalid_grant -> 'caducada') ---------
+alter table public.client_tokens add column if not exists estado text not null default 'ok';
+alter table public.client_tokens drop constraint if exists client_tokens_estado_chk;
+alter table public.client_tokens add constraint client_tokens_estado_chk check (estado in ('ok','caducada'));
+
 -- ---- Lotes: plazos ------------------------------------------------------------------
 alter table public.lotes add column if not exists adelantado    boolean not null default false;
 alter table public.lotes add column if not exists aprobado_auto boolean not null default false;
