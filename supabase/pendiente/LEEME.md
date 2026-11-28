@@ -11,3 +11,5 @@ Orden, en el proyecto de Reunvo (nunca en otro):
 Cambios de comportamiento solo para clientes con `flujo_v2`: plazos, fecha de inicio en día laborable, aprobación automática, bloqueo de Quitar tras aprobar. A los clientes actuales solo les llega la corrección de Quitar.
 
 Las listas (`lotes`) existentes no se modifican. Los envíos siguen en pausa: una lista nunca pasa a «enviando» con el envío del cliente en pausa.
+
+**n8n (fuera del repo):** `auth/start` no debe exigir cliente activo (la bienvenida funciona antes de activar). Los flujos de correo deben escribir `client_tokens.estado = 'caducada'` al recibir `invalid_grant` (Gmail y Microsoft) y `'ok'` al reconectar. Mientras no lo hagan, para Gmail el panel conserva el aviso antiguo por `token_expiry`; cuando lo hagan, quitar esa condición de `client_panel`.
