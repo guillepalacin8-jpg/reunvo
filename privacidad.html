@@ -51,8 +51,8 @@ con Google o con Microsoft, según la cuenta que usted elija conectar.</p>
 <p><b>Con Google</b> solicitamos un único permiso, <code>gmail.send</code>, que nos permite <b>enviar en su nombre, desde su
 propia dirección, los correos que usted ha aprobado previamente</b>.</p>
 <p><b>Con Microsoft</b> (Outlook o Microsoft 365) solicitamos tres permisos: <b>enviar correo en su nombre</b>,
-desde su propia dirección y solo los correos que usted ha aprobado previamente; <b>iniciar sesión y leer su perfil básico</b>
-(nombre y dirección de correo) para identificar la cuenta conectada; y <b>mantener el acceso</b>, para poder enviar sin
+desde su propia dirección y solo los correos que usted ha aprobado previamente; <b>iniciar sesión</b>
+(identificación y dirección de correo) para identificar la cuenta conectada, sin leer su perfil; y <b>mantener el acceso</b>, para poder enviar sin
 pedirle que vuelva a autorizar cada vez.</p>
 <p><b>Ninguno de estos permisos da acceso a su bandeja de entrada.</b> Reunvo no lee, no descarga y no almacena
 los mensajes que recibe, ni los que ya tenía enviados. No es una política interna: los permisos
@@ -133,7 +133,7 @@ transfer it to third parties for that purpose.</p>
 stored in a table with Row Level Security enabled, unreachable from the public application and
 readable only by the automated sending process. Reunvo has no employees and no human reads user
 data. With Google we request a single scope, <code>gmail.send</code>, the narrowest that allows sending on the
-user's behalf; with Microsoft we request three permissions: send mail on the user's behalf, sign in and read the basic profile, and maintain access. No permission gives access to the inbox. Upon revocation or account closure, tokens are deleted.</p>
+user's behalf; with Microsoft we request three permissions: send mail on the user's behalf, sign in (identity and email address only; the profile is not read), and maintain access. No permission gives access to the inbox. Upon revocation or account closure, tokens are deleted.</p>
 </div>
 
 <h2>Base legal</h2>
