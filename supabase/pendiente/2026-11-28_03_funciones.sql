@@ -226,6 +226,18 @@ begin
   return jsonb_build_object('ts', now(), 'clientes', v_out);
 end $function$;
 
+-- Tope de solicitudes de target por cliente y día. Cuenta TODAS las filas, también los
+-- rechazos por zona (status 'rechazada_zona'), para que no se pueda sondear sin límite.
+CREATE OR REPLACE FUNCTION public.reunvo_target_tope(p_client uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select count(*) >= 5 from target_requests
+   where client_id = p_client and requested_at > now() - interval '24 hours';
+$function$;
+
 -- ---- Target: solicitud del cliente (nuevo) y aplicación por Reunvo ---------------------
 -- La función antigua se mantiene (el panel la usa si falta la nueva) pero sin mencionar
 -- el texto antiguo del mensaje, que no se dice al cliente.
@@ -245,8 +257,7 @@ begin
      or coalesce(p_rev_min,0) > 1000000 or coalesce(p_rev_max,0) > 1000000
      or (p_rev_min is not null and p_rev_max is not null and p_rev_min > p_rev_max) then
     return jsonb_build_object('ok',false,'mensaje','Revise los datos de la solicitud.'); end if;
-  if (select count(*) from target_requests where client_id = v and requested_at > now() - interval '24 hours') >= 5 then
-    return jsonb_build_object('ok',false,'mensaje','Ha enviado varias solicitudes hoy. Escríbanos y lo vemos juntos.'); end if;
+  if reunvo_target_tope(v) then return jsonb_build_object('ok',false,'mensaje','Ha enviado varias solicitudes hoy. Escríbanos y lo vemos juntos.'); end if;
   insert into target_requests(client_id,region,sector,rev_min,rev_max,requested_at,status)
     values(v,nullif(trim(p_region),''),nullif(trim(p_sector),''),p_rev_min,p_rev_max,now(),'pendiente');
   return jsonb_build_object('ok',true,'mensaje','Solicitud enviada. La revisaremos y se la confirmaremos.');
@@ -265,8 +276,7 @@ declare v uuid; v_metric text; v_min numeric; v_max numeric; v_ccaa text; v_prov
 begin
   select id into v from clients where panel_token = p_token and status = 'active';
   if v is null then return jsonb_build_object('error','token'); end if;
-  if (select count(*) from target_requests where client_id = v and requested_at > now() - interval '24 hours') >= 5 then
-    return jsonb_build_object('ok',false,'mensaje','Ha enviado varias solicitudes hoy. Escríbanos y lo vemos juntos.'); end if;
+  if reunvo_target_tope(v) then return jsonb_build_object('ok',false,'mensaje','Ha enviado varias solicitudes hoy. Escríbanos y lo vemos juntos.'); end if;
 
   v_metric := coalesce(nullif(p_target->>'metric',''),'revenue');
   if v_metric not in ('revenue','result') then
@@ -301,6 +311,9 @@ begin
 
   v_choca := reunvo_choca_zona(v, v_ccaa, v_metric, v_min, v_max);
   if v_choca is not null then
+    -- Se registra (y cuenta en el tope diario) con el mismo mensaje neutro de cualquier rechazo.
+    insert into target_requests (client_id, requested_at, status, meta)
+    values (v, now(), 'rechazada_zona', jsonb_build_object('origen','panel_v2'));
     return jsonb_build_object('ok',false,'mensaje',v_choca); end if;
 
   -- Una sola solicitud pendiente por cliente: la nueva sustituye a la anterior.
@@ -684,13 +697,14 @@ begin
   -- El cliente tiene que tener sus días de aprobación completos + la semana de revisión.
   v_min := current_date + (case when v_apr > 0 and coalesce(c.flujo_v2,false) then v_apr + v_rev else 1 end);
   if v_ini < v_min then v_ini := v_min; end if;
-  if coalesce(c.flujo_v2,false) then v_ini := reunvo_dia_envio(v_ini, c.dias_envio); end if;
-
-  v_per := to_char(v_ini,'YYYY-MM');
-  while exists (select 1 from lotes where client_id=p_client_id and periodo=v_per) loop
-    v_ini := v_ini + 30; v_per := to_char(v_ini,'YYYY-MM');
+  -- Una sola pasada: el inicio de un cliente con flujo_v2 nunca cae en fin de semana; el
+  -- periodo (mes) se calcula ya con la fecha ajustada.
+  loop
+    if coalesce(c.flujo_v2,false) then v_ini := reunvo_dia_envio(v_ini, c.dias_envio); end if;
+    v_per := to_char(v_ini,'YYYY-MM');
+    exit when not exists (select 1 from lotes where client_id=p_client_id and periodo=v_per);
+    v_ini := v_ini + 30;
   end loop;
-  if coalesce(c.flujo_v2,false) then v_ini := reunvo_dia_envio(v_ini, c.dias_envio); end if;
 
   v_obj := coalesce(c.emails_per_day,10) * coalesce(c.cola_objetivo_dias,20);
   v_estado := case when v_apr = 0 then 'guille' else 'cliente' end;
@@ -858,6 +872,7 @@ end $function$;
 revoke execute on function public.reunvo_choca_zona(uuid, text, text, numeric, numeric) from public, anon, authenticated;
 revoke execute on function public.reunvo_empresa_restringida(public.companies, uuid)       from public, anon, authenticated;
 revoke execute on function public.reunvo_elegible(public.companies, public.clients)      from public, anon, authenticated;
+revoke execute on function public.reunvo_target_tope(uuid)                              from public, anon, authenticated;
 revoke execute on function public.reunvo_dia_envio(date, int[])                          from public, anon, authenticated;
 revoke execute on function public.reunvo_fin_envios(uuid)                                from public, anon, authenticated;
 revoke execute on function public.buscar_reemplazo(uuid)                                 from public, anon, authenticated;
