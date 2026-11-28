@@ -4,7 +4,7 @@ Nada de esto está hecho. El código (rama `feat/alta-microsoft-v2`) está listo
 
 1. **Microsoft Entra:** seguir `docs/GUIA_ENTRA.md` (app multiinquilino con cuentas personales; permisos `Mail.Send`, `openid`, `email`, `offline_access`; sin `User.Read`). Anotar el Id. de aplicación.
 2. **Secreto:** crearlo en Entra y pegarlo solo en las credenciales de n8n. Recordatorio en el calendario un mes antes de que caduque.
-3. **Editor verificado** y marca (nombre, logo, enlaces de privacidad y términos). Sin esto, muchas empresas exigen consentimiento del administrador.
+3. **Editor verificado** y marca (nombre, logo, enlace de privacidad `https://reunvo.com/privacidad.html` y términos). Sin esto, muchas empresas exigen consentimiento del administrador.
 4. **Gmail primero:** antes de ejecutar el SQL 05, los flujos de Gmail en n8n deben leer `client_tokens` con `proveedor = 'google'`. Si no, intentarían refrescar con Google un token de Microsoft.
 5. **Ejecutar el SQL 05** (después de 03). Vuelta atrás: `..._05_..._99_vuelta_atras.sql`. Usa `client_tokens.updated_at`, que existe en producción.
 6. **Flujos n8n de Microsoft**, siguiendo `n8n/microsoft/graph.js`:

@@ -23,7 +23,7 @@ Necesita una cuenta de Microsoft con acceso a https://entra.microsoft.com (puede
 
 ## 4. Verificar el editor
 1. Cuenta de Microsoft AI Cloud Partner Program (MCP ID) → **Marca** → **Editor verificado**. Sin esto, los clientes con Microsoft 365 empresarial suelen ver «necesita aprobación del administrador» y no pueden dar de alta.
-2. Complete también **Marca**: nombre, logo, enlace a `https://reunvo.com/privacidad` y a los términos.
+2. Complete también **Marca**: nombre, logo, enlace de privacidad `https://reunvo.com/privacidad.html` y a los términos.
 
 ## 5. Prueba
 1. Con una cuenta propia (no de cliente) abra `conectar.html` con su enlace de prueba y pulse «Continuar con Microsoft 365 / Outlook».
