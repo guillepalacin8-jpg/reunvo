@@ -34,8 +34,7 @@
   input.search{width:100%;padding:9px 11px;border:1px solid #d6dae2;border-radius:9px;font-size:14px;margin-bottom:12px;max-width:420px}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .gcard{background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:14px 16px}
-  .gcard.out{opacity:.45}
-  .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
+    .gcard.nueva{border-color:#c8a45c;box-shadow:0 0 0 3px #fdf6e6;animation:entra 2.4s ease-out}
   @keyframes entra{0%{background:#fdf6e6}100%{background:#fff}}
   .gcard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .gcard .nm{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -50,6 +49,26 @@
   .frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px}.frm label{font-size:12px;color:#6b7688;display:block;margin-bottom:3px}.frm input{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px}.frm .full{grid-column:1/3}
   .foot{color:#8fa0bd;font-size:11px;margin-top:auto;padding:14px 10px 0}
   @media(max-width:720px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px}.brand,.who,.foot{display:none}.nav{white-space:nowrap}.main{padding:16px}.stats2,.frm,.grid{grid-template-columns:1fr}.frm .full{grid-column:1}}
+  /* Diálogo de confirmación en la propia página (sustituye a confirm()) */
+  .modal{position:fixed;inset:0;background:rgba(20,36,63,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal.on{display:flex}
+  .modal .box{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(20,36,63,.25)}
+  .modal h4{margin:0 0 8px;font-size:16px;color:#1a3c6e}
+  .modal p{margin:0 0 16px;color:#3a4763;font-size:13.5px;white-space:pre-line}
+  .modal .btns{display:flex;gap:8px;justify-content:flex-end}
+  .b-ghost{background:#eef1f6;color:#3a4763}
+  /* Formulario de target */
+  .frm select{width:100%;padding:8px 10px;border:1px solid #d6dae2;border-radius:8px;font-size:14px;background:#fff}
+  .seg{display:inline-flex;border:1px solid #d6dae2;border-radius:9px;overflow:hidden}
+  .frm .seg label{white-space:nowrap;margin:0;padding:7px 12px;font-size:13px;color:#3a4763;cursor:pointer;display:flex;gap:6px;align-items:center}
+  .seg input{margin:0}
+  .frm .seg label:has(input:checked){background:#1a3c6e;color:#fff}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#eef1f6;color:#1a3c6e;border-radius:999px;padding:4px 10px;font-size:12.5px}
+  .chip button{border:0;background:none;color:#6b7688;cursor:pointer;font-size:14px;line-height:1;padding:0}
+  .frm .chk{margin:0;display:inline-flex;align-items:center;gap:5px;background:#f7f8fa;border:1px solid #e6e9ef;border-radius:8px;padding:4px 9px;font-size:12.5px;color:#3a4763}
+  .ferr{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:9px;padding:9px 12px;font-size:12.5px;display:none}
+  .fnote{color:#8a6d2f;background:#fff8ec;border:1px solid #f0dcae;border-radius:9px;padding:8px 12px;font-size:12.5px;display:none}
 </style>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -84,18 +103,27 @@
     </section>
 
     <section id="s-target"><h1>Mi target</h1>
-      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos — las zonas y sectores se asignan en exclusiva, así que ningún otro cliente compite por sus empresas.</p>
+      <p class="hint">Defina a quién quiere contactar. Al guardar, <b>nos llega una solicitud</b> y se la confirmamos.</p>
       <div id="target-pend"></div>
-      <div class="panelbox"><div class="frm">
-        <div class="full"><label>Región / zona</label><input id="t-region" placeholder="p.ej. Cataluña, Madrid…"></div>
-        <div class="full"><label>Sector (opcional — vacío = todos)</label><input id="t-sector" placeholder="p.ej. industrial, alimentación…"></div>
-        <div><label>Facturación mínima (M€)</label><input id="t-min" type="number" min="0" step="1"></div>
-        <div><label>Facturación máxima (M€)</label><input id="t-max" type="number" min="0" step="1"></div>
-        <div class="full"><button class="act b-gold" onclick="pedirTarget(this)">Solicitar este target</button></div>
+      <div class="panelbox"><div class="frm" id="t-form">
+        <div class="full"><label>Criterio económico</label>
+          <div class="seg" role="radiogroup" aria-label="Criterio económico">
+            <label><input type="radio" name="t-metric" id="t-metric-revenue" value="revenue" checked onchange="tgtCambio()"> Facturación</label>
+            <label><input type="radio" name="t-metric" id="t-metric-result" value="result" onchange="tgtCambio()"> Resultado del ejercicio</label>
+          </div></div>
+        <div><label for="t-min" id="t-min-l">Facturación mínima (M€)</label><input id="t-min" type="number" step="0.1" oninput="tgtCambio()"></div>
+        <div><label for="t-max" id="t-max-l">Facturación máxima (M€)</label><input id="t-max" type="number" step="0.1" oninput="tgtCambio()"></div>
+        <div class="full"><label for="t-ccaa">Comunidad autónoma</label><select id="t-ccaa" onchange="tgtProvincias();tgtCambio()"></select></div>
+        <div class="full" id="t-prov-box" style="display:none"><label>Provincias <span style="color:#8fa0bd">(ninguna marcada = toda la comunidad)</span></label><div class="chips" id="t-prov"></div></div>
+        <div class="full"><label for="t-sector">Sector (CNAE 2009)</label><select id="t-sector" onchange="tgtAddSector(this)"></select>
+          <div class="chips" id="t-sectores"></div></div>
+        <div><label for="t-edad">Edad mínima del director general o administrador (años)</label><input id="t-edad" type="number" min="18" max="100" step="1" placeholder="Sin mínimo"></div>
+        <div class="full"><div class="ferr" id="t-err"></div></div>
+        <div class="full"><button class="act b-gold" id="t-enviar" onclick="pedirTarget(this)">Solicitar este target</button></div>
       </div></div></section>
 
     <section id="s-empresas"><h1>Su cola de empresas</h1>
-      <p class="hint">Estas son las empresas reservadas para usted, en exclusiva. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b> — al quitar una, entra otra automáticamente.</p>
+      <p class="hint" id="emp-hint">Estas son las empresas de su lista. Se irán contactando en su nombre al ritmo de su plan. <b>Quite las que no encajen</b>: al quitar una, entra la siguiente de su lista de reemplazo y la lista sigue completa.</p>
       <div id="lote-estado"></div>
       <input class="search" id="q-emp" placeholder="Buscar empresa, sector o ciudad…" oninput="filtrar('emp')">
       <div class="grid" id="lista-emp"></div></section>
@@ -119,6 +147,11 @@
       </div></section>
   </main>
 </div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="box"><h4 id="modal-t"></h4><p id="modal-p"></p>
+    <div class="btns"><button class="act b-ghost" id="modal-no">Cancelar</button><button class="act b-out" id="modal-si">Sí</button></div></div>
+</div>
+<script src="assets/catalogos.js?v=1"></script>
 <script>
 const SUPA="https://quywrltqzoyyorbsuiwc.supabase.co";
 const KEY="sb_publishable_2Ez2QOHdDenElF9uXynjDQ_Irz0Mhqp";
@@ -146,7 +179,23 @@ async function rpc(fn,a){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"PO
 function flash(m){const e=document.getElementById("msg");e.textContent=m;e.style.display="block";setTimeout(()=>e.style.display="none",5000);}
 function nav(s){document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));document.getElementById("s-"+s).classList.add("on");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.s===s));}
 function bars(a){if(!a||!a.length)return'<span class="hint">—</span>';const mx=Math.max.apply(null,a.map(x=>x.n));return a.map(x=>`<div class="bar"><span class="bl">${esc(x.s)}</span><span class="bt"><span class="bf" style="width:${Math.round(100*x.n/mx)}%"></span></span><span class="bn">${x.n}</span></div>`).join("");}
-function tgtTxt(t){if(!t)return"—";const p=[];if(t.region)p.push(t.region);if(t.sector)p.push(t.sector);if(t.rev_min||t.rev_max)p.push("€"+(t.rev_min||0)+"–"+(t.rev_max||"∞")+"M");return p.length?p.join(" · "):"sin definir";}
+const CAT=window.REUNVO_CATALOGOS||{cnae:[],ccaa:[]};
+const CNAE_T={},CCAA_T={},PROV_T={};
+CAT.cnae.forEach(x=>{CNAE_T[x.s]=x.t;x.d.forEach(d=>CNAE_T[d.c]=d.t);});
+CAT.ccaa.forEach(x=>{CCAA_T[x.c]=x.t;x.p.forEach(p=>PROV_T[p.c]=p.t);});
+const nM=v=>(v==null||v==="")?null:Number(v);
+const fM=v=>String(Math.round(v*100)/100).replace('.',',');
+function rango(min,max){min=nM(min);max=nM(max);if(min==null&&max==null)return"";
+  if(min!=null&&max!=null)return fM(min)+"–"+fM(max)+" M€";return min!=null?"desde "+fM(min)+" M€":"hasta "+fM(max)+" M€";}
+function tgtTxt(t){if(!t)return"—";const p=[];
+  if(t.ccaa){p.push((CCAA_T[t.ccaa]||t.ccaa)+((t.provincias&&t.provincias.length)?" ("+t.provincias.map(c=>PROV_T[c]||c).join(", ")+")":""));}
+  else if(t.region)p.push(t.region);
+  if(t.cnae&&t.cnae.length)p.push(t.cnae.map(c=>(c.length===1?"Sección ":"")+c+" "+(CNAE_T[c]||"")).join(" / "));
+  else if(t.sector)p.push(t.sector);
+  if(t.metric){const r=rango(t.min_meur,t.max_meur);if(r)p.push((t.metric==='result'?"Resultado ":"Facturación ")+r);}
+  else if(t.rev_min||t.rev_max)p.push("Facturación "+rango(t.rev_min,t.rev_max));
+  if(t.edad_min)p.push("DG desde "+t.edad_min+" años");
+  return p.length?p.join(" · "):"sin definir";}
 
 async function load(){
   try{const d=await rpc("client_panel",{});if(!d||d.error){throw new Error("Enlace no válido");}render(d);}
@@ -156,40 +205,41 @@ function render(d){
   document.getElementById("loading").style.display="none";
   const c=d.cliente||{},k=d.kpis||{},t=d.target||{},st=d.stats||{};
   document.getElementById("who").textContent=(c.name||"")+" · "+(c.epd||10)+"/día"+(c.plan?" · "+c.plan:"");
-  document.getElementById("s-resumen").classList.add("on");
+  // Al recargar (tras quitar o aprobar) se queda en la sección en la que estaba: antes se
+  // encendía Resumen además de la actual y se veían las dos a la vez.
+  if(!document.querySelector("section.on")) nav("resumen");
   const disp=(k.dossiers_cap||10)-(k.dossiers_usados||0);
-  const cupo=(k.cupo_mes==null?k.en_cola:k.cupo_mes)||0;
-  document.getElementById("lead").textContent="Este mes contactaremos "+cupo+" empresas en su nombre, de su cola de "+(k.en_cola||0)+". Revíselas, ajuste su target y pida el dossier de quien le responda.";
-  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En cola",k.en_cola],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
+  const cupo=((d.lote&&d.lote.objetivo)||(k.cupo_mes==null?k.en_cola:k.cupo_mes))||0;
+  document.getElementById("lead").textContent="Cada mes contactamos "+cupo+" empresas en su nombre"+(d.lote&&d.lote.periodo?" (lista de "+mesTxt(d.lote.periodo)+")":"")+". Revise su lista, ajuste su target y pida el dossier de quien le responda.";
+  document.getElementById("kpis").innerHTML=[["Contactadas",k.contactadas],["Aperturas",k.aperturas],["En su lista",(d.aprobacion?(d.aprobacion.filter(a=>!a.excluida).length):k.en_cola)],["Facturación media",st.facturacion_media?("€"+st.facturacion_media+"M"):"—"],["Dossiers disponibles",disp+"/"+(k.dossiers_cap||10),"gold"]]
     .map(([kk,vv,cl])=>`<div class="card${cl?' '+cl:''}"><div class="k">${kk}</div><div class="v">${vv==null?'—':vv}</div></div>`).join("");
   document.getElementById("secbars").innerHTML=bars(st.sectores);
   document.getElementById("citybars").innerHTML=bars(st.ciudades);
   document.getElementById("target-mini").innerHTML=`<div class="kv"><span class="k">A quién contactamos</span><span>${esc(tgtTxt(t))}</span></div>`;
-  document.getElementById("t-region").value=t.region||"";document.getElementById("t-sector").value=t.sector||"";
-  document.getElementById("t-min").value=t.rev_min||"";document.getElementById("t-max").value=t.rev_max||"";
+  tgtRellenar(t);
   const tp=d.target_pendiente;
   document.getElementById("target-pend").innerHTML=tp?`<div class="pend">⏳ Solicitud pendiente de aprobación: <b>${esc(tgtTxt(tp))}</b> (enviada ${fecha(tp.fecha)}).</div>`:"";
-  document.getElementById("b-emp").textContent=k.en_cola||0;document.getElementById("b-con").textContent=k.contactadas||0;
-  const gcard=(a,accion)=>`<div class="gcard ${a.excluida?'out':''}" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
+  document.getElementById("b-con").textContent=k.contactadas||0;
+  const gcard=(a,accion)=>`<div class="gcard" data-id="${esc(a.company_id||'')}" data-txt="${esc((a.empresa||'')+' '+(a.sector||'')+' '+(a.localidad||''))}">
      <div class="top"><div class="nm">${esc(a.empresa)}</div>${accion}</div>
      <div class="gmeta">${esc(a.localidad||'—')} · ${esc(a.sector||'—')}</div></div>`;
-  // Estado del lote: hasta cuándo puede depurar, y el botón para cerrarlo antes
+  // Cabecera del lote. El cupo sale del lote (objetivo = plan del cliente), no del código.
+  // Las quitadas no se enseñan: una vez quitada, se va. Al quitar entra otra de la lista de reemplazo,
+  // así que la lista se mantiene en el cupo mientras haya lista de reemplazo.
   const lo=d.lote||null;
-  document.getElementById("lote-estado").innerHTML = lo && lo.estado==='cliente'
-    ? `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7;margin-bottom:14px">
-         <h3 style="color:#b7791f">Lista de ${esc(lo.periodo)} · pendiente de su visto bueno</h3>
-         <p class="hint" style="margin-bottom:12px">Puede quitar empresas hasta el
-         <b>${fecha(lo.limite_cliente)}</b>. A partir de esa fecha preparamos los envíos, que
-         empiezan el <b>${fecha(lo.inicio_envio)}</b>.<br>
-         Si ya la ha revisado entera, díganoslo y pasamos a preparar la siguiente.</p>
-         <button class="act b-gold" onclick="loteOk(this)">Todas verificadas y correctas</button>
-       </div>`
-    : (lo ? `<div class="panelbox" style="margin-bottom:14px">
-         <h3>Lista de ${esc(lo.periodo)}</h3>
-         <p class="hint">Ya revisada. Los envíos empiezan el <b>${fecha(lo.inicio_envio)}</b>.
-         Le avisaremos cuando preparemos la siguiente.</p></div>` : '');
-
-  document.getElementById("lista-emp").innerHTML=(d.aprobacion||[]).map(a=>gcard(a,a.excluida?`<button class="act b-in" onclick="toggle('${a.company_id}',false,this)">Reponer</button>`:`<button class="act b-out" onclick="toggle('${a.company_id}',true,this)">Quitar</button>`)).join("")||'<p class="hint">No hay empresas en cola.</p>';
+  const lista=(d.aprobacion||[]).filter(a=>!a.excluida);
+  LISTA_N=lista.length;
+  const cupoLote=lo?(lo.objetivo||k.cupo_mes||lista.length):0;
+  CUPO=cupoLote;
+  document.getElementById("b-emp").textContent=lista.length;
+  document.getElementById("lote-estado").innerHTML = lo ? loteCabecera(lo,lista.length,cupoLote) : '';
+  const puedeQuitar = lo ? (lo.puede_quitar!=null ? !!lo.puede_quitar : true) : true;
+  LOTE_V2 = !!(lo && lo.flujo_v2);
+  // Lista cerrada: no se invita a quitar.
+  const H=document.getElementById("emp-hint");
+  if(!H.dataset.abierta) H.dataset.abierta=H.innerHTML;
+  H.innerHTML = puedeQuitar ? H.dataset.abierta : "Estas son las empresas de su lista aprobada.";
+  document.getElementById("lista-emp").innerHTML=lista.map(a=>gcard(a,puedeQuitar?`<button class="act b-out" onclick="quitar('${a.company_id}',this)">Quitar</button>`:'')).join("")||'<p class="hint">No hay empresas en cola.</p>';
   document.getElementById("lista-con").innerHTML=(d.contactadas||[]).map(a=>gcard(a,a.dossier_pedido?`<button class="act b-done" disabled>Pedido ✓</button>`:`<button class="act b-info" onclick="pedir('${a.company_id}',this)">Pedir info</button>`)).join("")||'<p class="hint">Aún no hay contactadas.</p>';
   // client_panel devuelve 'status' y 'delivered_at'. Esto leía 'estado' y 'entregado_el',
   // que nunca existen: TODO dossier salía como «Lo estamos preparando», incluso los entregados.
@@ -222,34 +272,161 @@ function render(d){
     [["Plan",c.plan||'—'],["Envíos/día",c.epd||10]].map(([kk,vv])=>`<div class="kv"><span class="k">${kk}</span><span>${esc(vv)}</span></div>`).join("");
   const sec=new URLSearchParams(location.search).get('s'); if(sec&&document.getElementById('s-'+sec)) nav(sec);
 }
+let LOTE_V2=false;
 async function loteOk(btn){
-  if(!confirm("Vamos a dar por buena su lista completa.\n\nDespués de esto ya no podrá quitar empresas de este mes.\n\n¿Confirma?")) return;
+  if(!await confirmar("¿Aprobar la lista completa?", LOTE_V2
+      ? "Los envíos empezarán 7 días después de su aprobación y nunca antes de que termine la lista en curso. Después ya no podrá quitar empresas de esta lista."
+      : "Pasamos a preparar los envíos con estas empresas.","Sí, aprobar")) return;
   btn.disabled=true; btn.textContent="…";
   const r=await rpc("client_lote_verificado",{});
-  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();}
-  else{btn.disabled=false;btn.textContent="Todas verificadas y correctas";
+  if(r&&r.ok){flash(r.mensaje||"Lista confirmada.");await load();nav("empresas");}
+  else{btn.disabled=false;btn.textContent="Aprobar la lista completa";
        flash((r&&r.mensaje)||"No se pudo confirmar.");}
 }
-async function toggle(id,ex,btn){
-  // Quitar una empresa la descarta para siempre: se confirma antes.
-  if(ex){
-    const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
-    if(!confirm("Quitar «"+(nm||"esta empresa")+"» de su lista.\n\nNo se le escribirá y entrará otra en su lugar.\n\n¿Confirma?")) return;
+let CUPO=0, LISTA_N=0;
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function mesTxt(per){const m=/^(\d{4})-(\d{2})/.exec(per||"");return m?MESES[+m[2]-1]+" "+m[1]:String(per||"");}
+function dmy(d){if(!d)return"—";const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));return m?m[3]+"/"+m[2]+"/"+m[1]:fecha(d);}
+// Por qué empiezan los envíos ese día. El servidor fija el inicio como la fecha más tardía entre
+// «aprobación + 7 días» y «fin de la lista que se está enviando» (nunca se solapan dos listas).
+function motivoTxt(l){return l.inicio_motivo==='fin_en_curso'?' (cuando termine la lista en curso)'
+  :((l.inicio_motivo==='aprobacion'||(!l.inicio_motivo&&l.adelantado))?' (7 días tras su aprobación)':'');}
+function loteCabecera(lo,n,cupo){
+  // Plazos (decisión 27-nov): el cliente tiene dias_aprobacion (14) para aprobar; la fecha límite
+  // es inicio − 7 (semana de revisión de correos). Si aprueba antes, los envíos empiezan 7 días
+  // después de su aprobación: el servidor adelanta inicio_envio y marca lote.adelantado.
+  const pendiente = lo.estado==='cliente';
+  const aprob = pendiente ? 0 : n;              // el cliente aprueba la lista entera con el botón
+  const falta = Math.max(cupo-n,0);
+  const tile=(k,v,cl)=>`<div class="card${cl?' '+cl:''}"><div class="k">${k}</div><div class="v" style="font-size:18px">${v}</div></div>`;
+  const tiles=[
+    tile("En su lista",`<span id="lote-n">${n}</span> de ${cupo}`),
+    tile("Aprobadas",`<span id="lote-ap">${aprob}</span> de ${cupo}`, pendiente?'gold':''),
+    tile(pendiente?"Apruebe antes del":(lo.aprobado_auto?"Aprobada automáticamente":"Aprobada"),pendiente?dmy(lo.limite_cliente):(lo.aprobada_el?dmy(lo.aprobada_el):"Sí")),
+    tile("Envíos a partir del",dmy(lo.inicio_envio))].join("");
+  const plazo = pendiente
+    ? `<b>Apruebe antes del ${dmy(lo.limite_cliente)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}${lo.inicio_motivo==='fin_en_curso'?' (cuando termine la lista en curso)':''}`
+    : (lo.aprobado_auto
+        ? `<b>Lista aprobada automáticamente el ${dmy(lo.aprobada_el)}</b> · Envíos a partir del ${dmy(lo.inicio_envio)}`
+        : `<b>Envíos a partir del ${dmy(lo.inicio_envio)}</b>${motivoTxt(lo)}`);
+  const A=lo.aprobada;
+  const ap = A ? `<p class="hint" style="margin:10px 0 0">Lista de ${esc(mesTxt(A.periodo))} ${A.aprobado_auto?('aprobada automáticamente el '+dmy(A.aprobada_el)):'aprobada'}: <b>envíos a partir del ${dmy(A.inicio_envio)}</b>${motivoTxt(A)}.</p>` : '';
+  const curso = lo.en_curso ? `<p class="hint" style="margin:10px 0 0">En curso: lista de ${esc(mesTxt(lo.en_curso.periodo))}, quedan ${lo.en_curso.por_enviar} por enviar.</p>` : '';
+  const aviso = falta ? `<div class="pend" id="lote-falta" style="margin:10px 0 0">Faltan ${falta} para completar el cupo: no quedan más empresas en la lista de reemplazo con su target. Las añadimos en cuanto haya.</div>` : '';
+  return `<div class="panelbox" style="${pendiente?'border-color:#e9c98a;background:#fffdf7;':''}margin-bottom:14px">
+     <h3 style="${pendiente?'color:#b7791f':''}">Lista de ${esc(mesTxt(lo.periodo))} · ${pendiente?'pendiente de su aprobación':'aprobada'}</h3>
+     <p id="lote-plazo" style="margin:0 0 12px;font-size:15px;color:#1a3c6e">${plazo}</p>
+     <div class="cards" style="margin-bottom:6px">${tiles}</div>
+     <p class="hint" style="margin:0">${pendiente
+       ? `Quite las que no encajen; cada una que quite se sustituye por la siguiente de su lista de reemplazo.${lo.flujo_v2?' Si la aprueba antes del plazo, los envíos empiezan 7 días después de su aprobación, y nunca antes de que termine la lista en curso.':''} Si no la aprueba, el ${dmy(lo.limite_cliente)} se da por aprobada tal como esté.`
+       : (lo.puede_quitar===false ? `La lista está cerrada: ya no admite cambios.` : `Aún puede quitar alguna; se sustituye por la siguiente de su lista de reemplazo.`)}</p>
+     ${aviso}${ap}${curso}
+     ${pendiente?'<button class="act b-gold" style="margin-top:12px" onclick="loteOk(this)">Aprobar la lista completa</button>':''}
+   </div>`;
+}
+let QUITANDO=false;   // una operación de quitar a la vez en esta pestaña
+async function quitar(id,btn){
+  // Quitar es definitivo: no hay «Reponer». Se confirma antes.
+  if(QUITANDO) return; QUITANDO=true;
+  try{ await quitarUna(id,btn); } finally { QUITANDO=false; }
+}
+async function quitarUna(id,btn){
+  const card=btn.closest('.gcard'), nm=card?(card.querySelector('.nm')||{}).textContent:'';
+  if(!await confirmar("¿Está seguro?","Va a quitar «"+(nm||"esta empresa")+"». No se le escribirá y entrará en su lugar la siguiente empresa de su lista de reemplazo.","Sí, quitar")) return;
+  btn.disabled=true; btn.textContent="…";
+  if(card){card.style.transition="opacity .2s";card.style.opacity=".3";}
+  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:true});
+  if(!(r&&r.ok)){btn.disabled=false;btn.textContent="Quitar";if(card)card.style.opacity="";flash((r&&r.mensaje)||"No se pudo, reintente.");return;}
+  await load(); nav('empresas');
+  flash(r.mensaje || "Quitada.");
+  if(r.ya_quitada) return;   // la quitó otra pestaña: solo se refresca
+  if(r.nueva&&r.nueva.company_id){
+    const grid=document.getElementById('lista-emp');
+    const c=grid.querySelector('.gcard[data-id="'+r.nueva.company_id+'"]');
+    if(c){grid.prepend(c);c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
   }
-  btn.disabled=true; const txt=btn.textContent; btn.textContent="…";
-  const r=await rpc("client_toggle_company",{p_company_id:id,p_exclude:ex});
-  if(r&&r.ok){
-    await load(); nav('empresas');
-    flash(r.mensaje || (ex?"Quitada.":"Repuesta."));
-    // Resaltar la que ha entrado en su lugar, para que se vea el cambio
-    if(r.nueva&&r.nueva.company_id){
-      const c=document.querySelector('#lista-emp .gcard[data-id="'+r.nueva.company_id+'"]');
-      if(c){c.classList.add('nueva');c.scrollIntoView({block:'center',behavior:'smooth'});}
-    }
-  } else {btn.disabled=false;btn.textContent=txt;flash((r&&r.mensaje)||"No se pudo, reintente.");}
 }
 async function pedir(id,btn){btn.disabled=true;btn.textContent="…";const r=await rpc("client_request_dossier",{p_company_id:id});if(r&&r.ok){flash(r.mensaje||"Pedido.");await load();nav('contactadas');}else{btn.disabled=false;btn.textContent="Pedir info";flash((r&&r.mensaje)||"Límite o error.");}}
-async function pedirTarget(btn){btn.disabled=true;const r=await rpc("client_request_target",{p_region:document.getElementById("t-region").value,p_sector:document.getElementById("t-sector").value,p_rev_min:parseFloat(document.getElementById("t-min").value)||null,p_rev_max:parseFloat(document.getElementById("t-max").value)||null});btn.disabled=false;if(r&&r.ok){flash(r.mensaje||"Solicitud enviada.");await load();nav('target');}else{flash("No se pudo enviar.");}}
+// ---- Diálogo de confirmación en la página (los visores embebidos bloquean confirm()) ----
+function confirmar(titulo,texto,si){
+  return new Promise(res=>{
+    const m=document.getElementById('modal'),bs=document.getElementById('modal-si'),bn=document.getElementById('modal-no');
+    document.getElementById('modal-t').textContent=titulo;document.getElementById('modal-p').textContent=texto;
+    bs.textContent=si||"Sí";m.classList.add('on');bs.focus();
+    // Una sola respuesta por diálogo: un doble clic en «Sí» no confirma dos veces.
+    // Un clic en el fondo no cierra (con doble clic en «Quitar» el segundo clic caía ahí).
+    let hecho=false;
+    const fin=v=>{if(hecho)return;hecho=true;m.classList.remove('on');bs.onclick=bn.onclick=document.onkeydown=null;res(v);};
+    bs.onclick=()=>fin(true);bn.onclick=()=>fin(false);
+    document.onkeydown=e=>{if(e.key==='Escape')fin(false);};
+  });
+}
+// ---- Formulario de target ----
+let T_SECT=[];
+function tgtOpciones(){
+  const cc=document.getElementById('t-ccaa'),se=document.getElementById('t-sector');
+  if(cc.options.length) return;
+  cc.innerHTML='<option value="">Toda España</option>'+CAT.ccaa.map(x=>`<option value="${x.c}">${esc(x.t)}</option>`).join('');
+  se.innerHTML='<option value="">Añadir un sector…</option>'+CAT.cnae.map(x=>`<optgroup label="${x.s} · ${esc(x.t)}"><option value="${x.s}">Toda la sección ${x.s} · ${esc(x.t)}</option>${x.d.map(d=>`<option value="${d.c}">${d.c} · ${esc(d.t)}</option>`).join('')}</optgroup>`).join('');
+}
+function tgtProvincias(sel){
+  const c=document.getElementById('t-ccaa').value, x=CAT.ccaa.find(a=>a.c===c), box=document.getElementById('t-prov-box');
+  if(!x||x.p.length<2){box.style.display='none';document.getElementById('t-prov').innerHTML='';return;}
+  box.style.display='block';
+  document.getElementById('t-prov').innerHTML=x.p.map(p=>`<label class="chk"><input type="checkbox" value="${p.c}" ${(sel||[]).includes(p.c)?'checked':''}> ${esc(p.t)}</label>`).join('');
+}
+function tgtChips(){document.getElementById('t-sectores').innerHTML=T_SECT.map(c=>`<span class="chip">${c.length===1?'Sección ':''}${c} · ${esc(CNAE_T[c]||'')}<button type="button" aria-label="Quitar sector" onclick="tgtDelSector('${c}')">×</button></span>`).join('')||'<span class="hint" style="margin:4px 0 0">Ningún sector elegido: todos los sectores.</span>';}
+function tgtAddSector(sel){const v=sel.value;sel.value='';if(!v||T_SECT.includes(v))return;
+  // Elegir una sección entera sustituye a sus divisiones sueltas
+  const sec=CAT.cnae.find(x=>x.s===v); if(sec) T_SECT=T_SECT.filter(c=>!sec.d.some(d=>d.c===c));
+  const padre=CAT.cnae.find(x=>x.d.some(d=>d.c===v)); if(padre&&T_SECT.includes(padre.s)) return;
+  T_SECT.push(v);tgtChips();}
+function tgtDelSector(c){T_SECT=T_SECT.filter(x=>x!==c);tgtChips();}
+function tgtRellenar(t){
+  tgtOpciones();
+  const metric=t.metric||'revenue';
+  document.getElementById('t-metric-'+metric).checked=true;
+  document.getElementById('t-min').value=t.metric?(t.min_meur??''):(t.rev_min??'');
+  document.getElementById('t-max').value=t.metric?(t.max_meur??''):(t.rev_max??'');
+  let cc=t.ccaa||''; if(!cc&&t.region){const x=CAT.ccaa.find(a=>a.t===t.region);cc=x?x.c:'';}
+  document.getElementById('t-ccaa').value=cc; tgtProvincias(t.provincias||[]);
+  T_SECT=(t.cnae||[]).slice(); tgtChips();
+  document.getElementById('t-edad').value=t.edad_min||'';
+  tgtCambio();
+}
+function tgtLeer(){
+  const metric=document.querySelector('input[name="t-metric"]:checked').value;
+  return {metric, min_meur:nM(document.getElementById('t-min').value), max_meur:nM(document.getElementById('t-max').value),
+    ccaa:document.getElementById('t-ccaa').value||null,
+    provincias:[...document.querySelectorAll('#t-prov input:checked')].map(i=>i.value),
+    cnae:T_SECT.slice(), edad_min:nM(document.getElementById('t-edad').value)};
+}
+function tgtCambio(){
+  const q=tgtLeer(), res=q.metric==='result';
+  document.getElementById('t-min-l').textContent=(res?'Resultado mínimo':'Facturación mínima')+' (M€)';
+  document.getElementById('t-max-l').textContent=(res?'Resultado máximo':'Facturación máxima')+' (M€)';
+  document.getElementById('t-min').min=res?'':'0';document.getElementById('t-max').min=res?'':'0';
+  document.getElementById('t-err').style.display='none';
+}
+function tgtError(m){const e=document.getElementById('t-err');e.textContent=m;e.style.display='block';}
+async function pedirTarget(btn){
+  const q=tgtLeer();
+  if(q.metric==='revenue'&&((q.min_meur!=null&&q.min_meur<0)||(q.max_meur!=null&&q.max_meur<0))) return tgtError('La facturación no puede ser negativa.');
+  if(q.min_meur!=null&&q.max_meur!=null&&q.min_meur>q.max_meur) return tgtError('El mínimo es mayor que el máximo.');
+  if(q.edad_min!=null&&(q.edad_min<18||q.edad_min>100)) return tgtError('La edad mínima debe estar entre 18 y 100 años.');
+  btn.disabled=true;
+  let r=await rpc("client_request_target_v2",{p_target:q});
+  if(r&&r.code==='PGRST202'){
+    // Base sin actualizar todavía: se envía por la función antigua, que no valida la zona.
+    const sec=q.cnae.length?q.cnae.map(c=>c+' '+(CNAE_T[c]||'')).join(' / '):'';
+    r=await rpc("client_request_target",{p_region:q.ccaa?CCAA_T[q.ccaa]+(q.provincias.length?' ('+q.provincias.map(c=>PROV_T[c]).join(', ')+')':''):'',
+      p_sector:[sec,q.metric==='result'?('Resultado '+rango(q.min_meur,q.max_meur)):'',q.edad_min?('DG desde '+q.edad_min+' años'):''].filter(Boolean).join(' · '),
+      p_rev_min:q.metric==='revenue'?q.min_meur:null,p_rev_max:q.metric==='revenue'?q.max_meur:null});
+  }
+  btn.disabled=false;
+  if(r&&r.ok){flash("Solicitud enviada. La revisaremos y se la confirmaremos.");await load();nav('target');}
+  else tgtError((r&&r.mensaje)||"No se pudo enviar. Inténtelo de nuevo.");
+}
 function filtrar(w){const q=document.getElementById("q-"+w).value.toLowerCase();document.querySelectorAll("#lista-"+w+" .gcard").forEach(r=>{r.style.display=r.getAttribute("data-txt").toLowerCase().includes(q)?"block":"none";});}
 load();
 </script>
