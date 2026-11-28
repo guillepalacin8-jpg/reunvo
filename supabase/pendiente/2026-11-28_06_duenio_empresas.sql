@@ -18,6 +18,43 @@ select f.s, pg_get_functiondef(to_regprocedure(f.s))
  where to_regprocedure(f.s) is not null
 on conflict (signatura) do nothing;
 
+-- Dominio normalizado (sin esquema, sin www, sin ruta) y lista de dominios que NO agrupan empresas
+-- (correo gratuito/compartido, redes, alojamiento): para ellos solo cuentan el email exacto y el NIF.
+CREATE OR REPLACE FUNCTION public.reunvo_dominio(p text)
+ RETURNS text LANGUAGE sql IMMUTABLE
+AS $function$
+  select nullif(split_part(regexp_replace(lower(btrim(coalesce(p,''))), '^([a-z]+://)?(www\.)?', ''), '/', 1), '');
+$function$;
+
+create table if not exists public.dominios_no_agrupables (dominio text primary key, motivo text);
+alter table public.dominios_no_agrupables enable row level security;   -- sin políticas
+insert into public.dominios_no_agrupables (dominio, motivo) values
+ ('gmail.com','correo gratuito'),('googlemail.com','correo gratuito'),('hotmail.com','correo gratuito'),('hotmail.es','correo gratuito'),
+ ('outlook.com','correo gratuito'),('outlook.es','correo gratuito'),('live.com','correo gratuito'),('live.es','correo gratuito'),
+ ('msn.com','correo gratuito'),('yahoo.com','correo gratuito'),('yahoo.es','correo gratuito'),('icloud.com','correo gratuito'),
+ ('telefonica.net','operadora'),('movistar.es','operadora'),('terra.es','operadora'),('ono.com','operadora'),('orange.es','operadora'),('jazztel.es','operadora'),
+ ('wixsite.com','alojamiento compartido'),('wordpress.com','alojamiento compartido'),('blogspot.com','alojamiento compartido'),
+ ('business.site','alojamiento compartido'),('sites.google.com','alojamiento compartido'),('linktr.ee','alojamiento compartido'),
+ ('facebook.com','red social'),('instagram.com','red social'),('linkedin.com','red social'),('google.com','buscador')
+on conflict (dominio) do nothing;
+
+-- Clave de agrupamiento por dominio: el dominio normalizado, o null si es uno de los no agrupables
+CREATE OR REPLACE FUNCTION public.reunvo_dominio_clave(p text)
+ RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+  select case when d is null or exists (select 1 from dominios_no_agrupables n where n.dominio = d) then null else d end
+    from (select reunvo_dominio(p) d) x;
+$function$;
+
+-- ¿Sigue vigente una asignación? Con envío: hasta la fecha fijada (12 meses desde el primer envío).
+-- Sin envío (reserva): 12 meses desde asignada_desde (propuesta; la decide Guillem: cambiar solo aquí).
+CREATE OR REPLACE FUNCTION public.reunvo_vigente(p_hasta timestamptz, p_desde timestamptz)
+ RETURNS boolean LANGUAGE sql STABLE
+AS $function$
+  select case when p_hasta is not null then p_hasta > now()
+              else coalesce(p_desde, now()) > now() - interval '12 months' end;
+$function$;
+
 -- Columnas e índices
 alter table public.companies add column if not exists cliente_id_asignado uuid references public.clients(id);
 alter table public.companies add column if not exists asignada_desde      timestamptz;
@@ -26,7 +63,7 @@ alter table public.companies add column if not exists asignada_hasta      timest
 alter table public.companies add column if not exists cliente              text;
 create index if not exists companies_duenio_idx   on public.companies (cliente_id_asignado) where cliente_id_asignado is not null;
 create index if not exists companies_nif_idx      on public.companies (nif) where nif is not null;
-create index if not exists companies_domain_l_idx on public.companies (lower(domain)) where domain is not null;
+create index if not exists companies_domain_n_idx on public.companies (public.reunvo_dominio(domain)) where domain is not null;
 create index if not exists companies_email_l_idx  on public.companies (lower(contact_email)) where contact_email is not null;
 create index if not exists campaigns_company_idx  on public.campaigns (company_id, status);
 
@@ -69,16 +106,16 @@ AS $function$
   select not (
     exists (select 1 from companies o where o.id = co.id
              and o.cliente_id_asignado is not null and o.cliente_id_asignado <> p_client
-             and (o.asignada_hasta is null or o.asignada_hasta > now()))
+             and reunvo_vigente(o.asignada_hasta, o.asignada_desde))
     or (co.nif is not null and exists (select 1 from companies o where o.nif = co.nif
              and o.cliente_id_asignado is not null and o.cliente_id_asignado <> p_client
-             and (o.asignada_hasta is null or o.asignada_hasta > now())))
-    or (co.domain is not null and exists (select 1 from companies o where lower(o.domain) = lower(co.domain)
+             and reunvo_vigente(o.asignada_hasta, o.asignada_desde)))
+    or (reunvo_dominio_clave(co.domain) is not null and exists (select 1 from companies o where reunvo_dominio(o.domain) = reunvo_dominio_clave(co.domain)
              and o.cliente_id_asignado is not null and o.cliente_id_asignado <> p_client
-             and (o.asignada_hasta is null or o.asignada_hasta > now())))
+             and reunvo_vigente(o.asignada_hasta, o.asignada_desde)))
     or (co.contact_email is not null and exists (select 1 from companies o where lower(o.contact_email) = lower(co.contact_email)
              and o.cliente_id_asignado is not null and o.cliente_id_asignado <> p_client
-             and (o.asignada_hasta is null or o.asignada_hasta > now())))
+             and reunvo_vigente(o.asignada_hasta, o.asignada_desde)))
   );
 $function$;
 
@@ -97,7 +134,7 @@ AS $function$
      where co.id = p_company
        and o.assigned_client_id = p_client and o.status = 'pilot_pending' and not coalesce(o.excluded_by_client,false)
        and ((co.nif is not null and o.nif = co.nif)
-            or (co.domain is not null and lower(o.domain) = lower(co.domain))
+            or (reunvo_dominio_clave(co.domain) is not null and reunvo_dominio(o.domain) = reunvo_dominio_clave(co.domain))
             or (co.contact_email is not null and lower(o.contact_email) = lower(co.contact_email))));
 $function$;
 
@@ -117,9 +154,9 @@ begin
          asignada_hasta = case when o.cliente_id_asignado = p_client then o.asignada_hasta else null end
    where (o.id = co.id
           or (co.nif is not null and o.nif = co.nif)
-          or (co.domain is not null and lower(o.domain) = lower(co.domain))
+          or (reunvo_dominio_clave(co.domain) is not null and reunvo_dominio(o.domain) = reunvo_dominio_clave(co.domain))
           or (co.contact_email is not null and lower(o.contact_email) = lower(co.contact_email)))
-     and (o.cliente_id_asignado is null or o.cliente_id_asignado = p_client or o.asignada_hasta <= now());
+     and (o.cliente_id_asignado is null or o.cliente_id_asignado = p_client or not reunvo_vigente(o.asignada_hasta, o.asignada_desde));
   return true;
 end $function$;
 
@@ -133,7 +170,7 @@ AS $function$
     and o.cliente_id_asignado = p_client and o.asignada_hasta is null
     and (o.id = co.id
          or (co.nif is not null and o.nif = co.nif)
-         or (co.domain is not null and lower(o.domain) = lower(co.domain))
+         or (reunvo_dominio_clave(co.domain) is not null and reunvo_dominio(o.domain) = reunvo_dominio_clave(co.domain))
          or (co.contact_email is not null and lower(o.contact_email) = lower(co.contact_email)))
     and not exists (select 1 from campaigns ca where ca.company_id = o.id and ca.client_id = p_client::text and ca.status = 'sent');
 $function$;
@@ -149,7 +186,7 @@ begin
      where co.id = new.company_id and o.cliente_id_asignado = new.client_id::uuid and o.asignada_hasta is null
        and (o.id = co.id
             or (co.nif is not null and o.nif = co.nif)
-            or (co.domain is not null and lower(o.domain) = lower(co.domain))
+            or (reunvo_dominio_clave(co.domain) is not null and reunvo_dominio(o.domain) = reunvo_dominio_clave(co.domain))
             or (co.contact_email is not null and lower(o.contact_email) = lower(co.contact_email)));
   end if;
   return new;
@@ -166,7 +203,7 @@ declare co public.companies%rowtype;
 begin
   select * into co from companies where id = p_company;
   if not found then return false; end if;
-  if co.cliente_id_asignado is null or co.asignada_hasta <= now() then
+  if co.cliente_id_asignado is null or not reunvo_vigente(co.asignada_hasta, co.asignada_desde) then
     -- sin dueño vigente: solo se reclama si la empresa está en la lista de ESTE cliente
     return coalesce(co.assigned_client_id = p_client, false) and reunvo_reclamar(p_company, p_client);
   end if;
@@ -556,6 +593,8 @@ begin
     'mensaje','Quitada. Ha entrado «'||v_nueva.company_name||'» en su lugar.');
 end $function$;
 
+revoke execute on function public.reunvo_dominio_clave(text)                         from public, anon, authenticated;
+revoke execute on function public.reunvo_vigente(timestamptz, timestamptz)           from public, anon, authenticated;
 revoke execute on function public.reunvo_cliente_texto()                            from public, anon, authenticated;
 revoke execute on function public.reunvo_cliente_renombrado()                      from public, anon, authenticated;
 revoke execute on function public.reunvo_lock_duenio()                              from public, anon, authenticated;

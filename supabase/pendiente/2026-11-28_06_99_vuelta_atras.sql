@@ -20,6 +20,10 @@ drop function if exists public.reunvo_liberar(uuid, uuid);
 drop function if exists public.reunvo_reclamar(uuid, uuid);
 drop function if exists public.reunvo_libre_para(public.companies, uuid);
 drop function if exists public.reunvo_lock_duenio();
+drop function if exists public.reunvo_dominio_clave(text);
+drop function if exists public.reunvo_vigente(timestamptz, timestamptz);
+drop function if exists public.reunvo_dominio(text);
+drop table if exists public.dominios_no_agrupables;
 drop function if exists public.reunvo_grupo_ya_en_lista(uuid, uuid);
 alter table public.companies drop column if exists cliente;
 -- las columnas cliente_id_asignado/asignada_* se dejan (vacías tras 07_99); eliminarlas solo si hace falta.

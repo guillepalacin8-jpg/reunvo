@@ -28,7 +28,7 @@ begin
     from (select distinct on (o2.id) o2.id, d.asignada_desde desde, d.asignada_hasta hasta
             from public.companies o2 join public.companies d on d.cliente_id_asignado = v_cli and d.id <> o2.id
              and ((o2.nif is not null and o2.nif = d.nif)
-                  or (o2.domain is not null and lower(o2.domain) = lower(d.domain))
+                  or (reunvo_dominio_clave(o2.domain) is not null and reunvo_dominio(o2.domain) = reunvo_dominio(d.domain))
                   or (o2.contact_email is not null and lower(o2.contact_email) = lower(d.contact_email)))
            where o2.cliente_id_asignado is null
            order by o2.id, d.asignada_hasta desc nulls first) s
