@@ -493,9 +493,13 @@ begin
       'conectado', (t.refresh_token is not null and t.refresh_token <> ''),
       'proveedor', coalesce(to_jsonb(t)->>'proveedor','google'),
       'cuenta', t.gmail_email,
-      -- Conexión caducada = estado que escribe n8n al recibir invalid_grant. token_expiry es la
-      -- caducidad del access token (≈1 h) y daba falsas alarmas.
-      'caducado', (coalesce(to_jsonb(t)->>'estado','ok') = 'caducada')),
+      -- Conexión caducada = estado que escribe n8n al recibir invalid_grant (Microsoft: solo eso).
+      -- Gmail: hasta que n8n escriba `estado`, se mantiene además el aviso antiguo por
+      -- token_expiry, para no perder el aviso de revocación. Cuando n8n escriba `estado` para
+      -- Gmail, quitar la segunda condición (token_expiry es el access token, ≈1 h, y da falsas alarmas).
+      'caducado', (coalesce(to_jsonb(t)->>'estado','ok') = 'caducada'
+                   or (coalesce(to_jsonb(t)->>'proveedor','google') = 'google'
+                       and t.token_expiry is not null and t.token_expiry < now()))),
     'kpis', jsonb_build_object(
       'contactadas', (select count(distinct cp.company_id) from campaigns cp where cp.client_id=c.id::text),
       'aperturas',   (select count(distinct e.company_id) from email_events e
@@ -570,8 +574,9 @@ begin
               coalesce(l.aprobado_auto,false) as aprobado_auto,
               coalesce(c.flujo_v2,false) as flujo_v2,
               -- Interruptor: tras aprobar (cliente o automática) ¿se puede seguir quitando?
-              (l.estado = 'cliente' or not coalesce(c.flujo_v2,false)
-               or not coalesce(c.bloquear_quitar_tras_aprobar,true)) as puede_quitar,
+              (l.estado not in ('enviando','agotado')
+               and (l.estado = 'cliente' or not coalesce(c.flujo_v2,false)
+                    or not coalesce(c.bloquear_quitar_tras_aprobar,true))) as puede_quitar,
               (select count(*) from companies co where co.lote_id=l.id
                  and co.status='pilot_pending' and not coalesce(co.excluded_by_client,false)
                  and not exists (select 1 from campaigns ca where ca.company_id=co.id
@@ -906,7 +911,8 @@ AS $function$
               'firma', c.company, 'activo', (c.status = 'active'),
               'conectado', exists (select 1 from client_tokens t where t.client_id = c.id::text
                                     and coalesce(t.refresh_token,'') <> ''))
-       from clients c where c.panel_token = p_token and p_token is not null and length(p_token) >= 16),
+       from clients c where c.panel_token = p_token and p_token is not null and length(p_token) >= 16
+        and lower(coalesce(c.status,'')) not in ('cancelled','canceled','cancelado','cancelada','suspended','suspendido','suspendida','inactive','inactivo','baja')),
     jsonb_build_object('ok', false, 'error', 'token_invalido'));
 $function$;
 
