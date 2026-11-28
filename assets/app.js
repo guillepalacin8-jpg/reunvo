@@ -8,6 +8,17 @@ const REUNVO = {
   OAUTH_START_URL: "https://guillepalacin1.app.n8n.cloud/webhook/auth/start"
 };
 
+/* ---------- Alta de correo: Google o Microsoft ----------
+   El webhook de n8n recibe ?t=<token>&p=google|microsoft. Sin p, es Google. */
+const PROVEEDORES = {
+  google:    { nombre: "Gmail",              cuenta: "Google",    boton: "Continuar con Google" },
+  microsoft: { nombre: "Microsoft 365 / Outlook", cuenta: "Microsoft", boton: "Continuar con Microsoft" }
+};
+function normalizarProveedor(p) { return p === "microsoft" ? "microsoft" : "google"; }
+function oauthUrl(token, proveedor) {
+  return REUNVO.OAUTH_START_URL + "?t=" + encodeURIComponent(token) + "&p=" + normalizarProveedor(proveedor);
+}
+
 /* ---------- Token del cliente ----------
    Viaja en el fragment (#t=...): no aparece en logs ni en Referer.
    Se conserva en sessionStorage para navegar entre páginas. */

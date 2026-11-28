@@ -28,17 +28,18 @@
 
   <section data-app>
     <p class="eyebrow">Paso único</p>
-    <h1>Conecte su cuenta de Google.</h1>
-    <p class="lead">Le llevaremos a Google para que autorice a Reunvo a enviar correo en su nombre, desde su propia dirección. Nada más.</p>
+    <h1>Conecte su cuenta de correo.</h1>
+    <p class="lead">Elija Google (Gmail) o Microsoft (Microsoft 365 / Outlook). Le llevaremos a su proveedor para que autorice a Reunvo a enviar correo en su nombre, desde su propia dirección. Nada más.</p>
 
     <div class="aviso">
       <h2>Qué verá a continuación</h2>
-      <p>Google le pedirá que elija su cuenta y confirme un único permiso: enviar correo en su nombre. Nada más. Pulse <b>Permitir</b> y volverá aquí.</p>
+      <p>Su proveedor le pedirá que elija su cuenta y confirme un único permiso: enviar correo en su nombre. Nada más. Pulse <b>Permitir</b> (o <b>Aceptar</b>) y volverá aquí.</p>
     </div>
 
-    <button class="btn btn--block" id="btn-google">Continuar a Google</button>
+    <button class="btn btn--block" id="btn-google">Continuar con Google</button>
+    <button class="btn btn--block" id="btn-microsoft" style="margin-top:10px">Continuar con Microsoft 365 / Outlook</button>
 
-    <p class="contacto">Solo pedimos un permiso: enviar correo en su nombre (gmail.send). Es el permiso más estrecho que existe para esto. No da acceso a su bandeja de entrada, así que no podemos leer su correo aunque quisiéramos.<br>
+    <p class="contacto">Solo pedimos un permiso: enviar correo en su nombre (en Google, gmail.send; en Microsoft, Mail.Send). Es el permiso más estrecho que existe para esto. No da acceso a su bandeja de entrada, así que no podemos leer su correo aunque quisiéramos.<br>
     ¿Prefiere hacerlo acompañado? Llámenos y lo hacemos juntos en dos minutos: <a href="mailto:gp@reunvo.com">gp@reunvo.com</a></p>
   </section>
 
@@ -50,9 +51,9 @@
   const t = getToken();
   if (!t) { mostrarErrorToken(); return; }
   propagarToken(t);
-  document.getElementById("btn-google").addEventListener("click", () => {
-    location.href = REUNVO.OAUTH_START_URL + "?t=" + encodeURIComponent(t);
-  });
+  for (const p of ["google", "microsoft"]) {
+    document.getElementById("btn-" + p).addEventListener("click", () => { location.href = oauthUrl(t, p); });
+  }
 })();
 </script>
 </body>

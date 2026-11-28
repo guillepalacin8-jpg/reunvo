@@ -246,26 +246,30 @@ function render(d){
   const dosEstado=x=>x.status==='entregado'?`Enviado a su email el ${fecha(x.delivered_at)}`:(x.status==='listo'?'Enviándoselo ahora':'Lo estamos preparando');
   document.getElementById("lista-dos").innerHTML=(d.dossiers||[]).map(x=>`<div class="kv"><span>${esc(x.empresa)}</span><span class="k">Pedido ${fecha(x.fecha)} · ${esc(dosEstado(x))}</span></div>`).join("")||'<p class="hint">Todavía no ha pedido ningún dossier. Pídalos desde Contactadas.</p>';
   const gm=d.gmail||{};
-  const gmailLink=OAUTH_START_URL+"?t="+encodeURIComponent(T);
+  const prov=(gm.proveedor==='microsoft')?'microsoft':'google';
+  const NP=prov==='microsoft'?'Microsoft 365 / Outlook':'Gmail', QUIEN=prov==='microsoft'?'Microsoft':'Google';
+  const gmailLink=OAUTH_START_URL+"?t="+encodeURIComponent(T)+"&p="+prov;
+  const otroLink=OAUTH_START_URL+"?t="+encodeURIComponent(T)+"&p="+(prov==='microsoft'?'google':'microsoft');
   const gmailNota='<p class="hint" style="margin-top:8px">Solo escribimos en su nombre. Nunca leemos su bandeja de entrada.</p>';
   document.getElementById("gmail-estado").innerHTML = gm.caducado
     ? `<div class="panelbox" style="border-color:#fecaca;background:#fef2f2">
-         <h3 style="color:#b91c1c">Conexión de Gmail caducada</h3>
-         <p class="hint" style="color:#b91c1c;margin-bottom:12px">Google ha revocado o caducado el permiso para enviar en su nombre. Hasta que la reconecte, no podemos enviar sus correos.</p>
-         <button class="act b-gold" onclick="location.href='${gmailLink}'">Volver a conectar Gmail</button>
+         <h3 style="color:#b91c1c">Conexión de ${NP} caducada</h3>
+         <p class="hint" style="color:#b91c1c;margin-bottom:12px">${QUIEN} ha revocado o caducado el permiso para enviar en su nombre. Hasta que la reconecte, no podemos enviar sus correos.</p>
+         <button class="act b-gold" onclick="location.href='${gmailLink}'">Volver a conectar ${NP}</button>
          ${gmailNota}
        </div>`
     : (gm.conectado
       ? `<div class="panelbox">
-           <h3>Gmail conectado</h3>
+           <h3>${NP} conectado</h3>
            <p class="hint" style="margin-bottom:12px">Conectado como <b>${esc(gm.cuenta||'')}</b>.</p>
-           <button class="act b-info" onclick="location.href='${gmailLink}'">Reconectar Gmail</button>
+           <button class="act b-info" onclick="location.href='${gmailLink}'">Reconectar ${NP}</button>
            ${gmailNota}
          </div>`
       : `<div class="panelbox" style="border-color:#e9c98a;background:#fffdf7">
-           <h3 style="color:#b7791f">Gmail sin conectar</h3>
-           <p class="hint" style="margin-bottom:12px">Aún no hemos conectado su Gmail, así que no podemos enviar correos en su nombre.</p>
-           <button class="act b-gold" onclick="location.href='${gmailLink}'">Conectar mi Gmail</button>
+           <h3 style="color:#b7791f">Correo sin conectar</h3>
+           <p class="hint" style="margin-bottom:12px">Aún no hemos conectado su correo (Gmail o Microsoft 365 / Outlook), así que no podemos enviar correos en su nombre.</p>
+           <button class="act b-gold" onclick="location.href='${gmailLink}'">Conectar Gmail</button>
+           <button class="act b-gold" style="margin-left:6px" onclick="location.href='${otroLink}'">Conectar Microsoft 365 / Outlook</button>
            ${gmailNota}
          </div>`);
   document.getElementById("ajustes").innerHTML=

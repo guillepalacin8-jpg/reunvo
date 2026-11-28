@@ -426,6 +426,7 @@ begin
                                   'epd', coalesce(c.emails_per_day,10)),
     'gmail', jsonb_build_object(
       'conectado', (t.refresh_token is not null and t.refresh_token <> ''),
+      'proveedor', coalesce(to_jsonb(t)->>'proveedor','google'),
       'cuenta', t.gmail_email,
       'caducado', (t.token_expiry is not null and t.token_expiry < now())),
     'kpis', jsonb_build_object(
