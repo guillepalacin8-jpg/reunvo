@@ -464,8 +464,14 @@ begin
                                   'epd', coalesce(c.emails_per_day,10)),
     'gmail', jsonb_build_object(
       'conectado', (t.refresh_token is not null and t.refresh_token <> ''),
+      'proveedor', coalesce(to_jsonb(t)->>'proveedor','google'),
       'cuenta', t.gmail_email,
-      'caducado', (t.token_expiry is not null and t.token_expiry < now())),
+      -- Gmail: como siempre. Microsoft: solo el estado que escribe n8n al recibir invalid_grant
+      -- (la caducidad del access token no es una conexión caducada). to_jsonb(t): funciona
+      -- antes y después de ejecutar 05.
+      'caducado', (coalesce(to_jsonb(t)->>'estado','ok') = 'caducada'
+                   or (coalesce(to_jsonb(t)->>'proveedor','google') = 'google'
+                       and t.token_expiry is not null and t.token_expiry < now()))),
     'kpis', jsonb_build_object(
       'contactadas', (select count(distinct cp.company_id) from campaigns cp where cp.client_id=c.id::text),
       'aperturas',   (select count(distinct e.company_id) from email_events e

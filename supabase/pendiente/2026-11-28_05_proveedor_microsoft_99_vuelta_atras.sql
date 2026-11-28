@@ -1,0 +1,13 @@
+begin;
+drop function if exists public.client_oauth_iniciar(text, text);
+drop function if exists public.reunvo_oauth_consumir(uuid);
+drop function if exists public.reunvo_token_lease(text, int);
+drop function if exists public.reunvo_token_soltar(text);
+drop function if exists public.reunvo_token_estado(text, text);
+drop table if exists public.oauth_estados;
+alter table client_tokens drop constraint if exists client_tokens_proveedor_chk;
+alter table client_tokens drop constraint if exists client_tokens_estado_chk;
+alter table client_tokens drop column if exists refresh_lease_until;
+alter table client_tokens drop column if exists estado;
+alter table client_tokens drop column if exists proveedor;
+commit;

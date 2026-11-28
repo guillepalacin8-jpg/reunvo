@@ -8,6 +8,23 @@ const REUNVO = {
   OAUTH_START_URL: "https://guillepalacin1.app.n8n.cloud/webhook/auth/start"
 };
 
+/* ---------- Alta de correo: Google o Microsoft ----------
+   Google: ?t=<token>&p=google (flujo actual de n8n).
+   Microsoft: nunca lleva el token del panel. Se pide un nonce de un solo uso a la base
+   (client_oauth_iniciar) y se va a ?s=<nonce>&p=microsoft. */
+function normalizarProveedor(p) { return p === "microsoft" ? "microsoft" : "google"; }
+function oauthUrlGoogle(token) { return REUNVO.OAUTH_START_URL + "?t=" + encodeURIComponent(token) + "&p=google"; }
+async function oauthUrlMicrosoft(token) {
+  const res = await fetch(REUNVO.SUPABASE_URL + "/rest/v1/rpc/client_oauth_iniciar", {
+    method: "POST",
+    headers: { "apikey": REUNVO.SUPABASE_ANON_KEY, "Authorization": "Bearer " + REUNVO.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_token: token, p_proveedor: "microsoft" })
+  });
+  const d = await res.json();
+  if (!d || !d.ok || !d.nonce) throw new Error((d && d.mensaje) || "No se pudo iniciar la conexión.");
+  return REUNVO.OAUTH_START_URL + "?s=" + encodeURIComponent(d.nonce) + "&p=microsoft";
+}
+
 /* ---------- Token del cliente ----------
    Viaja en el fragment (#t=...): no aparece en logs ni en Referer.
    Se conserva en sessionStorage para navegar entre páginas. */
