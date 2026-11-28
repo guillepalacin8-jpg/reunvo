@@ -22,11 +22,45 @@ on conflict (signatura) do nothing;
 alter table public.companies add column if not exists cliente_id_asignado uuid references public.clients(id);
 alter table public.companies add column if not exists asignada_desde      timestamptz;
 alter table public.companies add column if not exists asignada_hasta      timestamptz;  -- null = reservada, aún sin envío
+-- Texto legible del dueño para el editor de tablas. Lo mantiene SOLO el trigger a partir de cliente_id_asignado.
+alter table public.companies add column if not exists cliente              text;
 create index if not exists companies_duenio_idx   on public.companies (cliente_id_asignado) where cliente_id_asignado is not null;
 create index if not exists companies_nif_idx      on public.companies (nif) where nif is not null;
 create index if not exists companies_domain_l_idx on public.companies (lower(domain)) where domain is not null;
 create index if not exists companies_email_l_idx  on public.companies (lower(contact_email)) where contact_email is not null;
 create index if not exists campaigns_company_idx  on public.campaigns (company_id, status);
+
+CREATE OR REPLACE FUNCTION public.reunvo_cliente_texto()
+ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+begin
+  new.cliente := (select coalesce(c.name, c.company) from clients c where c.id = new.cliente_id_asignado);  -- null si libre
+  return new;
+end $function$;
+drop trigger if exists reunvo_cliente_texto_trg on public.companies;
+create trigger reunvo_cliente_texto_trg before insert or update of cliente_id_asignado, cliente on public.companies
+  for each row execute function public.reunvo_cliente_texto();
+
+-- Si el cliente cambia de nombre, se actualiza el texto de sus empresas
+CREATE OR REPLACE FUNCTION public.reunvo_cliente_renombrado()
+ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+begin
+  update companies set cliente_id_asignado = cliente_id_asignado where cliente_id_asignado = new.id;
+  return new;
+end $function$;
+drop trigger if exists reunvo_cliente_renombrado_trg on public.clients;
+create trigger reunvo_cliente_renombrado_trg after update of name, company on public.clients
+  for each row when (old.name is distinct from new.name or old.company is distinct from new.company)
+  execute function public.reunvo_cliente_renombrado();
+
+-- Vista para el editor de tablas: «cliente» justo al lado del nombre (Postgres no permite reordenar
+-- columnas de la tabla sin reconstruirla; la vista es de solo lectura y respeta los permisos de quien la abre).
+create or replace view public.companies_con_cliente with (security_invoker = true) as
+  select id, company_name, cliente, status, nif, domain, contact_email, region,
+         cliente_id_asignado, asignada_desde, asignada_hasta, assigned_client_id, lote_id
+    from public.companies;
+revoke all on public.companies_con_cliente from anon, authenticated;
 
 -- ¿Está libre para este cliente? (sin dueño, dueño caducado, o de este cliente; vale para todo el grupo)
 CREATE OR REPLACE FUNCTION public.reunvo_libre_para(co public.companies, p_client uuid)
@@ -133,25 +167,33 @@ begin
   select * into co from companies where id = p_company;
   if not found then return false; end if;
   if co.cliente_id_asignado is null or co.asignada_hasta <= now() then
-    return reunvo_reclamar(p_company, p_client);          -- sin dueño: se reclama ahora, o se rechaza
+    -- sin dueño vigente: solo se reclama si la empresa está en la lista de ESTE cliente
+    return coalesce(co.assigned_client_id = p_client, false) and reunvo_reclamar(p_company, p_client);
   end if;
-  return co.cliente_id_asignado = p_client and reunvo_libre_para(co, p_client);
+  return coalesce(co.cliente_id_asignado = p_client, false) and reunvo_libre_para(co, p_client);
 end $function$;
 
--- Trigger: un envío a una empresa de otro cliente no se registra; avisa solo a Guillem
+-- GARANTÍA EN LA BASE: una campaña solo se registra si companies.cliente_id_asignado = client_id de la campaña
+-- (y ninguna fila con el mismo NIF/dominio/email es de otro dueño vigente). Si no, no se inserta y avisa solo a Guillem.
 CREATE OR REPLACE FUNCTION public.reunvo_campania_guarda()
  RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
 AS $function$
+declare ok boolean := false;
 begin
-  if new.client_id ~ '^[0-9a-f-]{36}$' and not reunvo_puede_enviar(new.client_id::uuid, new.company_id) then
-    insert into avisos_guillem(tipo, client_id, company_id, texto)
-    values ('dedup_bloqueado', new.client_id::uuid, new.company_id, 'Envío bloqueado: la empresa pertenece a otro cliente.');
+  if new.company_id is not null and new.client_id ~ '^[0-9a-f-]{36}$' then
+    ok := coalesce(reunvo_puede_enviar(new.client_id::uuid, new.company_id), false);
+  end if;
+  if not coalesce(ok, false) then
+    if new.client_id ~ '^[0-9a-f-]{36}$' then
+      insert into avisos_guillem(tipo, client_id, company_id, texto)
+      values ('dedup_bloqueado', new.client_id::uuid, new.company_id, 'Envío bloqueado: la empresa pertenece a otro cliente.');
+    end if;
     return null;
   end if;
   return new;
 end $function$;
 drop trigger if exists reunvo_campania_guarda_trg on public.campaigns;
-create trigger reunvo_campania_guarda_trg before insert on public.campaigns
+create trigger reunvo_campania_guarda_trg before insert or update of client_id, company_id on public.campaigns
   for each row execute function public.reunvo_campania_guarda();
 
 -- Sustitución silenciosa en un envío bloqueado (para el flujo): quita y reemplaza sin avisar al cliente
@@ -514,6 +556,8 @@ begin
     'mensaje','Quitada. Ha entrado «'||v_nueva.company_name||'» en su lugar.');
 end $function$;
 
+revoke execute on function public.reunvo_cliente_texto()                            from public, anon, authenticated;
+revoke execute on function public.reunvo_cliente_renombrado()                      from public, anon, authenticated;
 revoke execute on function public.reunvo_lock_duenio()                              from public, anon, authenticated;
 revoke execute on function public.reunvo_libre_para(public.companies, uuid)        from public, anon, authenticated;
 revoke execute on function public.reunvo_grupo_ya_en_lista(uuid, uuid)             from public, anon, authenticated;
