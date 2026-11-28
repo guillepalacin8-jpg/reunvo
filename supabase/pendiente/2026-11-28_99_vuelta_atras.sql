@@ -18,6 +18,9 @@ begin
   -- 2) Después se quitan las nuevas
   drop function if exists public.client_request_target_v2(text, jsonb);
   drop function if exists public.reunvo_fin_envios(uuid);
+  drop function if exists public.reunvo_dia_envio(date, int[]);
+  drop function if exists public.reunvo_target_tope(uuid);
+  drop function if exists public.reunvo_pausa_global();
   drop function if exists public.reunvo_elegible(public.companies, public.clients);
   drop function if exists public.reunvo_empresa_restringida(public.companies, uuid);
   drop function if exists public.reunvo_choca_zona(uuid, text, text, numeric, numeric);

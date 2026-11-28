@@ -136,6 +136,16 @@ begin
   return v_id;
 end $function$;
 
+-- Pausa real de los envíos: la tabla pausa_envios (clients.envio_pausado no basta). No se modifica aquí.
+CREATE OR REPLACE FUNCTION public.reunvo_pausa_global()
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select exists (select 1 from pausa_envios where activa);
+$function$;
+
 CREATE OR REPLACE FUNCTION public.reunvo_reponer_cola(p_token text, p_client_id uuid, p_n integer DEFAULT 50)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -150,6 +160,8 @@ begin
   if not found then return jsonb_build_object('ok',false,'mensaje','cliente no existe'); end if;
   if p_n is null or p_n <= 0 or p_n > 500 then
     return jsonb_build_object('ok',false,'mensaje','p_n debe estar entre 1 y 500'); end if;
+  if reunvo_pausa_global() then
+    return jsonb_build_object('ok',false,'mensaje','Envíos en pausa: no se repone la cola.'); end if;
 
   with elegibles as (
     select co.id, (co.revenue_eur is null) as sin_dato from companies co
@@ -178,6 +190,8 @@ CREATE OR REPLACE FUNCTION public.reunvo_mantener_colas()
 AS $function$
 declare c public.clients%rowtype; v_obj int; v_hay int; v_falta int; v_asig int; v_out jsonb := '[]'::jsonb;
 begin
+  if reunvo_pausa_global() then
+    return jsonb_build_object('ts', now(), 'clientes', v_out, 'pausa', true); end if;
   for c in
     select * from clients
      where status='active' and not coalesce(is_test,false)
@@ -831,7 +845,7 @@ begin
   -- Con el envío del cliente en pausa, una lista lista nunca pasa a «enviando».
   for l in select lo.* from lotes lo join clients cl on cl.id = lo.client_id
             where lo.estado='listo' and lo.inicio_envio <= current_date
-              and not coalesce(cl.envio_pausado,false) loop
+              and not coalesce(cl.envio_pausado,false) and not reunvo_pausa_global() loop
     update lotes set estado='enviando' where id=l.id;
     v_log := v_log || jsonb_build_object('lote',l.periodo,'de','listo','a','enviando');
   end loop;
@@ -849,7 +863,8 @@ begin
 
   for l in
     select c.* from clients c
-     where c.status='active' and not coalesce(c.envio_pausado,false) and c.html_template is not null
+     where c.status='active' and not coalesce(c.envio_pausado,false) and not reunvo_pausa_global()
+       and c.html_template is not null
        and coalesce(c.dias_aprobacion,7) > 0
        and not exists (select 1 from lotes lo where lo.client_id=c.id and lo.estado='cliente')
   loop
@@ -860,7 +875,8 @@ begin
   for l in
     select c.* from clients c
      where c.status='active' and not coalesce(c.is_test,false)
-       and not coalesce(c.envio_pausado,false) and c.html_template is not null
+       and not coalesce(c.envio_pausado,false) and not reunvo_pausa_global()
+       and c.html_template is not null
        and coalesce(c.dias_aprobacion,7) = 0
        and not exists (select 1 from lotes lo where lo.client_id=c.id
                         and lo.estado in ('guille','listo'))
@@ -878,6 +894,7 @@ end $function$;
 revoke execute on function public.reunvo_choca_zona(uuid, text, text, numeric, numeric) from public, anon, authenticated;
 revoke execute on function public.reunvo_empresa_restringida(public.companies, uuid)       from public, anon, authenticated;
 revoke execute on function public.reunvo_elegible(public.companies, public.clients)      from public, anon, authenticated;
+revoke execute on function public.reunvo_pausa_global()                                   from public, anon, authenticated;
 revoke execute on function public.reunvo_target_tope(uuid)                              from public, anon, authenticated;
 revoke execute on function public.reunvo_dia_envio(date, int[])                          from public, anon, authenticated;
 revoke execute on function public.reunvo_fin_envios(uuid)                                from public, anon, authenticated;
