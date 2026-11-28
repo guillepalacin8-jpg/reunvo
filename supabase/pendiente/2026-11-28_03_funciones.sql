@@ -493,12 +493,9 @@ begin
       'conectado', (t.refresh_token is not null and t.refresh_token <> ''),
       'proveedor', coalesce(to_jsonb(t)->>'proveedor','google'),
       'cuenta', t.gmail_email,
-      -- Gmail: como siempre. Microsoft: solo el estado que escribe n8n al recibir invalid_grant
-      -- (la caducidad del access token no es una conexión caducada). to_jsonb(t): funciona
-      -- antes y después de ejecutar 05.
-      'caducado', (coalesce(to_jsonb(t)->>'estado','ok') = 'caducada'
-                   or (coalesce(to_jsonb(t)->>'proveedor','google') = 'google'
-                       and t.token_expiry is not null and t.token_expiry < now()))),
+      -- Conexión caducada = estado que escribe n8n al recibir invalid_grant. token_expiry es la
+      -- caducidad del access token (≈1 h) y daba falsas alarmas.
+      'caducado', (coalesce(to_jsonb(t)->>'estado','ok') = 'caducada')),
     'kpis', jsonb_build_object(
       'contactadas', (select count(distinct cp.company_id) from campaigns cp where cp.client_id=c.id::text),
       'aperturas',   (select count(distinct e.company_id) from email_events e
@@ -639,6 +636,12 @@ begin
      and exists (select 1 from lotes where id = v_lote and estado <> 'cliente') then
     return jsonb_build_object('ok',false,
       'mensaje','Esta lista ya está aprobada y no admite cambios.');
+  end if;
+
+  -- Lista ya en envío o agotada: no se quita nada, para cualquier cliente.
+  if exists (select 1 from lotes where id = v_lote and estado in ('enviando','agotado')) then
+    return jsonb_build_object('ok',false,
+      'mensaje','Esta lista ya está en envío y no admite cambios.');
   end if;
 
   update companies set excluded_by_client = true where id = p_company_id;
@@ -888,6 +891,140 @@ begin
   return jsonb_build_object('ts', now(), 'cambios', v_log);
 end $function$;
 
+
+-- ---- Alta: la bienvenida funciona ANTES de activar el cliente ---------------------------
+-- panel_cliente exige status 'active', pero activar exige el correo conectado: el enlace de
+-- bienvenida no puede depender de estar activo. Solo devuelve nombres (el token es el secreto).
+CREATE OR REPLACE FUNCTION public.client_bienvenida(p_token text)
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select coalesce(
+    (select jsonb_build_object('ok', true, 'consultor', c.consultant_name,
+              'firma', c.company, 'activo', (c.status = 'active'),
+              'conectado', exists (select 1 from client_tokens t where t.client_id = c.id::text
+                                    and coalesce(t.refresh_token,'') <> ''))
+       from clients c where c.panel_token = p_token and p_token is not null and length(p_token) >= 16),
+    jsonb_build_object('ok', false, 'error', 'token_invalido'));
+$function$;
+
+CREATE OR REPLACE FUNCTION public.reunvo_estado_alta(p_token text, p_client_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare c record; v_falta text[] := '{}'; v_gmail record;
+begin
+  if not public.reunvo_es_admin(p_token) then
+    return jsonb_build_object('error','unauthorized'); end if;
+  select * into c from clients where id = p_client_id;
+  if not found then return jsonb_build_object('error','no existe'); end if;
+  select * into v_gmail from client_tokens where client_id = c.id::text;
+
+  -- Sin esto NO sale ni un correo, y el motor calla
+  if c.html_template is null then
+    v_falta := array_append(v_falta,'html_template — sin plantilla el motor devuelve «sin_plantilla» y no envía nunca'); end if;
+  if coalesce(trim(c.consultant_name),'') = '' then
+    v_falta := array_append(v_falta,'consultant_name — la firma del correo saldría vacía'); end if;
+  if coalesce(trim(c.consultant_company),'') = '' then
+    v_falta := array_append(v_falta,'consultant_company — la razón social de la firma'); end if;
+  if coalesce(trim(c.target_region),'') = '' then
+    v_falta := array_append(v_falta,'target_region — SIN ESTO SE LLEVA EMPRESAS DE OTROS CLIENTES'); end if;
+  if c.target_revenue_min is null and c.target_revenue_max is null then
+    v_falta := array_append(v_falta,'target_revenue_min/max — en MILES (10-80M€ = 10000/80000)'); end if;
+  if v_gmail.refresh_token is null or v_gmail.refresh_token = '' then
+    v_falta := array_append(v_falta,'Correo sin conectar — que pulse «Conectar mi correo» en su enlace de bienvenida (aún no necesita estar activo)'); end if;
+
+  return jsonb_build_object(
+    'cliente', coalesce(c.name,c.company,c.email), 'email', c.email, 'status', c.status,
+    'listo', (array_length(v_falta,1) is null),
+    'falta', to_jsonb(v_falta),
+    'gmail', v_gmail.gmail_email);
+end $function$;
+
+-- ---- Avisos a Guillem (dossiers) ---------------------------------------------------------
+create table if not exists public.avisos_guillem (
+  id         uuid primary key default gen_random_uuid(),
+  tipo       text not null,
+  client_id  uuid,
+  company_id uuid,
+  texto      text,
+  creado_at  timestamptz not null default now(),
+  visto_at   timestamptz
+);
+alter table public.avisos_guillem enable row level security;   -- sin políticas: solo funciones definer
+
+CREATE OR REPLACE FUNCTION public.client_request_dossier(p_token text, p_company_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v uuid; c int; nm text; d record;
+begin
+  select id into v from clients where panel_token=p_token and status='active';
+  if v is null then return jsonb_build_object('error','token'); end if;
+  -- Solo empresas ya contactadas por este cliente
+  if not exists (select 1 from campaigns where client_id = v::text and company_id = p_company_id) then
+    return jsonb_build_object('error','no_autorizado'); end if;
+  select company_name into nm from companies where id=p_company_id;
+
+  select * into d from dossier_requests where client_id=v and company_id=p_company_id
+   order by requested_at desc limit 1;
+  if found then
+    -- Re-pedir ya no es un no-op: se avisa a Guillem (como mucho una vez al día por empresa)
+    if not exists (select 1 from avisos_guillem where tipo='dossier_repetido' and client_id=v
+                    and company_id=p_company_id and creado_at > now() - interval '1 day') then
+      insert into avisos_guillem(tipo, client_id, company_id, texto)
+      values ('dossier_repetido', v, p_company_id,
+              'El cliente vuelve a pedir el dossier de '||coalesce(nm,'una empresa')||' (estado: '||coalesce(d.status,'?')
+              ||', pedido el '||to_char(d.requested_at,'DD/MM/YYYY')||').');
+    end if;
+    return jsonb_build_object('ok',true,'ya_pedido',true,'estado',d.status,
+      'mensaje', case when d.status = 'entregado'
+        then 'Se le envió el '||to_char(d.delivered_at,'DD/MM')||'. Si no lo encuentra, revise la carpeta de spam; hemos avisado a nuestro equipo.'
+        else 'Ya lo pidió el '||to_char(d.requested_at,'DD/MM')||' y sigue en preparación. Hemos avisado a nuestro equipo.' end);
+  end if;
+
+  select count(*) into c from dossier_requests where client_id=v and requested_at>=date_trunc('month',now());
+  if c>=10 then return jsonb_build_object('error','limite','mensaje','Has alcanzado el límite de 10 dossiers este mes.'); end if;
+  insert into dossier_requests(client_id,company_id,company_name,requested_at,status) values(v,p_company_id,nm,now(),'pendiente');
+  insert into leads(id,client_id,company_id,company_name,stage,created_at,updated_at,billed,meta)
+   select gen_random_uuid(),v,p_company_id,nm,'interesado',now(),now(),false,jsonb_build_object('source','pedir_info_panel')
+   where not exists(select 1 from leads where client_id=v and company_id=p_company_id);
+  insert into avisos_guillem(tipo, client_id, company_id, texto)
+  values ('dossier_nuevo', v, p_company_id, 'Nuevo dossier pedido: '||coalesce(nm,'una empresa')||'.');
+  return jsonb_build_object('ok',true,'mensaje','Pedido. Te llegará el dossier al email en breve.');
+end;$function$;
+
+CREATE OR REPLACE FUNCTION public.reunvo_avisos_pendientes(p_token text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if not public.reunvo_es_admin(p_token) then return jsonb_build_object('error','unauthorized'); end if;
+  return jsonb_build_object('ok',true,'avisos',
+    (select coalesce(jsonb_agg(to_jsonb(a) order by a.creado_at), '[]'::jsonb)
+       from avisos_guillem a where a.visto_at is null));
+end $function$;
+
+CREATE OR REPLACE FUNCTION public.reunvo_aviso_visto(p_token text, p_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if not public.reunvo_es_admin(p_token) then return jsonb_build_object('error','unauthorized'); end if;
+  update avisos_guillem set visto_at = now() where id = p_id and visto_at is null;
+  return jsonb_build_object('ok',true);
+end $function$;
+
 -- ---- Permisos ------------------------------------------------------------------------
 -- Las funciones internas no se pueden llamar desde el navegador (como el resto de las
 -- internas del proyecto); la del panel, sí.
@@ -903,5 +1040,6 @@ revoke execute on function public.reunvo_crear_lote(uuid, date)                 
 revoke execute on function public.reunvo_ciclo_lotes()                                   from public, anon, authenticated;
 revoke execute on function public.reunvo_mantener_colas()                                from public, anon, authenticated;
 grant  execute on function public.client_request_target_v2(text, jsonb)                  to anon, authenticated;
+grant  execute on function public.client_bienvenida(text)                                to anon, authenticated;
 
 commit;

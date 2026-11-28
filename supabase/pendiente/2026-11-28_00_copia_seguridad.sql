@@ -23,7 +23,9 @@ select f.signatura, pg_get_functiondef(to_regprocedure(f.signatura))
     ('public.buscar_reemplazo(uuid)'),
     ('public.reunvo_reponer_cola(text,uuid,integer)'),
     ('public.reunvo_mantener_colas()'),
-    ('public.reunvo_aplicar_target(text,uuid)')
+    ('public.reunvo_aplicar_target(text,uuid)'),
+    ('public.client_request_dossier(text,uuid)'),
+    ('public.reunvo_estado_alta(text,uuid)')
   ) f(signatura)
  where to_regprocedure(f.signatura) is not null
 on conflict (signatura) do nothing;

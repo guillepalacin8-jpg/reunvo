@@ -58,7 +58,7 @@
   if (!t) { mostrarErrorToken(); return; }
   propagarToken(t);
   try {
-    const d = await panelCliente(t);
+    const d = await bienvenidaCliente(t);
     if (!d.ok) { mostrarErrorToken(); return; }
     if (d.consultor) document.getElementById("saludo").textContent = "Bienvenido, " + d.consultor;
     if (d.firma)     document.getElementById("intro").textContent  =

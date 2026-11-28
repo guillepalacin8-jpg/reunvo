@@ -69,6 +69,18 @@ async function panelCliente(token) {
   return res.json();
 }
 
+/* ---------- RPC client_bienvenida: funciona antes de activar al cliente ---------- */
+async function bienvenidaCliente(token) {
+  const res = await fetch(REUNVO.SUPABASE_URL + "/rest/v1/rpc/client_bienvenida", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": REUNVO.SUPABASE_ANON_KEY,
+               "Authorization": "Bearer " + REUNVO.SUPABASE_ANON_KEY },
+    body: JSON.stringify({ p_token: token })
+  });
+  if (!res.ok) throw new Error("rpc_error_" + res.status);
+  return res.json();
+}
+
 /* ---------- Utilidades de presentación ---------- */
 function fmtFecha(iso) {
   if (!iso) return "—";
