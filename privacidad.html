@@ -56,10 +56,12 @@ desde su propia dirección y solo los correos que usted ha aprobado previamente;
 pedirle que vuelva a autorizar cada vez.</p>
 <p><b>Ninguno de estos permisos da acceso a su bandeja de entrada.</b> Reunvo no lee, no descarga y no almacena
 los mensajes que recibe, ni los que ya tenía enviados. No es una política interna: los permisos
-concedidos no lo permiten técnicamente. Tampoco solicitamos ningún otro permiso sobre su correo.</p>
-<p>De su cuenta de Google o de Microsoft almacenamos únicamente los <b>tokens de acceso y actualización</b>
-necesarios para enviar en su nombre, y su <b>dirección de correo</b> para identificar la cuenta
-conectada. Estos datos se guardan cifrados en tránsito y con acceso restringido.</p>
+concedidos no lo permiten técnicamente. Tampoco solicitamos ningún otro permiso sobre su correo.
+Los correos que enviamos en su nombre quedan en la carpeta Enviados de su propia cuenta.</p>
+<p>De su cuenta de correo almacenamos únicamente lo necesario para enviar en su nombre: con Google, los
+<b>tokens de acceso y actualización</b>; con Microsoft, solo el <b>token de actualización</b> (no almacenamos el
+de acceso); y en ambos casos su <b>dirección de correo</b>, para identificar la cuenta conectada.
+Estos datos se guardan cifrados en tránsito y con acceso restringido.</p>
 <p><b>Uso limitado (Google).</b> El uso que Reunvo hace de la información recibida de las APIs de Google se
 ajusta a la <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes">Política de Datos de Usuario de los Servicios API de Google</a>,
 incluidos sus requisitos de Uso Limitado. No transferimos, vendemos ni utilizamos estos datos para
@@ -99,7 +101,7 @@ modelos de inteligencia artificial o de aprendizaje automático</b>, ni generali
 los cedemos a terceros con ese fin.</p>
 
 <h2 id="proteccion">Cómo protegemos estos datos</h2>
-<p>Los tokens de acceso a su cuenta de correo son el dato más sensible que manejamos y se tratan como
+<p>Los tokens de su cuenta de correo son el dato más sensible que manejamos y se tratan como
 tal:</p>
 <ul>
  <li><b>Cifrado en tránsito:</b> toda comunicación viaja por HTTPS con TLS 1.2 o superior. Ningún
@@ -122,7 +124,7 @@ tal:</p>
 <h2 style="color:#1a3c6e">Summary in English (for reviewers)</h2>
 <p><b>Data sharing.</b> We do not sell, rent or share Google or Microsoft user data with third parties for their
 own purposes, and we never use it for advertising. Google and Microsoft user data (OAuth tokens and the connected
-account's email address) is shared only with the sub-processors strictly required to operate the
+account's email address; with Microsoft, only the refresh token and the address are stored, not the access token) is shared only with the sub-processors strictly required to operate the
 service, acting on our instructions: <b>Supabase</b> (encrypted storage of tokens), <b>n8n</b>
 (transient use of the token to call the Gmail or Microsoft Graph API), and <b>Google</b> or <b>Microsoft</b> themselves. <b>PDFShift receives no
 Google or Microsoft user data.</b> We disclose data outside this circuit only where legally required.</p>
@@ -133,7 +135,7 @@ transfer it to third parties for that purpose.</p>
 stored in a table with Row Level Security enabled, unreachable from the public application and
 readable only by the automated sending process. Reunvo has no employees and no human reads user
 data. With Google we request a single scope, <code>gmail.send</code>, the narrowest that allows sending on the
-user's behalf; with Microsoft we request three permissions: send mail on the user's behalf, sign in (identity and email address only; the profile is not read), and maintain access. No permission gives access to the inbox. Upon revocation or account closure, tokens are deleted.</p>
+user's behalf; with Microsoft we request three permissions: send mail on the user's behalf, sign in (identity and email address only; the profile is not read), and maintain access. No permission gives access to the inbox. Emails sent on the user's behalf remain in the Sent folder of the user's own account. Upon revocation or account closure, tokens are deleted.</p>
 </div>
 
 <h2>Base legal</h2>
